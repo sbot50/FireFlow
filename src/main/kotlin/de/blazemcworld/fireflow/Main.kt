@@ -5,6 +5,7 @@ import de.blazemcworld.fireflow.gui.NodeComponent
 import de.blazemcworld.fireflow.gui.Pos2d
 import de.blazemcworld.fireflow.gui.TextComponent
 import de.blazemcworld.fireflow.node.impl.NodeList
+import io.github.oshai.kotlinlogging.KotlinLogging
 import net.minestom.server.MinecraftServer
 import net.minestom.server.coordinate.BlockVec
 import net.minestom.server.entity.GameMode
@@ -19,7 +20,10 @@ import net.minestom.server.extras.MojangAuth
 import net.minestom.server.instance.LightingChunk
 import net.minestom.server.instance.block.Block
 
+private val LOGGER = KotlinLogging.logger {}
+
 fun main() {
+    LOGGER.info { "Starting up FireFlow..." }
     val srv = MinecraftServer.init()!!
     MojangAuth.init()
 
@@ -106,4 +110,6 @@ fun main() {
     }
 
     srv.start("0.0.0.0", 25565)
+
+    LOGGER.info { "Ready!" }
 }
