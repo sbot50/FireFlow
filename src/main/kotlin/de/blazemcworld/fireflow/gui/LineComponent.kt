@@ -17,6 +17,8 @@ class LineComponent {
         val meta = entityMeta as TextDisplayMeta
         meta.text = Component.text("-")
         meta.backgroundColor = 0
+        meta.transformationInterpolationDuration = 1
+        meta.posRotInterpolationDuration = 1
     }
 
     var start = Pos2d.ZERO

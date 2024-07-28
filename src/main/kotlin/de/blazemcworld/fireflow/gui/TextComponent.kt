@@ -14,6 +14,8 @@ class TextComponent {
         val meta = entityMeta as TextDisplayMeta
         meta.backgroundColor = 0
         meta.lineWidth = Int.MAX_VALUE
+        meta.transformationInterpolationDuration = 1
+        meta.posRotInterpolationDuration = 1
     }
 
     var pos = Pos2d.ZERO
