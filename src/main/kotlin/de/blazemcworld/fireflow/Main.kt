@@ -1,6 +1,7 @@
 package de.blazemcworld.fireflow
 
 import de.blazemcworld.fireflow.gui.IOComponent
+import de.blazemcworld.fireflow.gui.LineComponent
 import de.blazemcworld.fireflow.gui.NodeComponent
 import de.blazemcworld.fireflow.gui.Pos2d
 import de.blazemcworld.fireflow.node.impl.NodeList
@@ -60,6 +61,7 @@ fun main() {
     }
 
     var creatingLine: IOComponent.Output? = null
+    var previewLine = LineComponent()
     var draggingNode: NodeComponent? = null
 
     val allNodes = mutableListOf<NodeComponent>()
@@ -73,7 +75,26 @@ fun main() {
             if (node.includes(cursor)) {
                 for (output in node.outputs) {
                     if (output.includes(cursor)) {
+                        if (creatingLine == output) {
+                            creatingLine = null
+                            previewLine.remove()
+                            return@addListener
+                        }
                         creatingLine = output
+                        previewLine.remove()
+                        previewLine = LineComponent()
+                        previewLine.color = output.io.type.color
+                        previewLine.start = Pos2d(output.pos.x, output.pos.y + output.text.height() * 0.75)
+
+                        scheduler.submitTask task@{
+                            if (creatingLine == null) {
+                                previewLine.remove()
+                                return@task TaskSchedule.stop()
+                            }
+                            previewLine.end = it.player.cursorRaycast()
+                            previewLine.update(inst)
+                            return@task TaskSchedule.tick(1)
+                        }
                         return@addListener
                     }
                 }
@@ -83,6 +104,7 @@ fun main() {
                             input.connect(output)
                             input.update(inst)
                             creatingLine = null
+                            previewLine.remove()
                             return@addListener
                         }
                     }
@@ -91,6 +113,7 @@ fun main() {
 
                 if (it.player.heldSlot.toInt() == 8) {
                     creatingLine = null
+                    previewLine.remove()
                     node.remove()
                     allNodes.remove(node)
                 } else if (it.player.heldSlot.toInt() == 7) {
