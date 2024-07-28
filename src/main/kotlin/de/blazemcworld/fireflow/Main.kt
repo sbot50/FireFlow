@@ -6,6 +6,7 @@ import de.blazemcworld.fireflow.gui.Pos2d
 import de.blazemcworld.fireflow.gui.TextComponent
 import de.blazemcworld.fireflow.node.impl.NodeList
 import io.github.oshai.kotlinlogging.KotlinLogging
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.MinecraftServer
 import net.minestom.server.coordinate.BlockVec
 import net.minestom.server.entity.GameMode
@@ -61,6 +62,9 @@ fun main() {
 
     var creatingLine: TextComponent? = null
 
+    var selectedNode: NodeComponent? = null
+    var cursorOffset: Pos2d? = null
+
     val allNodes = mutableListOf<NodeComponent>()
     events.addListener(PlayerBlockInteractEvent::class.java) {
         if (it.hand == Player.Hand.OFF) return@addListener
@@ -93,13 +97,33 @@ fun main() {
                 if (it.player.heldSlot.toInt() == 8) {
                     node.remove()
                     allNodes.remove(node)
-                } else {
-                    node.pos = cursor
-                    node.update(inst)
+                } else if (it.player.heldSlot.toInt() == 7) {
+                    if (selectedNode != null) {
+                        selectedNode?.setOutlineColor(NamedTextColor.WHITE)
+                        selectedNode?.update(inst)
+                    }
+                    if (selectedNode == node) selectedNode = null
+                    else {
+                        node.setOutlineColor(NamedTextColor.GREEN)
+                        node.update(inst)
+                        cursorOffset = node.pos - cursor
+                        selectedNode = node
+                    }
                 }
                 return@addListener
             }
         }
+
+        if (selectedNode != null && it.player.heldSlot.toInt() == 7) {
+            selectedNode?.setOutlineColor(NamedTextColor.WHITE)
+            selectedNode?.update(inst)
+            selectedNode!!.pos = cursor + cursorOffset!!
+            selectedNode!!.update(inst)
+            selectedNode = null
+            cursorOffset = null
+            return@addListener
+        }
+
         if (it.player.heldSlot >= NodeList.all.size) return@addListener
 
         val node = NodeList.all[it.player.heldSlot.toInt()]

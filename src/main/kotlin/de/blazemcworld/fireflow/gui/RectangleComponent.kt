@@ -1,5 +1,6 @@
 package de.blazemcworld.fireflow.gui
 
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.instance.Instance
 
 class RectangleComponent {
@@ -43,5 +44,12 @@ class RectangleComponent {
         if (size.y < 0 && (pos.y + size.y > check.y || pos.y < check.y)) return false
 
         return true
+    }
+
+    fun setColor(color: NamedTextColor) {
+        top.color = color
+        bottom.color = color
+        left.color = color
+        right.color = color
     }
 }
