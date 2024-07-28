@@ -1,5 +1,6 @@
 package de.blazemcworld.fireflow.gui
 
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.instance.Instance
 import kotlin.math.max
 import kotlin.math.min
@@ -60,5 +61,8 @@ class NodeComponent {
     }
 
     fun includes(pos: Pos2d) = outline.includes(pos)
+    fun setOutlineColor(color: NamedTextColor) {
+        outline.setColor(color)
+    }
 
 }
