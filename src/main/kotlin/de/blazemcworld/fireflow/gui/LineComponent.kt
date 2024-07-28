@@ -2,14 +2,13 @@ package de.blazemcworld.fireflow.gui
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import net.minestom.server.coordinate.Vec
 import net.minestom.server.entity.Entity
 import net.minestom.server.entity.EntityType
 import net.minestom.server.entity.metadata.display.TextDisplayMeta
 import net.minestom.server.instance.Instance
-import kotlin.math.atan2
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.math.*
 
 class LineComponent {
 
@@ -18,11 +17,13 @@ class LineComponent {
         val meta = entityMeta as TextDisplayMeta
         meta.text = Component.text("-")
         meta.backgroundColor = 0
+        meta.transformationInterpolationDuration = 1
+        meta.posRotInterpolationDuration = 1
     }
 
     var start = Pos2d.ZERO
     var end = Pos2d.ZERO
-    var color = NamedTextColor.WHITE
+    var color: TextColor = NamedTextColor.WHITE
 
     fun update(inst: Instance) {
         val meta = display.entityMeta as TextDisplayMeta
@@ -42,4 +43,20 @@ class LineComponent {
     fun remove() {
         display.remove()
     }
+
+    fun distance(p: Pos2d): Double {
+        val ab = Pos2d(end.x - start.x, end.y - start.y)
+        val ap = Pos2d(p.x - start.x, p.y - start.y)
+
+        val projection = (ap.x * ab.x + ap.y * ab.y) / (ab.x * ab.x + ab.y * ab.y)
+
+        val closestPoint = when {
+            projection <= 0 -> start
+            projection >= 1 -> end
+            else -> Pos2d(start.x + projection * ab.x, start.y + projection * ab.y)
+        }
+
+        return sqrt((p.x - closestPoint.x).pow(2) + (p.y - closestPoint.y).pow(2))
+    }
+
 }

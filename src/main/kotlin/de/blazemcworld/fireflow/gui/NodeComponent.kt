@@ -13,8 +13,8 @@ class NodeComponent {
 
     var pos = Pos2d.ZERO
     val title = TextComponent()
-    val inputs = mutableListOf<TextComponent>()
-    val outputs = mutableListOf<TextComponent>()
+    val inputs = mutableListOf<IOComponent.Input>()
+    val outputs = mutableListOf<IOComponent.Output>()
     private val outline = RectangleComponent()
 
     fun update(inst: Instance) {
@@ -25,10 +25,10 @@ class NodeComponent {
         var outputWidth = 0.0
 
         for (i in inputs) {
-            inputWidth = max(inputWidth, i.width())
+            inputWidth = max(inputWidth, i.text.width())
         }
         for (o in outputs) {
-            outputWidth = max(outputWidth, o.width())
+            outputWidth = max(outputWidth, o.text.width())
         }
         if (inputWidth + outputWidth < title.width()) {
             val diff = (title.width() - inputWidth - outputWidth) * 0.5
@@ -37,13 +37,13 @@ class NodeComponent {
         }
         inputWidth += CENTER_SPACING
         for (i in inputs) {
-            i.pos = Pos2d(pos.x + inputWidth - i.width(), inputY + baseY)
-            inputY -= i.height()
+            i.pos = Pos2d(pos.x + inputWidth - i.text.width(), inputY + baseY)
+            inputY -= i.text.height()
             i.update(inst)
         }
         for (o in outputs) {
             o.pos = Pos2d(pos.x - outputWidth, outputY + baseY)
-            outputY -= o.height()
+            outputY -= o.text.height()
             o.update(inst)
         }
         title.pos = Pos2d(pos.x - title.width() * 0.5 + (inputWidth - outputWidth) * 0.5, pos.y + title.height())
@@ -56,8 +56,8 @@ class NodeComponent {
     fun remove() {
         title.remove()
         outline.remove()
-        inputs.forEach(TextComponent::remove)
-        outputs.forEach(TextComponent::remove)
+        inputs.forEach(IOComponent::remove)
+        outputs.forEach(IOComponent::remove)
     }
 
     fun includes(pos: Pos2d) = outline.includes(pos)

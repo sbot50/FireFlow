@@ -1,9 +1,8 @@
 package de.blazemcworld.fireflow
 
-import de.blazemcworld.fireflow.gui.LineComponent
+import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.gui.NodeComponent
 import de.blazemcworld.fireflow.gui.Pos2d
-import de.blazemcworld.fireflow.gui.TextComponent
 import de.blazemcworld.fireflow.node.impl.NodeList
 import io.github.oshai.kotlinlogging.KotlinLogging
 import net.kyori.adventure.text.format.NamedTextColor
@@ -46,7 +45,7 @@ fun main() {
         it.modifier().fill(
             BlockVec(0, 0, 0).add(it.absoluteStart()),
             BlockVec(16, 128, 1).add(it.absoluteStart()),
-            Block.BLACK_CONCRETE
+            Block.POLISHED_BLACKSTONE
         )
     }
 
@@ -68,7 +67,7 @@ fun main() {
         it.isCancelled = true
     }
 
-    var creatingLine: TextComponent? = null
+    var creatingLine: IOComponent.Output? = null
 
     val allNodes = mutableListOf<NodeComponent>()
     events.addListener(PlayerBlockInteractEvent::class.java) {
@@ -85,13 +84,11 @@ fun main() {
                         return@addListener
                     }
                 }
-                creatingLine?.let { begin ->
+                creatingLine?.let { output ->
                     for (input in node.inputs) {
                         if (input.includes(cursor)) {
-                            val line = LineComponent()
-                            line.start = Pos2d(begin.pos.x, begin.pos.y + begin.height() * 0.75)
-                            line.end = Pos2d(input.pos.x + input.width(), input.pos.y + input.height() * 0.75)
-                            line.update(inst)
+                            input.connect(output)
+                            input.update(inst)
                             creatingLine = null
                             return@addListener
                         }
@@ -100,6 +97,7 @@ fun main() {
 
 
                 if (it.player.heldSlot.toInt() == 8) {
+                    creatingLine = null
                     node.remove()
                     allNodes.remove(node)
                 } else if (it.player.heldSlot.toInt() == 7) {
@@ -117,6 +115,16 @@ fun main() {
                     }
                 }
                 return@addListener
+            } else if (it.player.heldSlot.toInt() == 8) {
+                for (input in node.inputs) {
+                    for (line in input.lines) {
+                        if (line.distance(cursor) < 0.1) {
+                            input.connections.remove(input.lineOutputMap[line])
+                            input.update(inst)
+                            return@addListener
+                        }
+                    }
+                }
             }
         }
 
