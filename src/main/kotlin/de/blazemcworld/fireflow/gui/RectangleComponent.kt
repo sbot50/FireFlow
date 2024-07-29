@@ -1,6 +1,6 @@
 package de.blazemcworld.fireflow.gui
 
-import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.TextColor
 import net.minestom.server.instance.Instance
 
 class RectangleComponent {
@@ -46,7 +46,7 @@ class RectangleComponent {
         return true
     }
 
-    fun setColor(color: NamedTextColor) {
+    fun setColor(color: TextColor) {
         top.color = color
         bottom.color = color
         left.color = color

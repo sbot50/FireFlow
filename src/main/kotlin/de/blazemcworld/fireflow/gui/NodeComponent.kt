@@ -1,6 +1,5 @@
 package de.blazemcworld.fireflow.gui
 
-import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.instance.Instance
 import kotlin.math.max
 import kotlin.math.min
@@ -12,10 +11,11 @@ private const val CENTER_SPACING = 0.2
 class NodeComponent {
 
     var pos = Pos2d.ZERO
+    var isBeingMoved = false
     val title = TextComponent()
     val inputs = mutableListOf<IOComponent.Input>()
     val outputs = mutableListOf<IOComponent.Output>()
-    private val outline = RectangleComponent()
+    val outline = RectangleComponent()
 
     fun update(inst: Instance) {
         val baseY = pos.y
@@ -61,8 +61,5 @@ class NodeComponent {
     }
 
     fun includes(pos: Pos2d) = outline.includes(pos)
-    fun setOutlineColor(color: NamedTextColor) {
-        outline.setColor(color)
-    }
 
 }

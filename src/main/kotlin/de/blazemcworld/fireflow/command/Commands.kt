@@ -7,7 +7,9 @@ object Commands {
         val all = listOf(
             LobbyCommand,
             PlayCommand,
-            CodeCommand
+            CodeCommand,
+            ContributorCommand,
+            JoinCommand
         )
         all.forEach(MinecraftServer.getCommandManager()::register)
     }

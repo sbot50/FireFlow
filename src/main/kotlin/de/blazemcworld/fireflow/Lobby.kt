@@ -1,6 +1,7 @@
 package de.blazemcworld.fireflow
 
 import de.blazemcworld.fireflow.inventory.MySpacesInventory
+import de.blazemcworld.fireflow.util.fireflowSetInstance
 import de.blazemcworld.fireflow.util.reset
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -77,6 +78,6 @@ object Lobby {
     }
 
     fun playerJoin(player: Player) {
-        player.setInstance(instance, Pos.ZERO)
+        player.fireflowSetInstance(instance)
     }
 }

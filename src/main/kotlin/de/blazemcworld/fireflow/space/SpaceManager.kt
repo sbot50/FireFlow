@@ -5,11 +5,12 @@ import de.blazemcworld.fireflow.database.DatabaseHelper
 import de.blazemcworld.fireflow.database.table.PlayersTable
 import de.blazemcworld.fireflow.database.table.SpaceRolesTable
 import de.blazemcworld.fireflow.database.table.SpacesTable
+import de.blazemcworld.fireflow.util.fireflowSetInstance
 import net.kyori.adventure.text.Component
-import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.insertAndGetId
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object SpaceManager {
@@ -24,7 +25,7 @@ object SpaceManager {
             val spaceId = SpacesTable.insertAndGetId {
                 it[title] = Component.text(owner.username + "'s Space")
             }
-            val playerId = PlayersTable.select(PlayersTable.uuid eq owner.uuid)
+            val playerId = PlayersTable.selectAll().where(PlayersTable.uuid eq owner.uuid)
                 .adjustSelect { select(PlayersTable.id) }.single()
             createdId = SpaceRolesTable.insertAndGetId {
                 it[player] = playerId[PlayersTable.id].value
@@ -36,7 +37,7 @@ object SpaceManager {
     }
 
     fun sendToSpace(player: Player, id: Int) {
-        player.setInstance(getOrLoadSpace(id).playInstance, Pos.ZERO)
+        player.fireflowSetInstance(getOrLoadSpace(id).playInstance)
     }
 
     private fun getOrLoadSpace(id: Int): Space {

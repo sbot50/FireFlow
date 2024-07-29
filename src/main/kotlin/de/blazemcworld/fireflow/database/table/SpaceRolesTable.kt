@@ -13,10 +13,10 @@ object SpaceRolesTable : IntIdTable("space_roles") {
         from = { Role.byId(it) }
     ))
 
-    enum class Role(val id: Int) {
-        UNKNOWN(0),
-        OWNER(1),
-        CONTRIBUTOR(2);
+    enum class Role(val id: Int, val title: String?) {
+        UNKNOWN(0, null),
+        OWNER(1, "Owner"),
+        CONTRIBUTOR(2, "Contributor");
 
         companion object {
             private val id2roleMap = mutableMapOf<Int, Role>()

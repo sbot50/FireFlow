@@ -3,10 +3,10 @@ package de.blazemcworld.fireflow.command
 import de.blazemcworld.fireflow.database.table.PlayersTable
 import de.blazemcworld.fireflow.database.table.SpaceRolesTable
 import de.blazemcworld.fireflow.space.SpaceManager
+import de.blazemcworld.fireflow.util.fireflowSetInstance
 import de.blazemcworld.fireflow.util.sendError
 import net.minestom.server.command.builder.Command
 import net.minestom.server.command.builder.CommandExecutor
-import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
 import org.jetbrains.exposed.sql.JoinType
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -43,7 +43,7 @@ object CodeCommand : Command("code", "dev") {
                 return@exec
             }
 
-            sender.setInstance(space.codeInstance, Pos.ZERO)
+            sender.fireflowSetInstance(space.codeInstance)
         }
     }
 }

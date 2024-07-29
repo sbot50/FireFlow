@@ -18,6 +18,7 @@ object DeleteNodeTool : Tool {
         override fun use() {
             val cursor = space.codeCursor(player)
             space.codeNodes.find { it.includes(cursor) }?.let {
+                if (it.isBeingMoved) return
                 it.remove()
                 space.codeNodes.remove(it)
                 return

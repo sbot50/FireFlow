@@ -1,10 +1,10 @@
 package de.blazemcworld.fireflow.command
 
 import de.blazemcworld.fireflow.space.SpaceManager
+import de.blazemcworld.fireflow.util.fireflowSetInstance
 import de.blazemcworld.fireflow.util.sendError
 import net.minestom.server.command.builder.Command
 import net.minestom.server.command.builder.CommandExecutor
-import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
 
 object PlayCommand : Command("play") {
@@ -22,7 +22,7 @@ object PlayCommand : Command("play") {
                 sender.sendError("You are already playing on this space!")
                 return@exec
             }
-            sender.setInstance(space.playInstance, Pos.ZERO)
+            sender.fireflowSetInstance(space.playInstance)
         }
     }
 }

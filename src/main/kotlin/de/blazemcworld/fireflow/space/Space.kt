@@ -5,6 +5,7 @@ import de.blazemcworld.fireflow.gui.NodeComponent
 import de.blazemcworld.fireflow.gui.Pos2d
 import de.blazemcworld.fireflow.inventory.ToolsInventory
 import de.blazemcworld.fireflow.tool.Tool
+import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent
 import de.blazemcworld.fireflow.util.reset
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -15,7 +16,6 @@ import net.minestom.server.coordinate.Pos
 import net.minestom.server.coordinate.Vec
 import net.minestom.server.entity.GameMode
 import net.minestom.server.entity.Player
-import net.minestom.server.entity.attribute.Attribute
 import net.minestom.server.event.inventory.PlayerInventoryItemChangeEvent
 import net.minestom.server.event.player.*
 import net.minestom.server.instance.InstanceContainer
@@ -92,7 +92,6 @@ class Space(val id: Int) {
             it.player.reset()
             it.player.isAllowFlying = true
             it.player.isFlying = true
-            it.player.getAttribute(Attribute.PLAYER_BLOCK_INTERACTION_RANGE).baseValue = 16.0
             it.player.inventory.setItemStack(8, TOOLS_ITEM)
         }
 
@@ -105,8 +104,8 @@ class Space(val id: Int) {
 
         val playerTools = WeakHashMap<Player, Tool.Handler>()
 
-        fun updateTool(player: Player) {
-            for (tool in Tool.allTools) {
+        fun updateTool(player: Player, quit: Boolean = false) {
+            if (!quit) for (tool in Tool.allTools) {
                 if (tool.item == player.itemInMainHand) {
                     if (playerTools[player]?.tool == tool) return
                     playerTools[player]?.deselect()
@@ -118,7 +117,7 @@ class Space(val id: Int) {
             playerTools[player] = null
         }
 
-        codeEvents.addListener(PlayerBlockInteractEvent::class.java) click@{
+        codeEvents.addListener(PlayerUseItemEvent::class.java) click@{
             if (it.hand == Player.Hand.OFF) return@click
 
             if (it.player.itemInMainHand == TOOLS_ITEM) {
@@ -137,6 +136,9 @@ class Space(val id: Int) {
         }
         codeEvents.addListener(PlayerChangeHeldSlotEvent::class.java) {
             scheduler.execute { updateTool(it.player) }
+        }
+        codeEvents.addListener(PlayerExitInstanceEvent::class.java) {
+            updateTool(it.player, quit=true)
         }
     }
 
