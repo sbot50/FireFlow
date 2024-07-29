@@ -1,0 +1,8 @@
+{
+  "database": {
+    "jdbcUrl": "jdbc:mariadb://localhost:1111/exampleDB",
+    "user": "exampleUser",
+    "password": "examplePassword",
+    "driver": "org.mariadb.jdbc.Driver"
+  }
+}

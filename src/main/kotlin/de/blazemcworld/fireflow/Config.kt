@@ -5,7 +5,15 @@ import com.google.gson.JsonParser
 import java.io.File
 
 class Config(json: JsonObject) {
+
     companion object {
+        init {
+            if (!File("config.json").exists()) {
+                val fileContent = this::class.java.getResource("/defaultConfig.json")?.readText()
+                File("config.json").writeText(fileContent ?: "{}")
+            }
+        }
+
         val store = Config(JsonParser.parseReader(File("config.json").bufferedReader()).asJsonObject)
     }
 
