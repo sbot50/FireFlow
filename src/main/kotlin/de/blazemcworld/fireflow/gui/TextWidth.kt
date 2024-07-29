@@ -1,4 +1,4 @@
-package de.blazemcworld.fireflow
+package de.blazemcworld.fireflow.gui
 
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser

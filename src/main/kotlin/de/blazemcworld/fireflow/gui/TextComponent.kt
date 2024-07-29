@@ -1,6 +1,5 @@
 package de.blazemcworld.fireflow.gui
 
-import de.blazemcworld.fireflow.TextWidth
 import net.kyori.adventure.text.Component
 import net.minestom.server.entity.Entity
 import net.minestom.server.entity.EntityType
