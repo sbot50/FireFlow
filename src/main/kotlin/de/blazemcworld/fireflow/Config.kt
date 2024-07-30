@@ -9,8 +9,9 @@ class Config(json: JsonObject) {
     companion object {
         init {
             if (!File("config.json").exists()) {
-                val fileContent = this::class.java.getResource("/defaultConfig.json")?.readText()
-                File("config.json").writeText(fileContent ?: "{}")
+                val file = this::class.java.getResource("/defaultConfig.json") ?: throw Error("Could not load default config, Please report this to the developers!")
+                val fileContent = file.readText()
+                File("config.json").writeText(fileContent)
             }
         }
 
