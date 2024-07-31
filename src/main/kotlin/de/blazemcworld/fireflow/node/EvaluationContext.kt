@@ -26,7 +26,7 @@ class EvaluationContext(val global: GlobalNodeContext, val varStore: MutableMap<
         return out
     }
 
-    fun emit(output: NodeContext.BoundOutput<Void>, now: Boolean = false) {
+    fun emit(output: NodeContext.BoundOutput<Unit>, now: Boolean = false) {
         tasks.add {
             output.connected.singleOrNull()?.signalListener?.invoke(this)
         }
@@ -45,6 +45,7 @@ class EvaluationContext(val global: GlobalNodeContext, val varStore: MutableMap<
     fun child(shareLocals: Boolean): EvaluationContext {
         val c = if (shareLocals) EvaluationContext(global, varStore) else EvaluationContext(global)
         if (functionStack.isNotEmpty()) c.functionStack.push(functionStack.peek())
+        for ((k, v) in store) c.store[k] = v
         return c
     }
 }

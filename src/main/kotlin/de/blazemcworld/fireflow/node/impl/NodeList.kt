@@ -3,6 +3,7 @@ package de.blazemcworld.fireflow.node.impl
 object NodeList {
     val all = setOf(
         AddNumbersNode,
+        DivideNumbersNode,
         EmptyListNode,
         EqualNode,
         FillBlocksNode,
@@ -15,6 +16,7 @@ object NodeList {
         ListInsertNode,
         ListLengthNode,
         ListRemoveNode,
+        MultiplyNumbersNode,
         OnPlayerChatNode,
         OnPlayerJoinNode,
         PackPositionNode,

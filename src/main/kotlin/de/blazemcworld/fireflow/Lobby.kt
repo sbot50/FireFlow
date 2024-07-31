@@ -40,6 +40,7 @@ object Lobby {
             if (abs(it.absoluteStart().z() + 8) > 16) return@gen
             it.modifier().fillHeight(-1, 0, Block.POLISHED_ANDESITE)
         }
+        instance.timeRate = 0
 
         val events = instance.eventNode()
         events.addListener(PlayerMoveEvent::class.java) {

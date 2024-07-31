@@ -26,7 +26,7 @@ class SetVariableNode(private val store: VariableStore) : GenericNode("Set ${sto
         override fun setup(ctx: NodeContext) {
             ctx[signal].signalListener = {
                 it[ctx[name]]?.let { n ->
-                    store.setVariable(it, n, it[ctx[value]])
+                    store.setVariable(it, n, it[ctx[value]], type)
                 }
                 it.emit(ctx[next])
             }
@@ -63,22 +63,22 @@ class GetVariableNode(private val store: VariableStore) : GenericNode("Get ${sto
 
 object VariableNodes {
     val all = listOf(
-        GetVariableNode(VariableStore.Local), GetVariableNode(VariableStore.Space),
-        SetVariableNode(VariableStore.Local), SetVariableNode(VariableStore.Space),
+        GetVariableNode(VariableStore.Local), GetVariableNode(VariableStore.Space), GetVariableNode(VariableStore.Persistent),
+        SetVariableNode(VariableStore.Local), SetVariableNode(VariableStore.Space), SetVariableNode(VariableStore.Persistent),
     )
 }
 
 interface VariableStore {
     val type: String
     fun getVariable(ctx: EvaluationContext, name: String): Any?
-    fun setVariable(ctx: EvaluationContext, name: String, value: Any?)
+    fun setVariable(ctx: EvaluationContext, name: String, value: Any?, type: ValueType<*>)
 
     object Local : VariableStore {
         override val type = "Local"
 
         override fun getVariable(ctx: EvaluationContext, name: String): Any? = ctx.varStore[name]
 
-        override fun setVariable(ctx: EvaluationContext, name: String, value: Any?) {
+        override fun setVariable(ctx: EvaluationContext, name: String, value: Any?, type: ValueType<*>) {
             ctx.varStore[name] = value
         }
     }
@@ -88,8 +88,20 @@ interface VariableStore {
 
         override fun getVariable(ctx: EvaluationContext, name: String): Any? = ctx.global.varStore[name]
 
-        override fun setVariable(ctx: EvaluationContext, name: String, value: Any?) {
+        override fun setVariable(ctx: EvaluationContext, name: String, value: Any?, type: ValueType<*>) {
             ctx.global.varStore[name] = value
+        }
+    }
+
+    object Persistent : VariableStore {
+        override val type = "Persistent"
+
+        override fun getVariable(ctx: EvaluationContext, name: String): Any? {
+            return ctx.global.space.varStore[name]
+        }
+
+        override fun setVariable(ctx: EvaluationContext, name: String, value: Any?, type: ValueType<*>) {
+            ctx.global.space.varStore[name] = type to value
         }
     }
 }

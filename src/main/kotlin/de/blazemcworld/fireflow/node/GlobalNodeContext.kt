@@ -2,9 +2,12 @@ package de.blazemcworld.fireflow.node
 
 import de.blazemcworld.fireflow.Config
 import de.blazemcworld.fireflow.FireFlow
+import de.blazemcworld.fireflow.Lobby
 import de.blazemcworld.fireflow.gui.NodeComponent
 import de.blazemcworld.fireflow.space.Space
 import de.blazemcworld.fireflow.util.sendError
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.MinecraftServer
 import net.minestom.server.timer.TaskSchedule
 
@@ -15,7 +18,7 @@ class GlobalNodeContext(val space: Space) {
     private var cpuTime = 0L
     private var cpuDepth = 0
     private var cpuStart = System.nanoTime()
-
+    private var halted = false
 
     init {
         for (component in space.codeNodes) {
@@ -40,7 +43,10 @@ class GlobalNodeContext(val space: Space) {
         if (cpuDepth == 0) {
             cpuStart = System.nanoTime()
         }
-        if (cpuLimit()) return
+        if (cpuLimit()) {
+            halt()
+            return
+        }
         cpuDepth++
         try {
             code()
@@ -48,16 +54,22 @@ class GlobalNodeContext(val space: Space) {
             cpuDepth--
             if (cpuDepth == 0) {
                 cpuTime += System.nanoTime() - cpuStart
-                if (cpuTime > Config.store.limits.cpuPerTick) {
-                    onDestroy.forEach { it() }
-                    FireFlow.LOGGER.info { "Halted Space #${space.id}! (Used ${cpuTime}ns CPU, ${Config.store.limits.cpuPerTick}ns Limit)"}
-
-                    for (player in space.codeInstance.players + space.playInstance.players) {
-                        player.sendError("This space has been halted for using too much cpu!")
-                    }
-                }
+                if (cpuTime > Config.store.limits.cpuPerTick) halt()
             }
         }
+    }
+
+    private fun halt() {
+        onDestroy.forEach { it() }
+        halted = true
+        for (p in space.playInstance.players) {
+            p.sendMessage(Component.text("Space was halted for using too much cpu!").color(NamedTextColor.RED))
+            Lobby.playerJoin(p)
+        }
+        for (player in space.codeInstance.players) {
+            player.sendError("This space has been halted for using too much cpu!")
+        }
+        FireFlow.LOGGER.info { "Halted Space #${space.id}! (Used ${cpuTime}ns CPU, ${Config.store.limits.cpuPerTick}ns Limit)"}
     }
 
     fun cpuLimit() = cpuTime + System.nanoTime() - cpuStart > Config.store.limits.cpuPerTick

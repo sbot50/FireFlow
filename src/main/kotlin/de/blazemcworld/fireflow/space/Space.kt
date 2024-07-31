@@ -2,6 +2,7 @@ package de.blazemcworld.fireflow.space
 
 import com.google.gson.*
 import de.blazemcworld.fireflow.FireFlow
+import de.blazemcworld.fireflow.Lobby
 import de.blazemcworld.fireflow.gui.NodeComponent
 import de.blazemcworld.fireflow.gui.Pos2d
 import de.blazemcworld.fireflow.inventory.ToolsInventory
@@ -31,6 +32,7 @@ import net.minestom.server.item.Material
 import net.minestom.server.timer.TaskSchedule
 import java.io.File
 import java.util.*
+import kotlin.math.abs
 
 private val TOOLS_ITEM = ItemStack.builder(Material.CHEST)
     .customName(Component.text("Tools").color(NamedTextColor.GOLD).decoration(TextDecoration.ITALIC, false))
@@ -46,15 +48,20 @@ class Space(val id: Int) {
     val codeNodes = mutableListOf<NodeComponent>()
     val functions = mutableListOf<Pair<FunctionInputsNode, FunctionOutputsNode>>()
     val functionNodes = mutableSetOf<FunctionCallNode>()
+    val varStore = mutableMapOf<String, Pair<ValueType<*>, Any?>>()
     private var isUnused = false
     private var globalNodeContext: GlobalNodeContext
-    private val codeFile = File("spaces").resolve(id.toString()).resolve("code.json")
+    private val spaceDir = File("spaces").resolve(id.toString())
+    private val codeFile = spaceDir.resolve("code.json")
+    private val variableFile = spaceDir.resolve("vars.json")
 
     init {
         FireFlow.LOGGER.info { "Loading Space #$id" }
         val manager = MinecraftServer.getInstanceManager()
         codeInstance = manager.createInstanceContainer()
         playInstance = manager.createInstanceContainer()
+        codeInstance.timeRate = 0
+        playInstance.timeRate = 0
 
         codeInstance.setChunkSupplier(::LightingChunk)
         playInstance.setChunkSupplier(::LightingChunk)
@@ -69,8 +76,14 @@ class Space(val id: Int) {
                 Block.POLISHED_BLACKSTONE
             )
         }
+        playInstance.setGenerator gen@{
+            if (abs(it.absoluteStart().x() + 8) > 16) return@gen
+            if (abs(it.absoluteStart().z() + 8) > 16) return@gen
+            it.modifier().fillHeight(-1, 0, Block.SMOOTH_STONE)
+        }
 
         readCodeFromDisk()
+        readVariablesFromDisk()
 
         val scheduler = MinecraftServer.getSchedulerManager()
         scheduler.submitTask {
@@ -169,24 +182,28 @@ class Space(val id: Int) {
     }
 
     fun reload() {
+        for (p in playInstance.players) {
+            p.sendMessage(Component.text("Space is reloading!").color(NamedTextColor.RED))
+            Lobby.playerJoin(p)
+        }
         globalNodeContext.onDestroy.forEach { it() }
         globalNodeContext = GlobalNodeContext(this)
     }
 
+    private fun writeType(t: ValueType<*>): JsonElement {
+        if (t.generic == null) {
+            return JsonPrimitive(t.name)
+        }
+        val info = JsonObject()
+        info.addProperty("__type", t.generic!!.name)
+        for ((k, v) in t.generics) {
+            info.add(k, writeType(v))
+        }
+        return info
+    }
+
     private fun writeCodeToDisk() {
         val data = JsonObject()
-
-        fun formatType(t: ValueType<*>): JsonElement {
-            if (t.generic == null) {
-                return JsonPrimitive(t.name)
-            }
-            val info = JsonObject()
-            info.addProperty("__type", t.generic!!.name)
-            for ((k, v) in t.generics) {
-                info.add(k, formatType(v))
-            }
-            return info
-        }
 
         val functionJson = JsonArray()
         for ((input, output) in functions) {
@@ -199,7 +216,7 @@ class Space(val id: Int) {
             for (type in input.outputs) {
                 val info = JsonObject()
                 info.addProperty("name", type.name)
-                info.add("type", formatType(type.type))
+                info.add("type", writeType(type.type))
                 inputs.add(info)
             }
             fnData.add("in", inputs)
@@ -208,7 +225,7 @@ class Space(val id: Int) {
             for (type in output.inputs) {
                 val info = JsonObject()
                 info.addProperty("name", type.name)
-                info.add("type", formatType(type.type))
+                info.add("type", writeType(type.type))
                 outputs.add(info)
             }
             fnData.add("out", outputs)
@@ -231,7 +248,7 @@ class Space(val id: Int) {
                 nodeJson.addProperty("id", node.node.generic!!.title)
                 val generics = JsonObject()
                 for ((k, v) in node.node.generics) {
-                    generics.add(k, formatType(v))
+                    generics.add(k, writeType(v))
                 }
                 nodeJson.add("g", generics)
             }
@@ -257,26 +274,27 @@ class Space(val id: Int) {
         codeFile.writeText(data.toString())
     }
 
+    private fun readType(json: JsonElement): ValueType<*>? {
+        if (json.isJsonPrimitive) {
+            return AllTypes.all.find { it is ValueType<*> && it.name == json.asString } as ValueType<*>?
+        }
+        if (json !is JsonObject) return null
+        val genericType = AllTypes.all.find { it is GenericType && json.get("__type").asString == it.name } as GenericType
+        val info = mutableMapOf<String, ValueType<*>>()
+        for ((k, v) in json.entrySet()) {
+            if (k == "__type") continue
+            info[k] = readType(v) ?: return null
+        }
+        return genericType.create(info)
+    }
+
+
     private fun readCodeFromDisk() {
         if (!codeFile.exists()) return
         val data = JsonParser.parseString(codeFile.readText()).asJsonObject
         codeNodes.clear()
         functions.clear()
         functionNodes.clear()
-
-        fun readType(json: JsonElement): ValueType<*>? {
-            if (json.isJsonPrimitive) {
-                return AllTypes.all.find { it is ValueType<*> && it.name == json.asString } as ValueType<*>?
-            }
-            if (json !is JsonObject) return null
-            val genericType = AllTypes.all.find { it is GenericType && json.get("__type").asString == it.name } as GenericType
-            val info = mutableMapOf<String, ValueType<*>>()
-            for ((k, v) in json.entrySet()) {
-                if (k == "__type") continue
-                info[k] = readType(v) ?: return null
-            }
-            return genericType.create(info)
-        }
 
         val newNodes = mutableListOf<NodeComponent?>()
         while (newNodes.size < data.getAsJsonArray("nodes").size()) {
@@ -352,5 +370,52 @@ class Space(val id: Int) {
         FireFlow.LOGGER.info { "Saving Space #$id" }
         playInstance.saveChunksToStorage()
         writeCodeToDisk()
+        writeVariablesToDisk()
+    }
+
+    private fun writeVariablesToDisk() {
+        val types = mutableMapOf<ValueType<*>, MutableSet<Pair<String, Any?>>>()
+        for ((n, v) in varStore) {
+            types.computeIfAbsent(v.first) { mutableSetOf() }.add(n to v.second)
+        }
+        val store = JsonObject()
+        val objectsJson = JsonArray()
+        val typesMap = JsonArray()
+        for ((t, all) in types) {
+            val entry = JsonObject()
+            entry.add("type", writeType(t))
+            val map = JsonObject()
+            val objects = mutableMapOf<Any?, Pair<Int, JsonElement>>()
+            for ((k, v) in all) {
+                map.add(k, (t as ValueType<Any?>).serialize(v, objects))
+            }
+            entry.add("vars", map)
+            for ((id, v) in objects.values) {
+                while (objectsJson.size() < id) objectsJson.add(JsonNull.INSTANCE)
+                objectsJson.set(id, v)
+            }
+            typesMap.add(entry)
+        }
+        store.add("types", typesMap)
+        store.add("objects", objectsJson)
+        if (!variableFile.parentFile.exists()) variableFile.parentFile.mkdirs()
+        variableFile.writeText(store.toString())
+    }
+
+    private fun readVariablesFromDisk() {
+        varStore.clear()
+        if (!variableFile.exists()) return
+        val json = JsonParser.parseString(variableFile.readText()).asJsonObject
+
+        val objectsJson = json.getAsJsonArray("objects")
+        val objects = mutableMapOf<Int, Pair<Any?, JsonElement>>()
+        for ((i, v) in objectsJson.withIndex()) objects[i] = null to v
+
+        for (type in json.getAsJsonArray("types")) {
+            val t = readType(type.asJsonObject.get("type")) ?: continue
+            for ((k, v) in type.asJsonObject.getAsJsonObject("vars").entrySet()) {
+                varStore[k] = t to t.deserialize(v, this, objects)
+            }
+        }
     }
 }

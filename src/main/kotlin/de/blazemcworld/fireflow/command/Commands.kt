@@ -13,6 +13,7 @@ object Commands {
             LobbyCommand,
             PlayCommand,
             ReloadCommand,
+            VariablesCommand,
         )
         all.forEach(MinecraftServer.getCommandManager()::register)
     }

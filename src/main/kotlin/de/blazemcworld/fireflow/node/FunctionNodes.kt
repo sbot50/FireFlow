@@ -18,7 +18,7 @@ class FunctionCallNode(private val fnInputs: FunctionInputsNode, private val fnO
     override fun setup(ctx: NodeContext) {
         for (input in inputs) {
             ctx[input].signalListener = listen@{
-                val matching = fnInputs.outputs.find { it.name == input.name } as Output<Void>? ?: return@listen
+                val matching = fnInputs.outputs.find { it.name == input.name } as Output<Unit>? ?: return@listen
                 val otherCtx = ctx.global.nodeContexts[fnInputs.component] ?: return@listen
 
                 it.functionStack.add(ctx.component)
@@ -96,7 +96,7 @@ class FunctionOutputsNode(val fn: String) : BaseNode("$fn Outputs", Material.PRI
     override fun setup(ctx: NodeContext) {
         for (input in inputs) {
             ctx[input as Input<Any?>].signalListener = listen@{
-                val matching = it.functionStack.peek().node.outputs.find { o -> o.name == input.name } as Output<Void>? ?: return@listen
+                val matching = it.functionStack.peek().node.outputs.find { o -> o.name == input.name } as Output<Unit>? ?: return@listen
                 val matchingCtx = ctx.global.nodeContexts[it.functionStack.peek()] ?: return@listen
                 it.emit(matchingCtx[matching])
             }
