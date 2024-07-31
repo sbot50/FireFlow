@@ -74,7 +74,7 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
     open val generics = emptyMap<String, ValueType<*>>()
     open val generic: GenericNode? = null
 
-    fun <T> input(name: String, type: ValueType<T>) = Input(name, type).also { inputs += it }
+    fun <T> input(name: String, type: ValueType<T>, optional: Boolean = false) = Input(name, type, optional).also { inputs += it }
     fun <T> output(name: String, type: ValueType<T>) = Output(name, type).also { outputs += it }
 
     override fun menuItem() = ItemStack.builder(material)
@@ -117,6 +117,6 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
         val name: String
         val type: ValueType<T>
     }
-    open class Input<T>(override val name: String, override val type: ValueType<T>): IO<T>
+    open class Input<T>(override val name: String, override val type: ValueType<T>, val optional: Boolean): IO<T>
     open class Output<T>(override val name: String, override val type: ValueType<T>): IO<T>
 }

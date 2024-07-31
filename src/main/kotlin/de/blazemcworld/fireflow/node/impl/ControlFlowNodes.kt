@@ -8,8 +8,8 @@ import net.minestom.server.timer.TaskSchedule
 
 object ScheduleNode : BaseNode("Schedule", Material.CLOCK) {
     private val signal = input("Signal", SignalType)
-    private val delay = input("Delay", NumberType)
-    private val sharedLocals = input("Shared Locals", ConditionType)
+    private val delay = input("Delay", NumberType, true)
+    private val sharedLocals = input("Shared Locals", ConditionType, true)
     private val next = output("Next", SignalType)
     private val schedule = output("Schedule", SignalType)
 

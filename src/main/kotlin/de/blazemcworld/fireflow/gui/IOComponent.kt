@@ -3,6 +3,7 @@ package de.blazemcworld.fireflow.gui
 import de.blazemcworld.fireflow.node.BaseNode
 import de.blazemcworld.fireflow.node.SignalType
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.instance.Instance
 
 abstract class IOComponent(val node: NodeComponent) {
@@ -29,6 +30,7 @@ abstract class IOComponent(val node: NodeComponent) {
 
         init {
             text.text = Component.text("○ " + io.name).color(io.type.color)
+            if (io.optional) text.text = text.text.append(Component.text("*").color(NamedTextColor.GRAY))
         }
 
         fun connect(output: Output): Boolean {
