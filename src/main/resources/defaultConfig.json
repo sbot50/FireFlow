@@ -3,9 +3,9 @@
     "jdbcUrl": "jdbc:mariadb://localhost:1111/exampleDB",
     "user": "exampleUser",
     "password": "examplePassword",
-    "driver": "org.mariadb.jdbc.Driver",
-    "limits": {
-      "spacesPerPlayer": 5
-    }
+    "driver": "org.mariadb.jdbc.Driver"
+  },
+  "limits": {
+    "spacesPerPlayer": 5
   }
 }

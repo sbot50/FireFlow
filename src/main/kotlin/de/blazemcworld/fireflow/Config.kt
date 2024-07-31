@@ -10,8 +10,7 @@ class Config(json: JsonObject) {
         init {
             if (!File("config.json").exists()) {
                 val file = this::class.java.getResource("/defaultConfig.json") ?: throw Error("Could not load default config, Please report this to the developers!")
-                val fileContent = file.readText()
-                File("config.json").writeText(fileContent)
+                File("config.json").writeText(file.readText())
             }
         }
 
