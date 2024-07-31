@@ -45,5 +45,9 @@ object DatabaseHelper {
             username = Config.store.database.user
             password = Config.store.database.password
         }))
+
+        transaction {
+            SchemaUtils.createMissingTablesAndColumns(PlayersTable, SpacesTable, SpaceRolesTable)
+        }
     }
 }
