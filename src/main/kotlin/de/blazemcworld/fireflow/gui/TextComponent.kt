@@ -27,7 +27,7 @@ class TextComponent {
         display.setInstance(inst, adjusted.to3d(15.999).withView(180f, 0f))
     }
 
-    fun width() = TextWidth.calculate(text) * 1 / 40
+    fun width() = TextWidth.calculate(text) / 40
     fun height() = 0.25
 
     fun remove() {

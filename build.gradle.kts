@@ -14,6 +14,9 @@ dependencies {
     // minestom
     implementation("net.minestom:minestom-snapshots:1f34e60ea6")
 
+    // minimessage
+    implementation("net.kyori:adventure-text-minimessage:4.17.0")
+
     // database
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.4.1")

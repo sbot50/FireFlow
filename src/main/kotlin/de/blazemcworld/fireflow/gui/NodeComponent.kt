@@ -1,5 +1,8 @@
 package de.blazemcworld.fireflow.gui
 
+import de.blazemcworld.fireflow.node.BaseNode
+import de.blazemcworld.fireflow.node.impl.ValueLiteralNode
+import net.kyori.adventure.text.Component
 import net.minestom.server.instance.Instance
 import kotlin.math.max
 import kotlin.math.min
@@ -8,8 +11,10 @@ private const val PADDING = 0.1
 private const val DOUBLE_PADDING = PADDING * 2
 private const val CENTER_SPACING = 0.2
 
-class NodeComponent {
+class NodeComponent(val node: BaseNode) {
 
+    var valueLiteral = "unset"
+    private val valueDisplay = TextComponent()
     var pos = Pos2d.ZERO
     var isBeingMoved = false
     val title = TextComponent()
@@ -24,6 +29,8 @@ class NodeComponent {
         var inputWidth = 0.0
         var outputWidth = 0.0
 
+        if (node is ValueLiteralNode<*>) inputWidth = TextWidth.calculate(valueLiteral) / 40
+
         for (i in inputs) {
             inputWidth = max(inputWidth, i.text.width())
         }
@@ -36,6 +43,12 @@ class NodeComponent {
             outputWidth += diff
         }
         inputWidth += CENTER_SPACING
+        if (node is ValueLiteralNode<*>) {
+            valueDisplay.text = Component.text(valueLiteral).color(node.type.color)
+            valueDisplay.pos = Pos2d(pos.x + inputWidth - valueDisplay.width(), inputY + baseY)
+            inputY -= valueDisplay.height()
+            valueDisplay.update(inst)
+        }
         for (i in inputs) {
             i.pos = Pos2d(pos.x + inputWidth - i.text.width(), inputY + baseY)
             inputY -= i.text.height()
@@ -56,6 +69,7 @@ class NodeComponent {
     fun remove() {
         title.remove()
         outline.remove()
+        valueDisplay.remove()
         inputs.forEach(IOComponent::remove)
         outputs.forEach(IOComponent::remove)
     }

@@ -1,10 +1,11 @@
 package de.blazemcworld.fireflow.gui
 
-import de.blazemcworld.fireflow.node.NodeIO
+import de.blazemcworld.fireflow.node.BaseNode
+import de.blazemcworld.fireflow.node.SignalType
 import net.kyori.adventure.text.Component
 import net.minestom.server.instance.Instance
 
-abstract class IOComponent {
+abstract class IOComponent(val node: NodeComponent) {
 
     val text = TextComponent()
     var pos = Pos2d.ZERO
@@ -23,7 +24,7 @@ abstract class IOComponent {
 
     abstract fun disconnectAll()
 
-    class Input(val io: NodeIO) : IOComponent() {
+    class Input(val io: BaseNode.Input<*>, node: NodeComponent) : IOComponent(node) {
         val connections = mutableSetOf<Output>()
 
         init {
@@ -33,9 +34,10 @@ abstract class IOComponent {
         fun connect(output: Output): Boolean {
             if (output.io.type != io.type) return false
 
-            when (io.type.flow) {
-                NodeIO.Flow.FORWARDS -> output.disconnectAll()
-                NodeIO.Flow.BACKWARDS -> disconnectAll()
+            if (io.type is SignalType) {
+                output.disconnectAll()
+            } else {
+                disconnectAll()
             }
             connections.add(output)
             output.connections.add(this)
@@ -74,7 +76,7 @@ abstract class IOComponent {
             super.update(inst)
         }
     }
-    class Output(val io: NodeIO) : IOComponent() {
+    class Output(val io: BaseNode.Output<*>, node: NodeComponent) : IOComponent(node) {
         val connections = mutableSetOf<Input>()
         init {
             text.text = Component.text(io.name + " ○").color(io.type.color)

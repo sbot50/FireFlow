@@ -5,11 +5,14 @@ import net.minestom.server.MinecraftServer
 object Commands {
     init {
         val all = listOf(
-            LobbyCommand,
-            PlayCommand,
             CodeCommand,
             ContributorCommand,
-            JoinCommand
+            FunctionCommand,
+            JoinCommand,
+            LiteralCommand,
+            LobbyCommand,
+            PlayCommand,
+            ReloadCommand,
         )
         all.forEach(MinecraftServer.getCommandManager()::register)
     }

@@ -7,6 +7,7 @@ import de.blazemcworld.fireflow.database.table.SpaceRolesTable
 import de.blazemcworld.fireflow.database.table.SpacesTable
 import de.blazemcworld.fireflow.util.fireflowSetInstance
 import net.kyori.adventure.text.Component
+import net.minestom.server.MinecraftServer
 import net.minestom.server.entity.Player
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.insertAndGetId
@@ -15,7 +16,15 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object SpaceManager {
 
-    private val loadedSpaces =  mutableMapOf<Int, Space>()
+    private val loadedSpaces = mutableMapOf<Int, Space>()
+
+    init {
+        MinecraftServer.getSchedulerManager().buildShutdownTask {
+            for (space in loadedSpaces.values) {
+                space.save()
+            }
+        }
+    }
 
     fun createSpace(owner: Player): Int? {
         var createdId: Int? = null

@@ -21,5 +21,6 @@ class Config(json: JsonObject) {
 
     class Limits(json: JsonObject) {
         val spacesPerPlayer = json.get("spacesPerPlayer")?.asInt ?: 5
+        val cpuPerTick = json.get("cpuPerTick")?.asLong ?: 10000000L //10ms
     }
 }

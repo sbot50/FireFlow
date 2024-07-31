@@ -25,4 +25,5 @@ fun Player.sendError(msg: String) {
 fun Player.fireflowSetInstance(instance: Instance, pos: Pos = Pos.ZERO) {
     MinecraftServer.getGlobalEventHandler().call(PlayerExitInstanceEvent(this, this.instance))
     setInstance(instance, pos)
+    instance.chunks.forEach { if (this in it.viewers) sendChunk(it) }
 }

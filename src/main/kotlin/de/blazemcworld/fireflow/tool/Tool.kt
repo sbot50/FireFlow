@@ -16,10 +16,10 @@ interface Tool {
 
     companion object {
         val allTools = setOf(
-            MoveNodeTool,
             CreateNodeTool,
-            DeleteNodeTool,
-            ConnectNodesTool
+            ConnectNodesTool,
+            MoveNodeTool,
+            DeleteNodeTool
         )
     }
 

@@ -44,6 +44,7 @@ object MoveNodeTool : Tool {
                 val max = Pos2d(max(start.x, cursor.x), max(start.y, cursor.y))
 
                 space.codeNodes.forEach {
+                    if (it.isBeingMoved) return@forEach
                     if (it.outline.pos.x < min.x || it.outline.pos.x + it.outline.size.x > max.x) return@forEach
                     if (it.outline.pos.y < min.y || it.outline.pos.y + it.outline.size.y > max.y) return@forEach
 
@@ -64,7 +65,7 @@ object MoveNodeTool : Tool {
                 }
                 return@let
             }
-            space.codeNodes.find { it.includes(cursor) }?.let {
+            space.codeNodes.find { it.includes(cursor) && !it.isBeingMoved }?.let {
                 nodes[it] = it.pos - cursor
                 it.outline.setColor(NamedTextColor.GREEN)
                 it.isBeingMoved = true
