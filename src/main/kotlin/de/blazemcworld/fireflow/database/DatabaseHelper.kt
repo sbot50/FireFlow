@@ -38,6 +38,31 @@ object DatabaseHelper {
         .join(PlayersTable, JoinType.INNER, PlayersTable.id, SpaceRolesTable.player)
         .selectAll().where((PlayersTable.uuid eq player.uuid) and (SpaceRolesTable.role eq SpaceRolesTable.Role.OWNER))
 
+    fun preferences(player: Player): MutableMap<String, Byte> {
+        val preferences = mutableMapOf<String, Byte>()
+        transaction {
+            val res = PlayersTable.selectAll().where(PlayersTable.uuid eq player.uuid).single()
+            for (entry in PlayersTable.preferences) {
+                preferences[entry.key] = res[entry.value]
+            }
+        }
+        return preferences
+    }
+
+    fun getPreference(player: Player, preference: String): Byte {
+        return preferences(player)[preference]!!
+    }
+
+    fun updatePreferences(player: Player, preferences: Map<String, Byte>) {
+        transaction {
+            PlayersTable.update({ PlayersTable.uuid eq player.uuid }) {
+                for (entry in preferences) {
+                    it[PlayersTable.preferences[entry.key]!!] = entry.value
+                }
+            }
+        }
+    }
+
     fun init() {
         Database.connect(HikariDataSource(HikariConfig().apply {
             jdbcUrl = Config.store.database.url
