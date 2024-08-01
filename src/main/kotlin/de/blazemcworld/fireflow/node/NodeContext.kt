@@ -1,5 +1,6 @@
 package de.blazemcworld.fireflow.node
 
+import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.gui.NodeComponent
 
 class NodeContext(val global: GlobalNodeContext, val component: NodeComponent) {
@@ -8,8 +9,9 @@ class NodeContext(val global: GlobalNodeContext, val component: NodeComponent) {
 
     operator fun <T> get(v: BaseNode.Output<T>) = store[v] as BoundOutput<T>
     operator fun <T> get(v: BaseNode.Input<T>): BoundInput<T> {
-        if (v is BaseNode.InsetInput && v.insetVal != null) {
-            return InsetInput(v)
+        val matchingInput: IOComponent.InsetInput<T>? = component.inputs.find { it.io == v } as? IOComponent.InsetInput<T>
+        if (v.type.insetable && matchingInput != null && matchingInput.insetVal != null) {
+            return BoundInsetInput(v, matchingInput)
         }
         return store[v] as BoundInput<T>
     }
@@ -45,8 +47,8 @@ class NodeContext(val global: GlobalNodeContext, val component: NodeComponent) {
         }
     }
 
-    inner class InsetInput<T>(v: BaseNode.InsetInput<T>) : BoundInput<T>(v) {
-        var insetVal: T? = v.insetVal
+    inner class BoundInsetInput<T>(v: BaseNode.Input<T>, insetValInp: IOComponent.InsetInput<T>) : BoundInput<T>(v) {
+        var insetVal: T? = insetValInp.insetVal
         override var connected = emptySet<BoundOutput<*>>()
     }
 

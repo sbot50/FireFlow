@@ -3,7 +3,6 @@ package de.blazemcworld.fireflow.tool
 import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.gui.LineComponent
 import de.blazemcworld.fireflow.gui.Pos2d
-import de.blazemcworld.fireflow.node.BaseNode
 import de.blazemcworld.fireflow.space.Space
 import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.MinecraftServer
@@ -16,10 +15,7 @@ object ConnectNodesTool : Tool {
     override val item = item(Material.BREEZE_ROD,
         "Connect Nodes", NamedTextColor.AQUA,
         "Used for connecting node",
-        "inputs and outputs.",
-        " ",
-        "Press Q while on a ",
-        "input/output to disconnect."
+        "inputs and outputs."
     )
 
     override fun handler(player: Player, space: Space) = object : Tool.Handler {
@@ -60,8 +56,8 @@ object ConnectNodesTool : Tool {
                         if (input.includes(cursor)) {
                             if (!input.connect(output)) return
 
-                            if (input.io is BaseNode.InsetInput && input.io.insetVal != null) {
-                                input.io.insetVal = null
+                            if (input is IOComponent.InsetInput<*> && input.insetVal != null) {
+                                input.insetVal = null
                             }
 
                             input.node.update(space.codeInstance)
@@ -70,31 +66,6 @@ object ConnectNodesTool : Tool {
                         }
                     }
                 }
-            }
-        }
-
-        override fun drop() {
-            val cursor = space.codeCursor(player)
-            space.codeNodes.find { it.includes(cursor) }?.let {
-                if (it.isBeingMoved) return
-
-                for (output in it.outputs) {
-                    if (output.includes(cursor)) {
-                        output.connections.clear()
-                        output.node.update(space.codeInstance)
-                        return
-                    }
-                }
-
-                for (input in it.inputs) {
-                    if (input.includes(cursor)) {
-                        input.connections.clear()
-                        input.node.update(space.codeInstance)
-                        return
-                    }
-                }
-                return
-
             }
         }
 

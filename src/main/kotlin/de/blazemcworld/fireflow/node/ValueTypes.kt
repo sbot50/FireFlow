@@ -49,14 +49,11 @@ abstract class ValueType<T> : SomeType  {
     abstract fun validate(something: Any?): T?
     open val generics = emptyMap<String, ValueType<*>>()
     open val generic: GenericType? = null
+    open val insetable = false
 
     abstract fun serialize(v: T, objects: MutableMap<Any?, Pair<Int, JsonElement>>): JsonElement
     abstract fun deserialize(json: JsonElement, space: Space, objects: MutableMap<Int, Pair<Any?, JsonElement>>): T
     abstract fun stringify(v: T): String
-}
-
-interface InsetableVal {
-
 }
 
 object PlayerType : ValueType<PlayerReference>() {
@@ -97,10 +94,11 @@ object SignalType : ValueType<Unit>() {
     override fun stringify(v: Unit) = "Signal"
 }
 
-object NumberType : ValueType<Double>(), InsetableVal {
+object NumberType : ValueType<Double>() {
     override val name = "Number"
     override val color: TextColor = NamedTextColor.RED
     override val material: Material = Material.SLIME_BALL
+    override val insetable = true
 
     override fun parse(str: String, space: Space) = str.toDoubleOrNull()
     override fun compareEqual(left: Double?, right: Double?) = left == right
@@ -117,10 +115,11 @@ object NumberType : ValueType<Double>(), InsetableVal {
 }
 
 
-object ConditionType : ValueType<Boolean>(), InsetableVal {
+object ConditionType : ValueType<Boolean>() {
     override val name = "Condition"
     override val color: TextColor = NamedTextColor.LIGHT_PURPLE
     override val material: Material = Material.ANVIL
+    override val insetable = true
 
     override fun parse(str: String, space: Space) = str == "true"
     override fun compareEqual(left: Boolean?, right: Boolean?) = left == right
@@ -135,10 +134,11 @@ object ConditionType : ValueType<Boolean>(), InsetableVal {
     override fun stringify(v: Boolean) = v.toString()
 }
 
-object TextType : ValueType<String>(), InsetableVal {
+object TextType : ValueType<String>() {
     override val name = "Text"
     override val color: TextColor = NamedTextColor.GREEN
     override val material: Material = Material.BOOK
+    override val insetable = true
 
     override fun parse(str: String, space: Space) = str
     override fun compareEqual(left: String?, right: String?) = left == right
@@ -167,10 +167,11 @@ private val mm = MiniMessage.builder()
         StandardTags.translatable(),
     ).build()).build()
 
-object MessageType : ValueType<Component>(), InsetableVal {
+object MessageType : ValueType<Component>() {
     override val name = "Message"
     override val color: TextColor = NamedTextColor.YELLOW
     override val material: Material = Material.ENCHANTED_BOOK
+    override val insetable = true
 
     override fun parse(str: String, space: Space) = mm.deserialize(str)
     override fun compareEqual(left: Component?, right: Component?) = left is Component && right is Component && mm.serialize(left) == mm.serialize(right)
@@ -185,7 +186,7 @@ object MessageType : ValueType<Component>(), InsetableVal {
     override fun stringify(v: Component) = mm.serialize(v)
 }
 
-object PositionType : ValueType<Pos>(), InsetableVal {
+object PositionType : ValueType<Pos>() {
     override val name: String = "Position"
     override val color: TextColor = NamedTextColor.YELLOW
     override val material: Material = Material.FILLED_MAP

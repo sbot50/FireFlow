@@ -3,7 +3,6 @@ package de.blazemcworld.fireflow.tool
 import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.gui.Pos2d
 import de.blazemcworld.fireflow.gui.RectangleComponent
-import de.blazemcworld.fireflow.node.BaseNode
 import de.blazemcworld.fireflow.space.Space
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
@@ -36,7 +35,7 @@ interface Tool {
        fun select() {}
        fun deselect() {}
        fun use() {}
-       fun drop() {}
+       //fun drop() {}
        fun chat(message: String): Boolean { return false }
    }
 

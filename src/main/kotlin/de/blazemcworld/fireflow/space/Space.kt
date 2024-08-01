@@ -3,6 +3,7 @@ package de.blazemcworld.fireflow.space
 import com.google.gson.*
 import de.blazemcworld.fireflow.FireFlow
 import de.blazemcworld.fireflow.Lobby
+import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.gui.NodeComponent
 import de.blazemcworld.fireflow.gui.Pos2d
 import de.blazemcworld.fireflow.inventory.ToolsInventory
@@ -130,7 +131,7 @@ class Space(val id: Int) {
 
         codeEvents.addListener(ItemDropEvent::class.java) {
             it.isCancelled = true
-            playerTools[it.player]?.drop()
+            //playerTools[it.player]?.drop()
         }
 
         fun updateTool(player: Player, quit: Boolean = false) {
@@ -252,11 +253,15 @@ class Space(val id: Int) {
                 nodeJson.addProperty("fn", 1)
             }
 
+            val insetJson = JsonObject()
+            var totalInsets = 0
             for (i in node.inputs) {
-                if (i.io is BaseNode.InsetInput<*> && i.io.insetVal != null) {
-                    nodeJson.add(i.io.name, i.io.searlize())
+                if (i is IOComponent.InsetInput<*> && i.insetVal != null) {
+                    insetJson.add(i.io.name, i.searlize())
+                    totalInsets++
                 }
             }
+            if (totalInsets > 0) nodeJson.add("insets", insetJson)
 
             if (node.node.generics.isNotEmpty()) {
                 nodeJson.addProperty("id", node.node.generic!!.title)
@@ -362,9 +367,12 @@ class Space(val id: Int) {
                 nodeJson.get("y").asDouble
             )
             if (nodeJson.has("literal")) comp.valueLiteral = nodeJson.get("literal").asString
-            for (i in comp.inputs) {
-                if (i.io is BaseNode.InsetInput<*> && nodeJson.has(i.io.name)) {
-                    i.io.deserialize(nodeJson.get(i.io.name), this)
+            if (nodeJson.has("insets")) {
+                val insetJson = nodeJson.getAsJsonObject("insets")
+                for (i in comp.inputs) {
+                    if (i is IOComponent.InsetInput<*> && insetJson.has(i.io.name)) {
+                        i.deserialize(insetJson.get(i.io.name), this)
+                    }
                 }
             }
             newNodes[id] = comp

@@ -1,13 +1,7 @@
 package de.blazemcworld.fireflow.node
 
-import com.google.gson.Gson
-import com.google.gson.JsonElement
-import com.google.gson.JsonObject
 import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.gui.NodeComponent
-import de.blazemcworld.fireflow.space.Space
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -80,16 +74,13 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
     open val generics = emptyMap<String, ValueType<*>>()
     open val generic: GenericNode? = null
 
-    fun <T> input(name: String, type: ValueType<T>): Input<T> {
-        if (type is InsetableVal) {
-            return InsetInput(name, type).also { inputs += it }
+    fun <T> input(name: String, type: ValueType<T>, default: T? = null): Input<T> {
+        if (type.insetable) {
+            return Input(name, type, default).also { inputs += it }
         }
-
         return Input(name, type).also { inputs += it }
     }
-    fun <T> input(name: String, type: ValueType<T>, insetVal: T): InsetInput<T> {
-        return InsetInput(name, type, insetVal).also { inputs += it }
-    }
+
     fun <T> output(name: String, type: ValueType<T>) = Output(name, type).also { outputs += it }
 
     override fun menuItem() = ItemStack.builder(material)
@@ -120,7 +111,11 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
         val c = NodeComponent(this)
         c.title.text = Component.text(title)
         for (i in inputs) {
-            c.inputs.add(IOComponent.Input(i, c))
+            if (i.type.insetable) {
+                c.inputs.add(IOComponent.InsetInput(i, c))
+            } else {
+                c.inputs.add(IOComponent.Input(i, c))
+            }
         }
         for (o in outputs) {
             c.outputs.add(IOComponent.Output(o, c))
@@ -132,25 +127,6 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
         val name: String
         val type: ValueType<T>
     }
-    open class Input<T>(override val name: String, override val type: ValueType<T>): IO<T>
-
-    open class InsetInput<T>(override val name: String, override val type: ValueType<T>, var insetVal: T? = null): Input<T>(name, type) {
-        fun stringify(): String {
-            return type.stringify(insetVal ?: return "unset")
-        }
-
-        fun updateInset(string: String, space: Space) {
-            insetVal = type.parse(string, space)
-        }
-
-        fun searlize(): JsonElement{
-            return type.serialize(insetVal ?: return JsonObject(), mutableMapOf())
-        }
-
-        fun deserialize(json: JsonElement, space: Space) {
-            insetVal = type.deserialize(json, space, mutableMapOf())
-        }
-    }
-
+    open class Input<T>(override val name: String, override val type: ValueType<T>, val default: T? = null): IO<T>
     open class Output<T>(override val name: String, override val type: ValueType<T>): IO<T>
 }

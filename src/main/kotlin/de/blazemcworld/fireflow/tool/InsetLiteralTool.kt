@@ -1,20 +1,11 @@
 package de.blazemcworld.fireflow.tool
 
 import de.blazemcworld.fireflow.gui.IOComponent
-import de.blazemcworld.fireflow.gui.NodeComponent
-import de.blazemcworld.fireflow.gui.Pos2d
-import de.blazemcworld.fireflow.gui.RectangleComponent
-import de.blazemcworld.fireflow.node.BaseNode
-import de.blazemcworld.fireflow.node.FunctionInputsNode
-import de.blazemcworld.fireflow.node.FunctionOutputsNode
 import de.blazemcworld.fireflow.space.Space
 import de.blazemcworld.fireflow.util.sendError
 import net.kyori.adventure.text.format.NamedTextColor
-import net.minestom.server.MinecraftServer
 import net.minestom.server.entity.Player
 import net.minestom.server.item.Material
-import net.minestom.server.timer.Task
-import net.minestom.server.timer.TaskSchedule
 
 object InsetLiteralTool : Tool {
     override val item = item(Material.REDSTONE_TORCH,
@@ -25,23 +16,21 @@ object InsetLiteralTool : Tool {
         "To use hold and type",
         "value in chat.",
         "",
-        "Click on inset val",
-        "to remove it."
+        "Click on inset val to",
+        "remove it."
     )
 
     override fun handler(player: Player, space: Space) = object : Tool.Handler {
         override val tool = InsetLiteralTool
 
-        val nodes = mutableMapOf<NodeComponent, Pos2d>()
-
-        var highlighter: Tool.IOHighlighter? = Tool.IOHighlighter(NamedTextColor.DARK_RED, player, space) { it is IOComponent.Input && it.io is BaseNode.InsetInput<*> }
+        var highlighter: Tool.IOHighlighter? = Tool.IOHighlighter(NamedTextColor.DARK_RED, player, space) { it is IOComponent.InsetInput<*> }
 
         override fun use() {
             val cursor = space.codeCursor(player)
             space.codeNodes.find { it.includes(cursor) }?.let {
                 for (input in it.inputs) {
-                    if (input.includes(cursor) && input.io is BaseNode.InsetInput<*>) {
-                        input.io.insetVal = null
+                    if (input.includes(cursor) && input is IOComponent.InsetInput<*>) {
+                        input.insetVal = null
                         input.node.update(space.codeInstance)
                         return
                     }
@@ -56,13 +45,13 @@ object InsetLiteralTool : Tool {
                 for (input in it.inputs) {
                     if (input.includes(cursor)) {
                         found = true
-                        if (input.io is BaseNode.InsetInput<*>) {
+                        if (input is IOComponent.InsetInput<*>) {
                             val literal = input.io.type.parse(message, space)
                             if (literal == null) {
                                 player.sendError("Value seems invalid!")
                                 return@let true
                             }
-                            input.io.updateInset(message, space)
+                            input.updateInset(message, space)
                             input.node.update(space.codeInstance)
 
                             input.disconnectAll()
