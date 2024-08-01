@@ -131,7 +131,6 @@ class Space(val id: Int) {
 
         codeEvents.addListener(ItemDropEvent::class.java) {
             it.isCancelled = true
-            //playerTools[it.player]?.drop()
         }
 
         fun updateTool(player: Player, quit: Boolean = false) {

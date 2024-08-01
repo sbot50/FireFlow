@@ -17,7 +17,10 @@ class NodeContext(val global: GlobalNodeContext, val component: NodeComponent) {
     }
 
     init {
-        for (i in component.inputs) store[i.io] = BoundInput(i.io)
+        for (i in component.inputs) {
+            store[i.io] = if (i.io.type.insetable && i is IOComponent.InsetInput<*> && i.insetVal != null)
+                BoundInsetInput(i) else BoundInput(i.io)
+        }
         for (o in component.outputs) store[o.io] = BoundOutput(o.io)
     }
 
@@ -47,7 +50,7 @@ class NodeContext(val global: GlobalNodeContext, val component: NodeComponent) {
         }
     }
 
-    inner class BoundInsetInput<T>(v: BaseNode.Input<T>, insetValInp: IOComponent.InsetInput<T>) : BoundInput<T>(v) {
+    inner class BoundInsetInput<T>(insetValInp: IOComponent.InsetInput<T>) : BoundInput<T>(insetValInp.io as BaseNode.Input<T>) {
         var insetVal: T? = insetValInp.insetVal
         override var connected = emptySet<BoundOutput<*>>()
     }
