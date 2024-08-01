@@ -83,7 +83,10 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
             if (inputs.isNotEmpty()) {
                 lore.add(Component.text("Needs:").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))
                 for (input in inputs) {
-                    lore.add(Component.text("- ").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+                    if (input.optional) lore.add(Component.text("- ").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+                        .append(Component.text(input.name).color(input.type.color))
+                        .append(Component.text("*").color(NamedTextColor.GRAY)))
+                    else lore.add(Component.text("- ").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
                         .append(Component.text(input.name).color(input.type.color)))
                 }
             }
