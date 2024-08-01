@@ -32,11 +32,13 @@ object ToMessageNode : GenericNode("To Message", Material.BOOK) {
         private val input = input("Input", type)
         private val output = output("Output", MessageType)
         override val generics = mapOf("Type" to type)
+        override val generic = ToMessageNode
 
         override fun setup(ctx: NodeContext) {
             ctx[output].defaultHandler = {
-                val input = ctx[input]
-                if (input != null) { Component.text(type.stringify(it[input]!!)) } else { Component.empty() }
+                val input = it[ctx[input]]
+                if (input == null) Component.empty()
+                else Component.text(type.stringify(input))
             }
         }
     }

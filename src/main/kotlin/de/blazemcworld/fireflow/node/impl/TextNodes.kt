@@ -48,10 +48,14 @@ object ToTextNode : GenericNode("To Text", Material.STRING) {
         private val input = input("Input", type)
         private val output = output("Output", TextType)
         override val generics = mapOf("Type" to type)
+        override val generic = ToTextNode
 
         override fun setup(ctx: NodeContext) {
-            val input = ctx[input] ?: return
-            ctx[output].defaultHandler = { type.stringify(it[input]!!) }
+            ctx[output].defaultHandler = {
+                val input = it[ctx[input]]
+                if (input == null) ""
+                else type.stringify(input)
+            }
         }
     }
 }
