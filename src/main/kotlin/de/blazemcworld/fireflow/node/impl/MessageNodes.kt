@@ -11,8 +11,9 @@ object FormatMiniMessageNode : BaseNode("Format MiniMessage", Material.INK_SAC) 
 
     override fun setup(ctx: NodeContext) {
         ctx[result].defaultHandler = {
-            val message = it[ctx[message]]!!
-            MessageType.parse(message, ctx.global.space)
+            val message = it[ctx[message]]
+            if (message == null) Component.empty()
+            else MessageType.parse(message, ctx.global.space)
         }
     }
 }
