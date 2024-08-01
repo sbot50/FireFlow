@@ -34,6 +34,8 @@ class TextComponent {
         display.remove()
     }
 
+    fun size() = Pos2d(width(), height())
+
     fun includes(other: Pos2d) = pos.x < other.x && pos.y < other.y
             && pos.x + width() > other.x && pos.y + height() > other.y
 

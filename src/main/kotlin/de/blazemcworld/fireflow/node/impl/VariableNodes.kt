@@ -62,10 +62,14 @@ class GetVariableNode(private val store: VariableStore) : GenericNode("Get ${sto
 }
 
 object VariableNodes {
-    val all = listOf(
-        GetVariableNode(VariableStore.Local), GetVariableNode(VariableStore.Space), GetVariableNode(VariableStore.Persistent),
-        SetVariableNode(VariableStore.Local), SetVariableNode(VariableStore.Space), SetVariableNode(VariableStore.Persistent),
-    )
+    val getLocal = GetVariableNode(VariableStore.Local)
+    val setLocal = SetVariableNode(VariableStore.Local)
+    val getSpace = GetVariableNode(VariableStore.Space)
+    val setSpace = SetVariableNode(VariableStore.Space)
+    val getPersistent = GetVariableNode(VariableStore.Persistent)
+    val setPersistent = SetVariableNode(VariableStore.Persistent)
+
+    val all = listOf(getLocal, setLocal, getSpace, setSpace, getPersistent, setPersistent)
 }
 
 interface VariableStore {

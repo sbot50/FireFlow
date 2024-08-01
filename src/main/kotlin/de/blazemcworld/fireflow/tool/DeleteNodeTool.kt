@@ -52,17 +52,17 @@ object DeleteNodeTool : Tool {
                         return@removeIf true
                     }
                 }
-                return
+                return@let
             }
 
             for (node in space.codeNodes) {
                 for (input in node.inputs) {
-                    for (line in input.lines) {
+                    for (line in input.connections) {
                         if (line.distance(cursor) < 0.1) {
-                            val output = input.lineOutputMap[line]
-                            input.connections.remove(output)
-                            output?.connections?.remove(input)
+                            input.connections.remove(line)
+                            line.output.connections.remove(input)
                             input.update(space.codeInstance)
+                            line.remove()
                             return
                         }
                     }

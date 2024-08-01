@@ -27,7 +27,11 @@ class GlobalNodeContext(val space: Space) {
         for (ctx in nodeContexts.values) ctx.computeConnections()
 
         for (component in space.codeNodes) {
-            component.node.setup(nodeContexts[component]!!)
+            try {
+                component.node.setup(nodeContexts[component]!!)
+            } catch (e: Exception) {
+                FireFlow.LOGGER.error(e) { "Error setting up node ${component.node}" }
+            }
         }
 
         val resetCpu = MinecraftServer.getSchedulerManager().submitTask {

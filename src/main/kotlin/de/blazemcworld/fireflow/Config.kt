@@ -31,4 +31,7 @@ class Config(json: JsonObject) {
         val spacesPerPlayer = json.get("spacesPerPlayer")?.asInt ?: 5
         val cpuPerTick = json.get("cpuPerTick")?.asLong ?: 10000000L //10ms
     }
+
+    val port = json.get("port")?.asInt ?: 25565
+    val motd = json.get("motd")?.asString ?: "FireFlow Server"
 }

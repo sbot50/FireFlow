@@ -3,6 +3,7 @@ package de.blazemcworld.fireflow.space
 import com.google.gson.*
 import de.blazemcworld.fireflow.FireFlow
 import de.blazemcworld.fireflow.Lobby
+import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.database.DatabaseHelper
 import de.blazemcworld.fireflow.database.table.PlayersTable
 import de.blazemcworld.fireflow.database.table.SpaceRolesTable
@@ -136,11 +137,12 @@ class Space(val id: Int) {
         codeEvents.addListener(PlayerBlockPlaceEvent::class.java) {
             it.isCancelled = true
         }
+
+        val playerTools = WeakHashMap<Player, Tool.Handler>()
+
         codeEvents.addListener(ItemDropEvent::class.java) {
             it.isCancelled = true
         }
-
-        val playerTools = WeakHashMap<Player, Tool.Handler>()
 
         fun updateTool(player: Player, quit: Boolean = false) {
             if (!quit) for (tool in Tool.allTools) {
@@ -166,6 +168,11 @@ class Space(val id: Int) {
             updateTool(it.player)
             playerTools[it.player]?.use()
         }
+
+        codeEvents.addListener(PlayerChatEvent::class.java) {
+            it.isCancelled = playerTools[it.player]?.chat(it.message) ?: false
+        }
+
         codeEvents.addListener(PlayerSwapItemEvent::class.java) {
             scheduler.execute { updateTool(it.player) }
         }
@@ -178,6 +185,7 @@ class Space(val id: Int) {
         codeEvents.addListener(PlayerExitInstanceEvent::class.java) {
             updateTool(it.player, quit=true)
         }
+
 
         globalNodeContext = GlobalNodeContext(this)
     }
@@ -269,6 +277,16 @@ class Space(val id: Int) {
                 nodeJson.addProperty("fn", 1)
             }
 
+            val insetJson = JsonObject()
+            var totalInsets = 0
+            for (i in node.inputs) {
+                if (i is IOComponent.InsetInput<*> && i.insetVal != null) {
+                    insetJson.add(i.io.name, i.searlize())
+                    totalInsets++
+                }
+            }
+            if (totalInsets > 0) nodeJson.add("insets", insetJson)
+
             if (node.node.generics.isNotEmpty()) {
                 nodeJson.addProperty("id", node.node.generic!!.title)
                 val generics = JsonObject()
@@ -285,8 +303,12 @@ class Space(val id: Int) {
                 val outputs = JsonArray()
                 for (c in input.connections) {
                     val id = JsonArray()
-                    id.add(codeNodes.indexOf(c.node))
-                    id.add(c.node.node.outputs.indexOf(c.io))
+                    id.add(codeNodes.indexOf(c.output.node))
+                    id.add(c.output.node.outputs.indexOf(c.output))
+                    for (relay in c.relays) {
+                        id.add(relay.x)
+                        id.add(relay.y)
+                    }
                     outputs.add(id)
                 }
                 connections.add(outputs)
@@ -373,6 +395,14 @@ class Space(val id: Int) {
                 nodeJson.get("y").asDouble
             )
             if (nodeJson.has("literal")) comp.valueLiteral = nodeJson.get("literal").asString
+            if (nodeJson.has("insets")) {
+                val insetJson = nodeJson.getAsJsonObject("insets")
+                for (i in comp.inputs) {
+                    if (i is IOComponent.InsetInput<*> && insetJson.has(i.io.name)) {
+                        i.deserialize(insetJson.get(i.io.name), this)
+                    }
+                }
+            }
             newNodes[id] = comp
         }
         for ((index, nodeJson) in data.get("nodes").asJsonArray.withIndex()) {
@@ -383,7 +413,11 @@ class Space(val id: Int) {
                 val input = node.inputs[inputIndex]
                 for (outputInfo in conn.asJsonArray) {
                     if (outputInfo !is JsonArray) throw IllegalStateException("Expected only json arrays in connections array.")
-                    (newNodes[outputInfo[0].asInt] ?: continue).outputs[outputInfo[1].asInt].connect(input)
+                    val relays = mutableListOf<Pos2d>()
+                    for (i in 2..<outputInfo.size() step 2) {
+                        relays.add(Pos2d(outputInfo[i].asDouble, outputInfo[i + 1].asDouble))
+                    }
+                    (newNodes[outputInfo[0].asInt] ?: continue).outputs[outputInfo[1].asInt].connect(input, relays)
                 }
             }
         }
