@@ -2,7 +2,6 @@ package de.blazemcworld.fireflow.node.impl
 
 import de.blazemcworld.fireflow.node.*
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.minimessage.MiniMessage
 import net.minestom.server.item.Material
 import java.util.*
 
@@ -13,12 +12,12 @@ object FormatMiniMessageNode : BaseNode("Format MiniMessage", Material.INK_SAC) 
     override fun setup(ctx: NodeContext) {
         ctx[result].defaultHandler = {
             val message = it[ctx[message]]!!
-            MiniMessage.miniMessage().deserialize(message)
+            MessageType.parse(message, ctx.global.space)
         }
     }
 }
 
-class ToMessageNode : GenericNode("To Message", Material.BOOK) {
+object ToMessageNode : GenericNode("To Message", Material.BOOK) {
     private val cache = WeakHashMap<ValueType<*>, Impl<*>>()
     override fun create(generics: Map<String, ValueType<*>>): Impl<*> = cache.computeIfAbsent(generics["Type"]) { Impl(generics["Type"]!!) }
 

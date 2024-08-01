@@ -15,7 +15,7 @@ object ConcatNode : BaseNode("Concatenate", Material.TRIPWIRE_HOOK) {
     }
 }
 
-object SubstringNode : BaseNode("Substring", Material.SHEARS) {
+object SubtextNode : BaseNode("Subtext", Material.SHEARS) {
     private val text = input("Text", TextType)
     private val min = input("Min", NumberType, 0.0)
     private val max = input("Max", NumberType)
@@ -25,15 +25,16 @@ object SubstringNode : BaseNode("Substring", Material.SHEARS) {
     override fun setup(ctx: NodeContext) {
         ctx[result].defaultHandler = {
             val text = it[ctx[text]]
+            val length = text?.length?.minus(1) ?: 0
             val min = it[ctx[min]]?.toInt() ?: 0
-            val max = it[ctx[max]]?.toInt() ?: text?.length
+            val max = it[ctx[max]]?.toInt() ?: length
 
-            text?.substring(min, max ?: text.length) ?: ""
+            text?.substring(if (0 > min) 0 else min, if (max > length) length else max) ?: ""
         }
     }
 }
 
-class ToStringNode : GenericNode("To Text", Material.STRING) {
+object ToTextNode : GenericNode("To Text", Material.STRING) {
     private val cache = WeakHashMap<ValueType<*>, Impl<*>>()
     override fun create(generics: Map<String, ValueType<*>>): Impl<*> = cache.computeIfAbsent(generics["Type"]) { Impl(generics["Type"]!!) }
 

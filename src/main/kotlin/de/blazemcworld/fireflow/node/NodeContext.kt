@@ -11,7 +11,7 @@ class NodeContext(val global: GlobalNodeContext, val component: NodeComponent) {
     operator fun <T> get(v: BaseNode.Input<T>): BoundInput<T> {
         val matchingInput: IOComponent.InsetInput<T>? = component.inputs.find { it.io == v } as? IOComponent.InsetInput<T>
         if (v.type.insetable && matchingInput != null && matchingInput.insetVal != null) {
-            return BoundInsetInput(v, matchingInput)
+            return store[v] as BoundInsetInput<T>
         }
         return store[v] as BoundInput<T>
     }
