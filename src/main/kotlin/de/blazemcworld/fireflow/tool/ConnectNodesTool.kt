@@ -22,6 +22,8 @@ object ConnectNodesTool : Tool {
         override val tool = ConnectNodesTool
 
         private var from: IOComponent.Output? = null
+        private val relays = mutableListOf<Pos2d>()
+        private var otherLines = mutableListOf<LineComponent>()
         private var previewLine = LineComponent()
         private var previewTask: Task? = null
 
@@ -41,7 +43,11 @@ object ConnectNodesTool : Tool {
 
                         previewTask?.cancel()
                         previewTask = MinecraftServer.getSchedulerManager().submitTask {
-                            previewLine.start = Pos2d(output.pos.x, output.pos.y + output.text.height() * 0.75)
+                            if (otherLines.isEmpty()) {
+                                previewLine.start = Pos2d(output.pos.x, output.pos.y + output.text.height() * 0.75)
+                            } else {
+                                otherLines[0].start = Pos2d(output.pos.x, output.pos.y + output.text.height() * 0.75)
+                            }
                             previewLine.end = space.codeCursor(player)
                             previewLine.update(space.codeInstance)
                             return@submitTask TaskSchedule.tick(1)
@@ -52,13 +58,21 @@ object ConnectNodesTool : Tool {
                 from?.let { output ->
                     for (input in node.inputs) {
                         if (input.includes(cursor)) {
-                            if (!input.connect(output)) return
+                            if (!input.connect(output, relays)) return
                             input.update(space.codeInstance)
                             deselect()
                             return
                         }
                     }
                 }
+            }
+            from?.let {
+                relays.add(cursor)
+                previewLine.end = cursor
+                otherLines.add(previewLine)
+                previewLine = LineComponent()
+                previewLine.start = cursor
+                previewLine.color = it.io.type.color
             }
         }
 
@@ -67,6 +81,9 @@ object ConnectNodesTool : Tool {
             previewLine.remove()
             previewTask?.cancel()
             previewTask = null
+            for (other in otherLines) other.remove()
+            otherLines.clear()
+            relays.clear()
         }
     }
 }

@@ -1,5 +1,6 @@
 package de.blazemcworld.fireflow.tool
 
+import de.blazemcworld.fireflow.gui.ConnectionComponent
 import de.blazemcworld.fireflow.gui.NodeComponent
 import de.blazemcworld.fireflow.gui.Pos2d
 import de.blazemcworld.fireflow.gui.RectangleComponent
@@ -24,6 +25,7 @@ object MoveNodeTool : Tool {
         override val tool = MoveNodeTool
 
         val nodes = mutableMapOf<NodeComponent, Pos2d>()
+        val connections = mutableMapOf<ConnectionComponent, List<Pos2d>>()
         var selectionStart: Pos2d? = null
         var moveTask: Task? = null
         var selectionIndicator = RectangleComponent()
@@ -59,8 +61,22 @@ object MoveNodeTool : Tool {
                             n.pos = movedCursor + offset
                             n.update(space.codeInstance)
                         }
+                        connections.forEach { conn ->
+                            for ((index, offset) in conn.value.withIndex()) {
+                                conn.key.relays[index] = movedCursor + offset
+                            }
+                        }
                         if (nodes.isEmpty()) return@task TaskSchedule.stop()
                         return@task TaskSchedule.tick(1)
+                    }
+                }
+
+                for ((node, _) in nodes) {
+                    for (input in node.inputs) {
+                        for (conn in input.connections) {
+                            if (!nodes.containsKey(conn.output.node)) continue
+                            connections[conn] = conn.relays.map { it - cursor }
+                        }
                     }
                 }
                 return@let
@@ -104,6 +120,7 @@ object MoveNodeTool : Tool {
                 node.update(space.codeInstance)
             }
             nodes.clear()
+            connections.clear()
             moveTask?.cancel()
             moveTask = null
             selectionTask?.cancel()

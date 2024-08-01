@@ -25,13 +25,13 @@ abstract class IOComponent(val node: NodeComponent) {
     abstract fun disconnectAll()
 
     class Input(val io: BaseNode.Input<*>, node: NodeComponent) : IOComponent(node) {
-        val connections = mutableSetOf<Output>()
+        val connections = mutableSetOf<ConnectionComponent>()
 
         init {
             text.text = Component.text("○ " + io.name).color(io.type.color)
         }
 
-        fun connect(output: Output): Boolean {
+        fun connect(output: Output, relays: List<Pos2d>): Boolean {
             if (output.io.type != io.type) return false
 
             if (io.type is SignalType) {
@@ -39,39 +39,24 @@ abstract class IOComponent(val node: NodeComponent) {
             } else {
                 disconnectAll()
             }
-            connections.add(output)
+            connections.add(ConnectionComponent(this, output).also { it.relays += relays })
             output.connections.add(this)
             return true
         }
 
         override fun disconnectAll() {
-            for (output in connections) {
-                output.connections.remove(this)
+            for (connection in connections) {
+                connection.output.connections.remove(this)
             }
-            connections.clear()
-            for (line in lines) {
+            for (line in connections) {
                 line.remove()
             }
-            lines.clear()
-            lineOutputMap.clear()
+            connections.clear()
         }
 
-        val lines = mutableListOf<LineComponent>()
-        val lineOutputMap = mutableMapOf<LineComponent, Output>()
         override fun update(inst: Instance) {
-            val origin = Pos2d(pos.x + text.width(), pos.y + text.height() * 0.75)
-
-            while (lines.size > connections.size) lines.removeLast().remove()
-            while (lines.size < connections.size) lines.add(LineComponent())
-
-            lineOutputMap.clear()
-            for ((line, output) in lines.zip(connections)) {
-                line.start = origin
-                line.end = Pos2d(output.pos.x, output.pos.y + output.text.height() * 0.75)
-                line.color = io.type.color
-                line.update(inst)
-
-                lineOutputMap[line] = output
+            for (connection in connections) {
+                connection.update(inst)
             }
             super.update(inst)
         }
@@ -82,20 +67,15 @@ abstract class IOComponent(val node: NodeComponent) {
             text.text = Component.text(io.name + " ○").color(io.type.color)
         }
 
-        fun connect(input: Input) = input.connect(this)
+        fun connect(input: Input, relays: List<Pos2d>) = input.connect(this, relays)
 
         override fun disconnectAll() {
             for (input in connections) {
-                input.connections.remove(this)
-                val removeMe = mutableSetOf<LineComponent>()
-                for ((line, output) in input.lineOutputMap) {
-                    if (output == this) {
-                        removeMe.add(line)
-                        input.lines.remove(line)
-                        line.remove()
-                    }
+                input.connections.removeIf {
+                    if (it.output != this) return@removeIf false
+                    it.remove()
+                    true
                 }
-                removeMe.forEach(input.lineOutputMap::remove)
             }
             connections.clear()
         }
