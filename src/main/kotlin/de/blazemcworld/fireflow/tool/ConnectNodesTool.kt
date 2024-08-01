@@ -16,7 +16,10 @@ object ConnectNodesTool : Tool {
     override val item = item(Material.BREEZE_ROD,
         "Connect Nodes", NamedTextColor.AQUA,
         "Used for connecting node",
-        "inputs and outputs"
+        "inputs and outputs.",
+        " ",
+        "Press Q while on a ",
+        "input/output to disconnect."
     )
 
     override fun handler(player: Player, space: Space) = object : Tool.Handler {
@@ -26,16 +29,18 @@ object ConnectNodesTool : Tool {
         private var previewLine = LineComponent()
         private var previewTask: Task? = null
 
+        private var highlighter: Tool.IOHighlighter? = Tool.IOHighlighter(NamedTextColor.AQUA, player, space)
+
         override fun use() {
             val cursor = space.codeCursor(player)
             for (node in space.codeNodes) {
                 for (output in node.outputs) {
                     if (output.includes(cursor)) {
                         if (from == output) {
-                            deselect()
+                            clearSelectionPreview()
                             return
                         }
-                        deselect()
+                        clearSelectionPreview()
                         from = output
                         previewLine = LineComponent()
                         previewLine.color = output.io.type.color
@@ -60,7 +65,7 @@ object ConnectNodesTool : Tool {
                             }
 
                             input.node.update(space.codeInstance)
-                            deselect()
+                            clearSelectionPreview()
                             return
                         }
                     }
@@ -68,11 +73,45 @@ object ConnectNodesTool : Tool {
             }
         }
 
-        override fun deselect() {
+        override fun drop() {
+            val cursor = space.codeCursor(player)
+            space.codeNodes.find { it.includes(cursor) }?.let {
+                if (it.isBeingMoved) return
+
+                for (output in it.outputs) {
+                    if (output.includes(cursor)) {
+                        output.connections.clear()
+                        output.node.update(space.codeInstance)
+                        return
+                    }
+                }
+
+                for (input in it.inputs) {
+                    if (input.includes(cursor)) {
+                        input.connections.clear()
+                        input.node.update(space.codeInstance)
+                        return
+                    }
+                }
+                return
+
+            }
+        }
+
+        override fun select() {
+            highlighter?.selected()
+        }
+
+        fun clearSelectionPreview() {
             from = null
             previewLine.remove()
             previewTask?.cancel()
             previewTask = null
+        }
+
+        override fun deselect() {
+            clearSelectionPreview()
+            highlighter?.deselect()
         }
     }
 }

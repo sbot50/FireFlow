@@ -1,8 +1,13 @@
 package de.blazemcworld.fireflow.node
 
+import com.google.gson.Gson
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.gui.NodeComponent
 import de.blazemcworld.fireflow.space.Space
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -136,6 +141,14 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
 
         fun updateInset(string: String, space: Space) {
             insetVal = type.parse(string, space)
+        }
+
+        fun searlize(): JsonElement{
+            return type.serialize(insetVal ?: return JsonObject(), mutableMapOf())
+        }
+
+        fun deserialize(json: JsonElement, space: Space) {
+            insetVal = type.deserialize(json, space, mutableMapOf())
         }
     }
 

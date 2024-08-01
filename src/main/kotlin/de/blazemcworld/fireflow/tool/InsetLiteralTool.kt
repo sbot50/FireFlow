@@ -1,5 +1,6 @@
 package de.blazemcworld.fireflow.tool
 
+import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.gui.NodeComponent
 import de.blazemcworld.fireflow.gui.Pos2d
 import de.blazemcworld.fireflow.gui.RectangleComponent
@@ -33,10 +34,7 @@ object InsetLiteralTool : Tool {
 
         val nodes = mutableMapOf<NodeComponent, Pos2d>()
 
-        var highlightTask: Task? = null
-        var selectionIndicator = RectangleComponent().apply {
-            setColor(NamedTextColor.DARK_RED)
-        }
+        var highlighter: Tool.IOHighlighter? = Tool.IOHighlighter(NamedTextColor.DARK_RED, player, space) { it is IOComponent.Input && it.io is BaseNode.InsetInput<*> }
 
         override fun use() {
             val cursor = space.codeCursor(player)
@@ -85,39 +83,12 @@ object InsetLiteralTool : Tool {
         }
 
         override fun select() {
-            highlightTask = MinecraftServer.getSchedulerManager().submitTask {
-                val cursor = space.codeCursor(player)
-                space.codeNodes.find { it.includes(cursor) }?.let {
-                    var found = false
-                    for (input in it.inputs) {
-                        if (input.includes(cursor) && input.io is BaseNode.InsetInput<*>) {
-                            nodes[it] = cursor
-                            selectionIndicator.pos = input.text.pos.plus(Pos2d(-.12, .05))
-                            selectionIndicator.size = input.text.size().plus(Pos2d(.2, 0))
-                            selectionIndicator.update(space.codeInstance)
-                            found = true
-                        }
-                    }
-                    if (!found) {
-                        selectionIndicator.pos = cursor
-                        selectionIndicator.size = Pos2d(0.1, 0.1)
-                        selectionIndicator.update(space.codeInstance)
-                    }
-                    return@submitTask TaskSchedule.tick(1)
-                }
-
-                selectionIndicator.pos = cursor
-                selectionIndicator.size = Pos2d(0.1, 0.1)
-                selectionIndicator.update(space.codeInstance)
-
-                return@submitTask TaskSchedule.tick(1)
-            }
+            highlighter?.selected()
         }
 
 
         override fun deselect() {
-            highlightTask?.cancel()
-            selectionIndicator.remove()
+            highlighter?.deselect()
         }
     }
 }

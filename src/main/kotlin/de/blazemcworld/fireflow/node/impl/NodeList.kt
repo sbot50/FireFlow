@@ -2,6 +2,8 @@ package de.blazemcworld.fireflow.node.impl
 
 object NodeList {
     val all = setOf(
+        OnPlayerChatNode,
+        OnPlayerJoinNode,
         AddNumbersNode,
         SubtractNumbersNode,
         MultiplyNumbersNode,
@@ -10,24 +12,23 @@ object NodeList {
         PowerNumbersNode,
         RandomNumberNode,
         EmptyListNode,
-        ListAppendNode,
-        ListGetNode,
-        ListInsertNode,
         ListLengthNode,
+        ListAppendNode,
+        ListInsertNode,
+        ListGetNode,
         ListRemoveNode,
+        IfNode,
         EqualNode,
+        GreaterThanNode,
         FillBlocksNode,
         GetBlockNode,
-        GreaterThanNode,
-        IfNode,
         KillPlayerNode,
-        OnPlayerChatNode,
-        OnPlayerJoinNode,
         PackPositionNode,
+        UnpackPositionNode,
         PlayerPositionNode,
         ScheduleNode,
         SendMessageNode,
-        SetBlockNode,
-        UnpackPositionNode,
+        ActionBarNode,
+        SetBlockNode
     ) + ValueLiteralNode.all + VariableNodes.all
 }
