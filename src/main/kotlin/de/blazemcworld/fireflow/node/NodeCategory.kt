@@ -54,20 +54,28 @@ class NodeCategory(val title: String, color: TextColor, material: Material, val 
             slot(7, "Flow", NamedTextColor.BLUE, Material.WATER_BUCKET, InventoryType.CHEST_3_ROW) {
                 slot(0, ScheduleNode)
             }
-            slot(19, "Value Literals", NamedTextColor.GRAY, Material.WRITABLE_BOOK, InventoryType.CHEST_3_ROW) {
+            slot(18, "Value Literals", NamedTextColor.GRAY, Material.WRITABLE_BOOK, InventoryType.CHEST_3_ROW) {
                 for ((i, v) in ValueLiteralNode.all.withIndex()) slot(i, v)
             }
-            slot(21, "User Functions", TextColor.color(66, 245, 182), Material.DIAMOND, InventoryType.CHEST_3_ROW) {
+            slot(20, "User Functions", TextColor.color(66, 245, 182), Material.DIAMOND, InventoryType.CHEST_3_ROW) {
                 userFunctions = true
             }
-            slot(23, "Text", TextType.color, Material.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, InventoryType.CHEST_3_ROW) {
+            slot(22, "Text", TextType.color, Material.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, InventoryType.CHEST_3_ROW) {
                 slot(0, ToTextNode)
                 slot(1, ConcatNode)
                 slot(2, SubtextNode)
             }
-            slot(25, "Messages", MessageType.color, Material.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE, InventoryType.CHEST_3_ROW) {
+            slot(24, "Messages", MessageType.color, Material.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE, InventoryType.CHEST_3_ROW) {
                 slot(0, ToMessageNode)
                 slot(1, FormatMiniMessageNode)
+            }
+            slot(26, "Dictionaries", DictionaryType.color, Material.COBWEB, InventoryType.CHEST_3_ROW) {
+                slot(0, EmptyDictionaryNode)
+                slot(1, DictionaryGetNode)
+                slot(2, DictionarySetNode)
+                slot(3, DictionarySizeNode)
+                slot(4, DictionaryRemoveNode)
+                slot(5, DictionaryKeysNode)
             }
             slot(37, "Positions", NamedTextColor.YELLOW, Material.COMPASS, InventoryType.CHEST_3_ROW) {
                 slot(0, PackPositionNode)

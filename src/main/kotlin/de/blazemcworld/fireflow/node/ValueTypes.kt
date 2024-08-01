@@ -26,6 +26,7 @@ object AllTypes {
         dataOnly += MessageType
         dataOnly += PositionType
         dataOnly += ListType
+        dataOnly += DictionaryType
         all += dataOnly
         all += SignalType
     }
@@ -271,3 +272,56 @@ object ListType : GenericType {
     }
 }
 class ListReference<T>(val type: ValueType<T>, val store: MutableList<T>)
+
+object DictionaryType : GenericType {
+    private val cache = WeakHashMap<ValueType<*>, WeakHashMap<ValueType<*>, Impl<*, *>>>()
+    override fun create(generics: MutableMap<String, ValueType<*>>): Impl<*, *> = create(generics["Key"]!!, generics["Value"]!!)
+    fun <K, V> create(key: ValueType<K>, value: ValueType<V>): Impl<K, V> = cache.computeIfAbsent(key) { WeakHashMap() }.computeIfAbsent(value) { Impl(key, value) } as Impl<K, V>
+
+    override val generics = mapOf("Key" to AllTypes.dataOnly, "Value" to AllTypes.dataOnly)
+    override val name: String = "Dictionary"
+    override val material: Material = Material.COBWEB
+    override val color: TextColor = NamedTextColor.WHITE
+
+    class Impl<K, V>(private val key: ValueType<K>, private val value: ValueType<V>) : ValueType<DictionaryReference<K, V>>() {
+        override val generics = mapOf("Key" to key, "Value" to value)
+        override val generic = DictionaryType
+
+        override fun deserialize(json: JsonElement, space: Space, objects: MutableMap<Int, Pair<Any?, JsonElement>>): DictionaryReference<K, V> {
+            val id = json.asInt
+            objects[id]?.first?.let { return it as DictionaryReference<K, V> }
+            val jsonInfo = objects[id]!!.second
+            val out = mutableMapOf<K, V>()
+            for (i in 0..jsonInfo.asJsonArray.size() step 2) {
+                out[key.deserialize(jsonInfo.asJsonArray[i], space, objects)] = value.deserialize(json.asJsonArray[i + 1], space, objects)
+            }
+            val res = DictionaryReference(key, value, out)
+            objects[id] = res to jsonInfo
+            return res
+        }
+
+        override fun serialize(v: DictionaryReference<K, V>, objects: MutableMap<Any?, Pair<Int, JsonElement>>): JsonElement {
+            if (objects.containsKey(this)) return JsonPrimitive(objects[this]!!.first)
+            val json = JsonArray()
+            val id = objects.size
+            objects[this] = id to json
+            for (each in v.store) {
+                json.add(key.serialize(each.key, objects))
+                json.add(value.serialize(each.value, objects))
+            }
+            return JsonPrimitive(id)
+        }
+
+        override fun stringify(v: DictionaryReference<K, V>) = "Dictionary(${v.store.size} Entries)"
+
+        override val name: String = "Dictionary(${key.name}, ${value.name})"
+        override val color: TextColor = key.color
+        override val material: Material = key.material
+
+        override fun parse(str: String, space: Space) = null
+        override fun validate(something: Any?) = if (something is DictionaryReference<*, *> && something.key == key && something.value == value) something as DictionaryReference<K, V> else null
+
+        override fun compareEqual(left: DictionaryReference<K, V>?, right: DictionaryReference<K, V>?) = left != null && right != null && left.store == right.store
+    }
+}
+data class DictionaryReference<K, V>(val key: ValueType<K>, val value: ValueType<V>, val store: MutableMap<K, V>)
