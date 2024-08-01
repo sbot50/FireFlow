@@ -7,7 +7,12 @@ class NodeContext(val global: GlobalNodeContext, val component: NodeComponent) {
     private val store = HashMap<BaseNode.IO<*>, Bound<*>>()
 
     operator fun <T> get(v: BaseNode.Output<T>) = store[v] as BoundOutput<T>
-    operator fun <T> get(v: BaseNode.Input<T>) = store[v] as BoundInput<T>
+    operator fun <T> get(v: BaseNode.Input<T>): BoundInput<T> {
+        if (v is BaseNode.InsetInput && v.insetVal != null) {
+            return InsetInput(v)
+        }
+        return store[v] as BoundInput<T>
+    }
 
     init {
         for (i in component.inputs) store[i.io] = BoundInput(i.io)
@@ -30,12 +35,19 @@ class NodeContext(val global: GlobalNodeContext, val component: NodeComponent) {
             connected = component.outputs.find { it.io == v }?.connections?.map { global.nodeContexts[it.node]!![it.io] }?.toSet() ?: emptySet()
         }
     }
-    inner class BoundInput<T>(v: BaseNode.Input<T>) : Bound<BaseNode.Input<T>>(v) {
+
+    open inner class BoundInput<T>(v: BaseNode.Input<T>) : Bound<BaseNode.Input<T>>(v) {
         var signalListener: (EvaluationContext) -> Unit = {}
 
-        lateinit var connected: Set<BoundOutput<*>>
+        open lateinit var connected: Set<BoundOutput<*>>
         override fun computeConnections() {
             connected = component.inputs.find { it.io == v }?.connections?.map { global.nodeContexts[it.node]!![it.io] }?.toSet() ?: emptySet()
         }
     }
+
+    inner class InsetInput<T>(v: BaseNode.InsetInput<T>) : BoundInput<T>(v) {
+        var insetVal: T? = v.insetVal
+        override var connected = emptySet<BoundOutput<*>>()
+    }
+
 }

@@ -1,6 +1,8 @@
 package de.blazemcworld.fireflow.node.impl
 
 import de.blazemcworld.fireflow.node.*
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.minimessage.MiniMessage
 import net.minestom.server.item.Material
 
 object KillPlayerNode : BaseNode("Kill Player", Material.SKELETON_SKULL) {
@@ -28,7 +30,7 @@ object PlayerPositionNode : BaseNode("Player Position", Material.ENDER_EYE) {
 object SendMessageNode : BaseNode("Send Message", Material.WRITTEN_BOOK) {
     private val signal = input("Signal", SignalType)
     private val player = input("Player", PlayerType)
-    private val message = input("Message", MessageType)
+    private val message = input("Message", MessageType, Component.text("Test"));
     private val next = output("Next", SignalType)
 
     override fun setup(ctx: NodeContext) {

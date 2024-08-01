@@ -3,6 +3,7 @@ package de.blazemcworld.fireflow.tool
 import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.gui.LineComponent
 import de.blazemcworld.fireflow.gui.Pos2d
+import de.blazemcworld.fireflow.node.BaseNode
 import de.blazemcworld.fireflow.space.Space
 import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.MinecraftServer
@@ -53,7 +54,12 @@ object ConnectNodesTool : Tool {
                     for (input in node.inputs) {
                         if (input.includes(cursor)) {
                             if (!input.connect(output)) return
-                            input.update(space.codeInstance)
+
+                            if (input.io is BaseNode.InsetInput && input.io.insetVal != null) {
+                                input.io.insetVal = null
+                            }
+
+                            input.node.update(space.codeInstance)
                             deselect()
                             return
                         }

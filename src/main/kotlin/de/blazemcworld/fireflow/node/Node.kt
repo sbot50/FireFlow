@@ -2,6 +2,7 @@ package de.blazemcworld.fireflow.node
 
 import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.gui.NodeComponent
+import de.blazemcworld.fireflow.space.Space
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.TextDecoration
@@ -74,7 +75,16 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
     open val generics = emptyMap<String, ValueType<*>>()
     open val generic: GenericNode? = null
 
-    fun <T> input(name: String, type: ValueType<T>) = Input(name, type).also { inputs += it }
+    fun <T> input(name: String, type: ValueType<T>): Input<T> {
+        if (type is InsetableVal) {
+            return InsetInput(name, type).also { inputs += it }
+        }
+
+        return Input(name, type).also { inputs += it }
+    }
+    fun <T> input(name: String, type: ValueType<T>, insetVal: T): InsetInput<T> {
+        return InsetInput(name, type, insetVal).also { inputs += it }
+    }
     fun <T> output(name: String, type: ValueType<T>) = Output(name, type).also { outputs += it }
 
     override fun menuItem() = ItemStack.builder(material)
@@ -118,5 +128,16 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
         val type: ValueType<T>
     }
     open class Input<T>(override val name: String, override val type: ValueType<T>): IO<T>
+
+    open class InsetInput<T>(override val name: String, override val type: ValueType<T>, var insetVal: T? = null): Input<T>(name, type) {
+        fun stringify(): String {
+            return type.stringify(insetVal ?: return "unset")
+        }
+
+        fun updateInset(string: String, space: Space) {
+            insetVal = type.parse(string, space)
+        }
+    }
+
     open class Output<T>(override val name: String, override val type: ValueType<T>): IO<T>
 }

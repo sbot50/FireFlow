@@ -19,7 +19,8 @@ interface Tool {
             CreateNodeTool,
             ConnectNodesTool,
             MoveNodeTool,
-            DeleteNodeTool
+            DeleteNodeTool,
+            InsetLiteralTool
         )
     }
 
@@ -28,6 +29,7 @@ interface Tool {
        fun select() {}
        fun deselect() {}
        fun use() {}
+       fun chat(message: String): Boolean { return false }
    }
 
     fun item(material: Material, name: String, color: TextColor, vararg description: String) = ItemStack.builder(material)

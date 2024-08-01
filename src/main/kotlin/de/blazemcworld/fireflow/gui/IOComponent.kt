@@ -4,6 +4,7 @@ import de.blazemcworld.fireflow.node.BaseNode
 import de.blazemcworld.fireflow.node.SignalType
 import net.kyori.adventure.text.Component
 import net.minestom.server.instance.Instance
+import kotlin.math.min
 
 abstract class IOComponent(val node: NodeComponent) {
 
@@ -28,7 +29,17 @@ abstract class IOComponent(val node: NodeComponent) {
         val connections = mutableSetOf<Output>()
 
         init {
-            text.text = Component.text("○ " + io.name).color(io.type.color)
+            updateText()
+        }
+
+        private fun updateText() {
+            if (io is BaseNode.InsetInput && io.insetVal != null) {
+                val display = io.stringify()
+
+                text.text = Component.text("⏹ " + display.substring(0..min(display.length-1, 10)) + (if (display.length > 10) "..." else "") ).color(io.type.color)
+            } else {
+                text.text = Component.text("○ " + io.name).color(io.type.color)
+            }
         }
 
         fun connect(output: Output): Boolean {
@@ -59,6 +70,8 @@ abstract class IOComponent(val node: NodeComponent) {
         val lines = mutableListOf<LineComponent>()
         val lineOutputMap = mutableMapOf<LineComponent, Output>()
         override fun update(inst: Instance) {
+            updateText()
+
             val origin = Pos2d(pos.x + text.width(), pos.y + text.height() * 0.75)
 
             while (lines.size > connections.size) lines.removeLast().remove()

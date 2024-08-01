@@ -155,6 +155,11 @@ class Space(val id: Int) {
             updateTool(it.player)
             playerTools[it.player]?.use()
         }
+
+        codeEvents.addListener(PlayerChatEvent::class.java) {
+            it.isCancelled = playerTools[it.player]?.chat(it.message) ?: false
+        }
+
         codeEvents.addListener(PlayerSwapItemEvent::class.java) {
             scheduler.execute { updateTool(it.player) }
         }

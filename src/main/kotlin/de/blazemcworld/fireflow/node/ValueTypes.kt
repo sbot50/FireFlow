@@ -55,6 +55,10 @@ abstract class ValueType<T> : SomeType  {
     abstract fun stringify(v: T): String
 }
 
+interface InsetableVal {
+
+}
+
 object PlayerType : ValueType<PlayerReference>() {
     override val name = "Player"
     override val color: TextColor = NamedTextColor.GOLD
@@ -83,6 +87,7 @@ object SignalType : ValueType<Unit>() {
     override val name = "Signal"
     override val color: TextColor = NamedTextColor.AQUA
     override val material: Material = Material.LIGHT_BLUE_DYE
+
     override fun parse(str: String, space: Space) = null
     override fun compareEqual(left: Unit?, right: Unit?) = false
     override fun validate(something: Any?) = null
@@ -92,7 +97,7 @@ object SignalType : ValueType<Unit>() {
     override fun stringify(v: Unit) = "Signal"
 }
 
-object NumberType : ValueType<Double>() {
+object NumberType : ValueType<Double>(), InsetableVal {
     override val name = "Number"
     override val color: TextColor = NamedTextColor.RED
     override val material: Material = Material.SLIME_BALL
@@ -112,7 +117,7 @@ object NumberType : ValueType<Double>() {
 }
 
 
-object ConditionType : ValueType<Boolean>() {
+object ConditionType : ValueType<Boolean>(), InsetableVal {
     override val name = "Condition"
     override val color: TextColor = NamedTextColor.LIGHT_PURPLE
     override val material: Material = Material.ANVIL
@@ -130,7 +135,7 @@ object ConditionType : ValueType<Boolean>() {
     override fun stringify(v: Boolean) = v.toString()
 }
 
-object TextType : ValueType<String>() {
+object TextType : ValueType<String>(), InsetableVal {
     override val name = "Text"
     override val color: TextColor = NamedTextColor.GREEN
     override val material: Material = Material.BOOK
@@ -162,7 +167,7 @@ private val mm = MiniMessage.builder()
         StandardTags.translatable(),
     ).build()).build()
 
-object MessageType : ValueType<Component>() {
+object MessageType : ValueType<Component>(), InsetableVal {
     override val name = "Message"
     override val color: TextColor = NamedTextColor.YELLOW
     override val material: Material = Material.ENCHANTED_BOOK
@@ -180,7 +185,7 @@ object MessageType : ValueType<Component>() {
     override fun stringify(v: Component) = mm.serialize(v)
 }
 
-object PositionType : ValueType<Pos>() {
+object PositionType : ValueType<Pos>(), InsetableVal {
     override val name: String = "Position"
     override val color: TextColor = NamedTextColor.YELLOW
     override val material: Material = Material.FILLED_MAP
