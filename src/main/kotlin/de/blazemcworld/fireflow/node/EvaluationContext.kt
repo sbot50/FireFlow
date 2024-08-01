@@ -16,6 +16,11 @@ class EvaluationContext(val global: GlobalNodeContext, val varStore: MutableMap<
     operator fun <T> get(input: NodeContext.BoundInput<T>): T? {
         var out: T? = null
         global.measureCode {
+            if (input is NodeContext.BoundInsetInput && input.insetVal != null) {
+                out = input.insetVal
+                return@measureCode
+            }
+
             val output = input.connected.singleOrNull() ?: return@measureCode
             if (store.containsKey(output)) {
                 out = store[output]!!.get() as T?

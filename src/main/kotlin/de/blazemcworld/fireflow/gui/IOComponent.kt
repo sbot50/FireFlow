@@ -1,9 +1,15 @@
 package de.blazemcworld.fireflow.gui
 
+import com.google.gson.JsonElement
+import com.google.gson.JsonObject
 import de.blazemcworld.fireflow.node.BaseNode
 import de.blazemcworld.fireflow.node.SignalType
+import de.blazemcworld.fireflow.node.ValueType
+import de.blazemcworld.fireflow.space.Space
 import net.kyori.adventure.text.Component
 import net.minestom.server.instance.Instance
+import kotlin.math.max
+import kotlin.math.min
 
 abstract class IOComponent(val node: NodeComponent) {
 
@@ -24,11 +30,21 @@ abstract class IOComponent(val node: NodeComponent) {
 
     abstract fun disconnectAll()
 
-    class Input(val io: BaseNode.Input<*>, node: NodeComponent) : IOComponent(node) {
+    open class Input(val io: BaseNode.Input<*>, node: NodeComponent) : IOComponent(node) {
         val connections = mutableSetOf<ConnectionComponent>()
 
         init {
-            text.text = Component.text("○ " + io.name).color(io.type.color)
+            updateText()
+        }
+
+        private fun updateText() {
+            if (this is InsetInput<*> && insetVal != null) {
+                val display = stringify()
+
+                text.text = Component.text("⏹ " + display.substring(0..max(0,min(display.length-1, 10))) + (if (display.length > 10) "..." else "") ).color(io.type.color)
+            } else {
+                text.text = Component.text("○ " + io.name).color(io.type.color)
+            }
         }
 
         fun connect(output: Output, relays: List<Pos2d>): Boolean {
@@ -54,13 +70,36 @@ abstract class IOComponent(val node: NodeComponent) {
             connections.clear()
         }
 
+        val lines = mutableListOf<LineComponent>()
+        val lineOutputMap = mutableMapOf<LineComponent, Output>()
         override fun update(inst: Instance) {
+            updateText()
+
             for (connection in connections) {
                 connection.update(inst)
             }
             super.update(inst)
         }
     }
+
+    class InsetInput<T>(val input : BaseNode.Input<T>, node: NodeComponent, var insetVal: T? = input.default, val type: ValueType<T> = input.type) : Input(input, node) {
+        fun stringify(): String {
+            return type.stringify(insetVal ?: return "unset")
+        }
+
+        fun updateInset(string: String, space: Space) {
+            insetVal = type.parse(string, space)
+        }
+
+        fun searlize(): JsonElement {
+            return type.serialize(insetVal ?: return JsonObject(), mutableMapOf())
+        }
+
+        fun deserialize(json: JsonElement, space: Space) {
+            insetVal = type.deserialize(json, space, mutableMapOf())
+        }
+    }
+
     class Output(val io: BaseNode.Output<*>, node: NodeComponent) : IOComponent(node) {
         val connections = mutableSetOf<Input>()
         init {

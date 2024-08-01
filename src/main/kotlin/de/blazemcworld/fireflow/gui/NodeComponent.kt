@@ -32,8 +32,10 @@ class NodeComponent(val node: BaseNode) {
         if (node is ValueLiteralNode<*>) inputWidth = TextWidth.calculate(valueLiteral) / 40
 
         for (i in inputs) {
+            i.update(inst)
             inputWidth = max(inputWidth, i.text.width())
         }
+
         for (o in outputs) {
             outputWidth = max(outputWidth, o.text.width())
         }
@@ -49,16 +51,19 @@ class NodeComponent(val node: BaseNode) {
             inputY -= valueDisplay.height()
             valueDisplay.update(inst)
         }
-        for (i in inputs) {
-            i.pos = Pos2d(pos.x + inputWidth - i.text.width(), inputY + baseY)
-            inputY -= i.text.height()
-            i.update(inst)
-        }
+
         for (o in outputs) {
             o.pos = Pos2d(pos.x - outputWidth, outputY + baseY)
             outputY -= o.text.height()
             o.update(inst)
         }
+
+        for (i in inputs) {
+            i.pos = Pos2d(pos.x + inputWidth - i.text.width(), inputY + baseY)
+            inputY -= i.text.height()
+            i.update(inst)
+        }
+
         title.pos = Pos2d(pos.x - title.width() * 0.5 + (inputWidth - outputWidth) * 0.5, pos.y + title.height())
         title.update(inst)
         outline.pos = Pos2d(pos.x - outputWidth - PADDING, pos.y + min(inputY, outputY) + title.height() - PADDING)

@@ -15,7 +15,7 @@ object ConnectNodesTool : Tool {
     override val item = item(Material.BREEZE_ROD,
         "Connect Nodes", NamedTextColor.AQUA,
         "Used for connecting node",
-        "inputs and outputs"
+        "inputs and outputs."
     )
 
     override fun handler(player: Player, space: Space) = object : Tool.Handler {
@@ -27,16 +27,18 @@ object ConnectNodesTool : Tool {
         private var previewLine = LineComponent()
         private var previewTask: Task? = null
 
+        private var highlighter: Tool.IOHighlighter? = Tool.IOHighlighter(NamedTextColor.AQUA, player, space)
+
         override fun use() {
             val cursor = space.codeCursor(player)
             for (node in space.codeNodes) {
                 for (output in node.outputs) {
                     if (output.includes(cursor)) {
                         if (from == output) {
-                            deselect()
+                            clearSelectionPreview()
                             return
                         }
-                        deselect()
+                        clearSelectionPreview()
                         from = output
                         previewLine = LineComponent()
                         previewLine.color = output.io.type.color
@@ -59,8 +61,13 @@ object ConnectNodesTool : Tool {
                     for (input in node.inputs) {
                         if (input.includes(cursor)) {
                             if (!input.connect(output, relays)) return
-                            input.update(space.codeInstance)
-                            deselect()
+
+                            if (input is IOComponent.InsetInput<*> && input.insetVal != null) {
+                                input.insetVal = null
+                            }
+
+                            input.node.update(space.codeInstance)
+                            clearSelectionPreview()
                             return
                         }
                     }
@@ -76,7 +83,11 @@ object ConnectNodesTool : Tool {
             }
         }
 
-        override fun deselect() {
+        override fun select() {
+            highlighter?.selected()
+        }
+
+        fun clearSelectionPreview() {
             from = null
             previewLine.remove()
             previewTask?.cancel()
@@ -84,6 +95,11 @@ object ConnectNodesTool : Tool {
             for (other in otherLines) other.remove()
             otherLines.clear()
             relays.clear()
+        }
+
+        override fun deselect() {
+            clearSelectionPreview()
+            highlighter?.deselect()
         }
     }
 }

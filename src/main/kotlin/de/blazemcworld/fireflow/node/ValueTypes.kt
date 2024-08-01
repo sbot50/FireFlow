@@ -49,6 +49,7 @@ abstract class ValueType<T> : SomeType  {
     abstract fun validate(something: Any?): T?
     open val generics = emptyMap<String, ValueType<*>>()
     open val generic: GenericType? = null
+    open val insetable = false
 
     abstract fun serialize(v: T, objects: MutableMap<Any?, Pair<Int, JsonElement>>): JsonElement
     abstract fun deserialize(json: JsonElement, space: Space, objects: MutableMap<Int, Pair<Any?, JsonElement>>): T
@@ -83,6 +84,7 @@ object SignalType : ValueType<Unit>() {
     override val name = "Signal"
     override val color: TextColor = NamedTextColor.AQUA
     override val material: Material = Material.LIGHT_BLUE_DYE
+
     override fun parse(str: String, space: Space) = null
     override fun compareEqual(left: Unit?, right: Unit?) = false
     override fun validate(something: Any?) = null
@@ -96,6 +98,7 @@ object NumberType : ValueType<Double>() {
     override val name = "Number"
     override val color: TextColor = NamedTextColor.RED
     override val material: Material = Material.SLIME_BALL
+    override val insetable = true
 
     override fun parse(str: String, space: Space) = str.toDoubleOrNull()
     override fun compareEqual(left: Double?, right: Double?) = left == right
@@ -116,6 +119,7 @@ object ConditionType : ValueType<Boolean>() {
     override val name = "Condition"
     override val color: TextColor = NamedTextColor.LIGHT_PURPLE
     override val material: Material = Material.ANVIL
+    override val insetable = true
 
     override fun parse(str: String, space: Space) = str == "true"
     override fun compareEqual(left: Boolean?, right: Boolean?) = left == right
@@ -134,6 +138,7 @@ object TextType : ValueType<String>() {
     override val name = "Text"
     override val color: TextColor = NamedTextColor.GREEN
     override val material: Material = Material.BOOK
+    override val insetable = true
 
     override fun parse(str: String, space: Space) = str
     override fun compareEqual(left: String?, right: String?) = left == right
@@ -166,6 +171,7 @@ object MessageType : ValueType<Component>() {
     override val name = "Message"
     override val color: TextColor = NamedTextColor.YELLOW
     override val material: Material = Material.ENCHANTED_BOOK
+    override val insetable = true
 
     override fun parse(str: String, space: Space) = mm.deserialize(str)
     override fun compareEqual(left: Component?, right: Component?) = left is Component && right is Component && mm.serialize(left) == mm.serialize(right)

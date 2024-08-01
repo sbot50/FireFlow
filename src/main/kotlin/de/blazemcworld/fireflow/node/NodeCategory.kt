@@ -33,34 +33,52 @@ class NodeCategory(val title: String, color: TextColor, material: Material, val 
 
     companion object {
         val root = NodeCategory("Select a Node", NamedTextColor.GRAY, Material.BOOK, InventoryType.CHEST_5_ROW) {
-            slot(10, "Events", NamedTextColor.AQUA, Material.LIGHT_BLUE_DYE, InventoryType.CHEST_3_ROW) {
+            slot(1, "Events", NamedTextColor.AQUA, Material.LIGHT_BLUE_DYE, InventoryType.CHEST_3_ROW) {
                 slot(0, OnPlayerJoinNode)
                 slot(1, OnPlayerChatNode)
             }
-            slot(12, "Flow", NamedTextColor.BLUE, Material.WATER_BUCKET, InventoryType.CHEST_3_ROW) {
-                slot(0, ScheduleNode)
-            }
-            slot(14, "Players", NamedTextColor.GOLD, Material.PLAYER_HEAD, InventoryType.CHEST_3_ROW) {
-                slot(0, SendMessageNode)
-                slot(1, PlayerPositionNode)
-                slot(2, KillPlayerNode)
-            }
-            slot(16, "Numbers", NamedTextColor.RED, Material.SLIME_BALL, InventoryType.CHEST_3_ROW) {
+            slot(3, "Numbers", NamedTextColor.RED, Material.SLIME_BALL, InventoryType.CHEST_3_ROW) {
                 slot(0, AddNumbersNode)
                 slot(1, SubtractNumbersNode)
                 slot(2, MultiplyNumbersNode)
                 slot(3, DivideNumbersNode)
+                slot(4, ModuloNumbersNode)
+                slot(5, PowerNumbersNode)
+                slot(6, RandomNumberNode)
             }
-            slot(28, "Positions", NamedTextColor.YELLOW, Material.COMPASS, InventoryType.CHEST_3_ROW) {
+            slot(5, "Players", NamedTextColor.GOLD, Material.PLAYER_HEAD, InventoryType.CHEST_3_ROW) {
+                slot(0, SendMessageNode)
+                slot(1, PlayerPositionNode)
+                slot(2, KillPlayerNode)
+            }
+            slot(7, "Flow", NamedTextColor.BLUE, Material.WATER_BUCKET, InventoryType.CHEST_3_ROW) {
+                slot(0, ScheduleNode)
+            }
+            slot(19, "Value Literals", NamedTextColor.GRAY, Material.WRITABLE_BOOK, InventoryType.CHEST_3_ROW) {
+                for ((i, v) in ValueLiteralNode.all.withIndex()) slot(i, v)
+            }
+            slot(21, "User Functions", TextColor.color(66, 245, 182), Material.DIAMOND, InventoryType.CHEST_3_ROW) {
+                userFunctions = true
+            }
+            slot(23, "Text", TextType.color, Material.BOLT_ARMOR_TRIM_SMITHING_TEMPLATE, InventoryType.CHEST_3_ROW) {
+                slot(0, ToTextNode)
+                slot(1, ConcatNode)
+                slot(2, SubtextNode)
+            }
+            slot(25, "Messages", MessageType.color, Material.FLOW_ARMOR_TRIM_SMITHING_TEMPLATE, InventoryType.CHEST_3_ROW) {
+                slot(0, ToMessageNode)
+                slot(1, FormatMiniMessageNode)
+            }
+            slot(37, "Positions", NamedTextColor.YELLOW, Material.COMPASS, InventoryType.CHEST_3_ROW) {
                 slot(0, PackPositionNode)
                 slot(1, UnpackPositionNode)
             }
-            slot(30, "World", NamedTextColor.GREEN, Material.GRASS_BLOCK, InventoryType.CHEST_3_ROW) {
+            slot(39, "World", NamedTextColor.GREEN, Material.GRASS_BLOCK, InventoryType.CHEST_3_ROW) {
                 slot(0, GetBlockNode)
                 slot(1, SetBlockNode)
                 slot(2, FillBlocksNode)
             }
-            slot(32, "Variables", NamedTextColor.LIGHT_PURPLE, Material.ANVIL, InventoryType.CHEST_4_ROW) {
+            slot(41, "Variables", NamedTextColor.LIGHT_PURPLE, Material.ANVIL, InventoryType.CHEST_4_ROW) {
                 slot(10, VariableNodes.getLocal)
                 slot(13, VariableNodes.getSpace)
                 slot(16, VariableNodes.getPersistent)
@@ -68,19 +86,13 @@ class NodeCategory(val title: String, color: TextColor, material: Material, val 
                 slot(22, VariableNodes.setSpace)
                 slot(25, VariableNodes.setPersistent)
             }
-            slot(34, "Lists", NamedTextColor.WHITE, Material.SHULKER_BOX, InventoryType.CHEST_3_ROW) {
+            slot(43, "Lists", NamedTextColor.WHITE, Material.SHULKER_BOX, InventoryType.CHEST_3_ROW) {
                 slot(0, EmptyListNode)
                 slot(1, ListAppendNode)
                 slot(2, ListGetNode)
                 slot(3, ListLengthNode)
                 slot(4, ListInsertNode)
                 slot(5, ListRemoveNode)
-            }
-            slot(20, "Value Literals", NamedTextColor.GRAY, Material.WRITABLE_BOOK, InventoryType.CHEST_3_ROW) {
-                for ((i, v) in ValueLiteralNode.all.withIndex()) slot(i, v)
-            }
-            slot(24, "User Functions", TextColor.color(66, 245, 182), Material.DIAMOND, InventoryType.CHEST_3_ROW) {
-                userFunctions = true
             }
         }
     }
