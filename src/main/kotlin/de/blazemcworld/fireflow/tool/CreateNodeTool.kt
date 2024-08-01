@@ -1,6 +1,7 @@
 package de.blazemcworld.fireflow.tool
 
 import de.blazemcworld.fireflow.inventory.SelectionInventories
+import de.blazemcworld.fireflow.node.NodeCategory
 import de.blazemcworld.fireflow.space.Space
 import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.entity.Player
@@ -17,7 +18,7 @@ object CreateNodeTool : Tool {
         override val tool = CreateNodeTool
 
         override fun use() {
-            SelectionInventories.selectNode(player, space) { node ->
+            SelectionInventories.selectNode(player, space, NodeCategory.root) { node ->
                 space.codeNodes += node.newComponent().also {
                     it.pos = space.codeCursor(player)
                     it.update(space.codeInstance)

@@ -12,20 +12,36 @@ import net.minestom.server.item.ItemStack
 
 object SelectionInventories {
 
-    fun selectNode(player: Player, space: Space, callback: (BaseNode) -> Unit) {
-        val inv = Inventory(InventoryType.CHEST_6_ROW, "Select Node")
+    fun selectNode(player: Player, space: Space, category: NodeCategory, callback: (BaseNode) -> Unit) {
+        val inv = Inventory(category.invType, category.title)
 
-        val availableNodes = (NodeList.all + space.functionNodes).toList()
-
-        for ((slot, node) in availableNodes.withIndex()) {
+        for ((slot, node) in category.nodes) {
             inv.setItemStack(slot, node.menuItem())
+        }
+        for ((slot, sub) in category.categories) {
+            inv.setItemStack(slot, sub.item)
+        }
+
+        val functions = mutableMapOf<Int, FunctionCallNode>()
+        if (category.userFunctions) {
+            for ((i, f) in space.functionNodes.withIndex()) {
+                if (i >= inv.size) break
+                functions[i] = f
+                inv.setItemStack(i, f.menuItem())
+            }
         }
 
         inv.addInventoryCondition click@{ who, slot, _, _ ->
             if (who != player) return@click
-            if (slot !in availableNodes.indices) return@click
+            if (category.categories.containsKey(slot)) {
+                player.closeInventory()
+                selectNode(player, space, category.categories[slot]!!, callback)
+                return@click
+            }
+
+            if (!category.nodes.containsKey(slot) && !functions.containsKey(slot)) return@click
             player.closeInventory()
-            val node = availableNodes[slot]
+            val node = if (functions.containsKey(slot)) functions[slot] else category.nodes[slot]
             if (node in NodeList.all || node in space.functionNodes) {
                 when (node) {
                     is BaseNode -> callback(node)
