@@ -36,6 +36,7 @@ class NodeCategory(val title: String, color: TextColor, material: Material, val 
             slot(1, "Events", NamedTextColor.AQUA, Material.LIGHT_BLUE_DYE, InventoryType.CHEST_3_ROW) {
                 slot(0, OnPlayerJoinNode)
                 slot(1, OnPlayerChatNode)
+                slot(2, OnPlayerDeathNode)
             }
             slot(3, "Numbers", NamedTextColor.RED, Material.SLIME_BALL, InventoryType.CHEST_3_ROW) {
                 slot(0, AddNumbersNode)
