@@ -43,7 +43,7 @@ class NodeContext(val global: GlobalNodeContext, val component: NodeComponent) {
 
         open lateinit var connected: Set<BoundOutput<*>>
         override fun computeConnections() {
-            connected = component.inputs.find { it.io == v }?.connections?.map { global.nodeContexts[it.node]!![it.io] }?.toSet() ?: emptySet()
+            connected = component.inputs.find { it.io == v }?.connections?.map { global.nodeContexts[it.output.node]!![it.output.io] }?.toSet() ?: emptySet()
         }
     }
 

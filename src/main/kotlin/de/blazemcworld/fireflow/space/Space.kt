@@ -279,8 +279,12 @@ class Space(val id: Int) {
                 val outputs = JsonArray()
                 for (c in input.connections) {
                     val id = JsonArray()
-                    id.add(codeNodes.indexOf(c.node))
-                    id.add(c.node.node.outputs.indexOf(c.io))
+                    id.add(codeNodes.indexOf(c.output.node))
+                    id.add(c.output.node.outputs.indexOf(c.output))
+                    for (relay in c.relays) {
+                        id.add(relay.x)
+                        id.add(relay.y)
+                    }
                     outputs.add(id)
                 }
                 connections.add(outputs)
@@ -385,7 +389,11 @@ class Space(val id: Int) {
                 val input = node.inputs[inputIndex]
                 for (outputInfo in conn.asJsonArray) {
                     if (outputInfo !is JsonArray) throw IllegalStateException("Expected only json arrays in connections array.")
-                    (newNodes[outputInfo[0].asInt] ?: continue).outputs[outputInfo[1].asInt].connect(input)
+                    val relays = mutableListOf<Pos2d>()
+                    for (i in 2..<outputInfo.size() step 2) {
+                        relays.add(Pos2d(outputInfo[i].asDouble, outputInfo[i + 1].asDouble))
+                    }
+                    (newNodes[outputInfo[0].asInt] ?: continue).outputs[outputInfo[1].asInt].connect(input, relays)
                 }
             }
         }
