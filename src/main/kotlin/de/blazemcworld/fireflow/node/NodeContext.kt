@@ -8,7 +8,7 @@ class NodeContext(val global: GlobalNodeContext, val component: NodeComponent) {
     private val store = HashMap<BaseNode.IO<*>, Bound<*>>()
 
     operator fun <T> get(v: BaseNode.Output<T>) = store[v] as BoundOutput<T>
-    operator fun <T> get(v: BaseNode.Input<T>): BoundInput<T> = store[v] as BoundInput<T>
+    operator fun <T> get(v: BaseNode.Input<T>) = store[v] as BoundInput<T>
 
     init {
         for (i in component.inputs) {
