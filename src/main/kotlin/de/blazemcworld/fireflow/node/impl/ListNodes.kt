@@ -84,6 +84,7 @@ object ListGetNode : GenericNode("List Get", Material.TWISTING_VINES) {
             ctx[value].defaultHandler = v@{
                 val store = it[ctx[list]]?.store ?: return@v null
                 val index = it[ctx[index]]?.toInt() ?: return@v null
+                if (index !in store.indices) return@v null
                 store[index]
             }
         }
@@ -134,7 +135,11 @@ object ListRemoveNode : GenericNode("List Remove", Material.TNT) {
 
         override fun setup(ctx: NodeContext) {
             ctx[signal].signalListener = {
-                it[ctx[index]]?.let { v -> it[ctx[list]]?.store?.removeAt(v.toInt()) }
+                it[ctx[index]]?.let { v ->
+                    val store = it[ctx[list]]?.store
+                    if (store == null || v.toInt() !in store.indices) return@let
+                    store.removeAt(v.toInt())
+                }
                 it.emit(ctx[next])
             }
         }
@@ -167,7 +172,49 @@ object ListInsertNode : GenericNode("List Insert", Material.SHEARS) {
 
         override fun setup(ctx: NodeContext) {
             ctx[signal].signalListener = {
-                it[ctx[value]]?.let { v -> it[ctx[list]]?.store?.add(it[ctx[index]]?.toInt() ?: return@let, v) }
+                it[ctx[value]]?.let { v ->
+                    val store = it[ctx[list]]?.store
+                    val index = it[ctx[index]] ?: return@let
+                    if (store == null || index.toInt() !in store.indices) return@let
+                    store.add(index.toInt(), v)
+                }
+                it.emit(ctx[next])
+            }
+        }
+
+    }
+}
+
+object ListSetNode : GenericNode("List Set", Material.WHITE_WOOL) {
+    init {
+        generic("Type", AllTypes.dataOnly)
+        input("Signal", SignalType)
+        genericInput("List")
+        input("Index", NumberType)
+        genericInput("Value")
+        output("Next", SignalType)
+    }
+
+    private val cache = WeakHashMap<ValueType<*>, Impl<*>>()
+    override fun create(generics: Map<String, ValueType<*>>): Impl<*> = cache.computeIfAbsent(generics["Type"]) { Impl(generics["Type"]!!) }
+
+    class Impl<T>(type: ValueType<T>) : BaseNode("List(${type.name}) Set", type.material) {
+        private val signal = input("Signal", SignalType)
+        private val list = input("List", ListType.create(type))
+        private val index = input("Index", NumberType)
+        private val value = input("Value", type)
+        private val next = output("Next", SignalType)
+
+        override val generic = ListSetNode
+        override val generics = mapOf("Type" to type)
+
+        override fun setup(ctx: NodeContext) {
+            ctx[signal].signalListener = {
+                it[ctx[value]]?.let { v ->
+                    val store = it[ctx[list]]?.store
+                    val index = it[ctx[index]] ?: return@let
+                    if (store == null || index.toInt() !in store.indices) return@let
+                    it[ctx[list]]?.store?.set(index.toInt(), v) }
                 it.emit(ctx[next])
             }
         }

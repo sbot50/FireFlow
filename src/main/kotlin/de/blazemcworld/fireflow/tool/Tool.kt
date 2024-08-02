@@ -24,8 +24,8 @@ interface Tool {
         val allTools = setOf(
             CreateNodeTool,
             ConnectNodesTool,
-            MoveNodeTool,
-            DeleteNodeTool,
+            MoveTool,
+            DeleteTool,
             InsetLiteralTool
         )
     }

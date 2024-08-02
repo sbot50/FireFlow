@@ -57,6 +57,39 @@ object ConnectNodesTool : Tool {
                         return
                     }
                 }
+                if (from == null) for (input in node.inputs) {
+                    for (conn in input.connections) {
+                        for ((index, pos) in conn.relays.withIndex()) {
+                            if (pos.distance(cursor) < 0.2) {
+                                from = conn.output
+                                previewLine = LineComponent()
+                                previewLine.color = conn.output.io.type.color
+
+                                for (each in 0..index) {
+                                    relays += conn.relays[each]
+                                    previewLine.end = conn.relays[each]
+                                    otherLines.add(previewLine)
+                                    previewLine = LineComponent()
+                                    previewLine.start = conn.relays[each]
+                                    previewLine.color = conn.output.io.type.color
+                                }
+
+                                previewTask?.cancel()
+                                previewTask = MinecraftServer.getSchedulerManager().submitTask {
+                                    if (otherLines.isEmpty()) {
+                                        previewLine.start = Pos2d(conn.output.pos.x, conn.output.pos.y + conn.output.text.height() * 0.75)
+                                    } else {
+                                        otherLines[0].start = Pos2d(conn.output.pos.x, conn.output.pos.y + conn.output.text.height() * 0.75)
+                                    }
+                                    previewLine.end = space.codeCursor(player)
+                                    previewLine.update(space.codeInstance)
+                                    return@submitTask TaskSchedule.tick(1)
+                                }
+                                return
+                            }
+                        }
+                    }
+                }
                 from?.let { output ->
                     for (input in node.inputs) {
                         if (input.includes(cursor)) {

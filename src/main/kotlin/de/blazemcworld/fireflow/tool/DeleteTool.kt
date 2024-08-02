@@ -8,15 +8,15 @@ import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.entity.Player
 import net.minestom.server.item.Material
 
-object DeleteNodeTool : Tool {
+object DeleteTool : Tool {
     override val item = item(Material.REDSTONE_BLOCK,
         "Delete", NamedTextColor.RED,
         "Used for deleting nodes",
-        "or connections in the code"
+        "or connections in the code."
     )
 
     override fun handler(player: Player, space: Space) = object : Tool.Handler {
-        override val tool = DeleteNodeTool
+        override val tool = DeleteTool
 
         override fun use() {
             val cursor = space.codeCursor(player)
@@ -59,6 +59,13 @@ object DeleteNodeTool : Tool {
                 for (input in node.inputs) {
                     for (line in input.connections) {
                         if (line.distance(cursor) < 0.1) {
+                            for ((index, pos) in line.relays.withIndex()) {
+                                if (pos.distance(cursor) < 0.2) {
+                                    line.relays.removeAt(index)
+                                    line.update(space.codeInstance)
+                                    return
+                                }
+                            }
                             input.connections.remove(line)
                             line.output.connections.remove(input)
                             input.update(space.codeInstance)

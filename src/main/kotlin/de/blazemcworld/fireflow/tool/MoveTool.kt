@@ -14,17 +14,18 @@ import net.minestom.server.timer.TaskSchedule
 import kotlin.math.max
 import kotlin.math.min
 
-object MoveNodeTool : Tool {
+object MoveTool : Tool {
     override val item = item(Material.PISTON,
-        "Move Node", NamedTextColor.YELLOW,
-        "Used for moving nodes",
-        "around in the code"
+        "Move", NamedTextColor.YELLOW,
+        "Used for moving nodes or",
+        "connections around in the code."
     )
 
     override fun handler(player: Player, space: Space) = object : Tool.Handler {
-        override val tool = MoveNodeTool
+        override val tool = MoveTool
 
         val nodes = mutableMapOf<NodeComponent, Pos2d>()
+        var connection: ConnectionComponent? = null
         val connections = mutableMapOf<ConnectionComponent, List<Pos2d>>()
         var selectionStart: Pos2d? = null
         var moveTask: Task? = null
@@ -32,7 +33,7 @@ object MoveNodeTool : Tool {
         var selectionTask: Task? = null
 
         override fun use() {
-            if (nodes.isNotEmpty()) {
+            if (nodes.isNotEmpty() || connection != null) {
                 stopMoving()
                 return
             }
@@ -79,7 +80,7 @@ object MoveNodeTool : Tool {
                         }
                     }
                 }
-                return@let
+                return
             }
             space.codeNodes.find { it.includes(cursor) && !it.isBeingMoved }?.let {
                 nodes[it] = it.pos - cursor
@@ -96,9 +97,45 @@ object MoveNodeTool : Tool {
                     if (nodes.isEmpty()) return@task TaskSchedule.stop()
                     return@task TaskSchedule.tick(1)
                 }
+                return
             }
 
-            if (nodes.isEmpty()) {
+            for (node in space.codeNodes) {
+                for (input in node.inputs) {
+                    for (conn in input.connections) {
+                        for ((index, pos) in conn.relays.withIndex()) {
+                            if (pos.distance(cursor) < 0.1) {
+                                connection = conn
+                                moveTask = MinecraftServer.getSchedulerManager().submitTask task@{
+                                    if (connection == null) return@task TaskSchedule.stop()
+                                    val movedCursor = space.codeCursor(player)
+                                    connection?.relays?.set(index, movedCursor)
+                                    connection?.update(space.codeInstance)
+                                    return@task TaskSchedule.tick(1)
+                                }
+                                return
+                            }
+                        }
+                        for ((index, line) in (conn.relayLines + conn.finalLine).withIndex()) {
+                            if (line.distance(cursor) < 0.2) {
+                                conn.relays.add(index, cursor)
+                                conn.update(space.codeInstance)
+                                connection = conn
+                                moveTask = MinecraftServer.getSchedulerManager().submitTask task@{
+                                    if (connection == null) return@task TaskSchedule.stop()
+                                    val movedCursor = space.codeCursor(player)
+                                    connection?.relays?.set(index, movedCursor)
+                                    connection?.update(space.codeInstance)
+                                    return@task TaskSchedule.tick(1)
+                                }
+                                return
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (nodes.isEmpty() && connection == null) {
                 selectionStart = cursor
                 selectionTask?.cancel()
                 selectionIndicator.remove()
@@ -110,6 +147,7 @@ object MoveNodeTool : Tool {
                     selectionIndicator.update(space.codeInstance)
                     return@task TaskSchedule.tick(1)
                 }
+                return
             }
         }
 
@@ -121,6 +159,7 @@ object MoveNodeTool : Tool {
             }
             nodes.clear()
             connections.clear()
+            connection = null
             moveTask?.cancel()
             moveTask = null
             selectionTask?.cancel()

@@ -98,9 +98,10 @@ class NodeCategory(val title: String, color: TextColor, material: Material, val 
                 slot(0, EmptyListNode)
                 slot(1, ListAppendNode)
                 slot(2, ListGetNode)
-                slot(3, ListLengthNode)
-                slot(4, ListInsertNode)
-                slot(5, ListRemoveNode)
+                slot(3, ListSetNode)
+                slot(4, ListLengthNode)
+                slot(5, ListInsertNode)
+                slot(6, ListRemoveNode)
             }
         }
     }

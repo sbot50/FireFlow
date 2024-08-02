@@ -25,6 +25,7 @@ object NodeList {
         ListInsertNode,
         ListLengthNode,
         ListRemoveNode,
+        ListSetNode,
         ModuloNumbersNode,
         MultiplyNumbersNode,
         OnPlayerChatNode,

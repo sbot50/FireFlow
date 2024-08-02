@@ -25,11 +25,15 @@ object SubtextNode : BaseNode("Subtext", Material.SHEARS) {
     override fun setup(ctx: NodeContext) {
         ctx[result].defaultHandler = {
             val text = it[ctx[text]]
-            val length = text?.length?.minus(1) ?: 0
-            val min = it[ctx[min]]?.toInt() ?: 0
-            val max = it[ctx[max]]?.toInt() ?: length
+            val length = text?.length ?: 0
+            var min = it[ctx[min]]?.toInt() ?: 0
+            var max = it[ctx[max]]?.toInt() ?: length
 
-            text?.substring(if (0 > min) 0 else min, if (max > length) length else max) ?: ""
+            if (min < 0) min = 0 else if (min >= length) min = length
+            if (max < 0) max = 0 else if (max >= length) max = length
+            if (min < max) min = max.also { max = min }
+
+            text?.substring(min, max) ?: ""
         }
     }
 }

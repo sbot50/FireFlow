@@ -45,6 +45,7 @@ class LineComponent {
     }
 
     fun distance(p: Pos2d): Double {
+        if (start == end) return start.distance(p)
         val ab = Pos2d(end.x - start.x, end.y - start.y)
         val ap = Pos2d(p.x - start.x, p.y - start.y)
 

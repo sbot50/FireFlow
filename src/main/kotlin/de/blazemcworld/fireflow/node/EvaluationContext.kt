@@ -1,5 +1,6 @@
 package de.blazemcworld.fireflow.node
 
+import de.blazemcworld.fireflow.FireFlow
 import de.blazemcworld.fireflow.gui.NodeComponent
 import java.util.*
 import java.util.function.Supplier
@@ -26,14 +27,32 @@ class EvaluationContext(val global: GlobalNodeContext, val varStore: MutableMap<
                 out = store[output]!!.get() as T?
                 return@measureCode
             }
-            out = output.defaultHandler(this) as T?
+            try {
+                out = output.defaultHandler(this) as T?
+            } catch (e: Exception) {
+                FireFlow.LOGGER.error(e) { "Exception calling defaultHandler for ${output.nodeContext().component.node.title}!" }
+                for (connectedInput in output.nodeContext().inputs()) {
+                    if (connectedInput.v.type == SignalType) continue
+                    FireFlow.LOGGER.error { "${connectedInput.v.name} -> ${this[connectedInput]}" }
+                }
+            }
         }
         return out
     }
 
     fun emit(output: NodeContext.BoundOutput<Unit>, now: Boolean = false) {
         tasks.add {
-            output.connected.singleOrNull()?.signalListener?.invoke(this)
+            try {
+                output.connected.singleOrNull()?.signalListener?.invoke(this)
+            } catch (e: Exception) {
+                val connected = output.connected.singleOrNull() ?: return@add
+
+                FireFlow.LOGGER.error(e) { "Exception calling signalListener for ${output.nodeContext().component.node.title}!" }
+                for (input in connected.nodeContext().inputs()) {
+                    if (input.v.type == SignalType) continue
+                    FireFlow.LOGGER.error { "${input.v.name} -> ${this[input]}" }
+                }
+            }
         }
         if (now) taskLoop()
     }

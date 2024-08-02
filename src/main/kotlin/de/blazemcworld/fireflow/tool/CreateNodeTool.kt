@@ -11,7 +11,7 @@ object CreateNodeTool : Tool {
     override val item = item(Material.SLIME_BLOCK,
         "Create Node", NamedTextColor.GREEN,
         "Used for creating nodes",
-        "in the code"
+        "in the code."
     )
 
     override fun handler(player: Player, space: Space) = object : Tool.Handler {

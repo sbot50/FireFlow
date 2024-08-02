@@ -22,8 +22,12 @@ class NodeContext(val global: GlobalNodeContext, val component: NodeComponent) {
         for (v in store.values) v.computeConnections()
     }
 
-    abstract class Bound<T : BaseNode.IO<*>>(val v: T) {
+    fun inputs() = store.values.filterIsInstance<BoundInput<*>>()
+    fun outputs() = store.values.filterIsInstance<BoundInput<*>>()
+
+    abstract inner class Bound<T : BaseNode.IO<*>>(val v: T) {
         abstract fun computeConnections()
+        fun nodeContext() = this@NodeContext
     }
 
     inner class BoundOutput<T>(v: BaseNode.Output<T>) : Bound<BaseNode.Output<T>>(v) {
