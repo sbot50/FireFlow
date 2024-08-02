@@ -214,11 +214,13 @@ class Space(val id: Int) {
                 .adjustSelect { select(PlayersTable.uuid, role, PlayersTable.preferences["reload"]!!) }
             result.associate { it[PlayersTable.uuid] to mapOf( "role" to it[role], "reload" to it[PlayersTable.preferences["reload"]!!]) }
         }
+        println(data)
         for (p in players) {
             val playerData = data[p.uuid] ?: continue
-            if (playerData["reload"] == 2) SpaceManager.sendToSpace(p, spaceID)
-            if (playerData["reload"] == 1 && (playerData["role"] == SpaceRolesTable.Role.OWNER || playerData["role"] == SpaceRolesTable.Role.CONTRIBUTOR)) SpaceManager.sendToSpace(p, spaceID)
-            if (playerData["reload"] == 0 && playerData["role"] == SpaceRolesTable.Role.OWNER) SpaceManager.sendToSpace(p, spaceID)
+            val reloadType = playerData["reload"].toString().toInt()
+            if (reloadType == 2) SpaceManager.sendToSpace(p, spaceID)
+            if (reloadType == 1 && (playerData["role"] == SpaceRolesTable.Role.OWNER || playerData["role"] == SpaceRolesTable.Role.CONTRIBUTOR)) SpaceManager.sendToSpace(p, spaceID)
+            if (reloadType == 0 && playerData["role"] == SpaceRolesTable.Role.OWNER) SpaceManager.sendToSpace(p, spaceID)
         }
     }
 
