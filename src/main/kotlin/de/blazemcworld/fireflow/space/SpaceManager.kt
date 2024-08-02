@@ -46,7 +46,6 @@ object SpaceManager {
     }
 
     fun sendToSpace(player: Player, id: Int) {
-        println("test: $id")
         player.fireflowSetInstance(getOrLoadSpace(id).playInstance)
     }
 

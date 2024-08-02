@@ -214,7 +214,6 @@ class Space(val id: Int) {
                 .adjustSelect { select(PlayersTable.uuid, role, PlayersTable.preferences["reload"]!!) }
             result.associate { it[PlayersTable.uuid] to mapOf( "role" to it[role], "reload" to it[PlayersTable.preferences["reload"]!!]) }
         }
-        println(data)
         for (p in players) {
             val playerData = data[p.uuid] ?: continue
             val reloadType = playerData["reload"].toString().toInt()
