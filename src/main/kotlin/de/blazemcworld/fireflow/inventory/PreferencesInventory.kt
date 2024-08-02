@@ -43,6 +43,7 @@ object PreferencesInventory {
             val pref = preferences[key] ?: return@click
             var knownPref = knownPreferences[key] ?: return@click
             knownPref = if (type == ClickType.RIGHT_CLICK) pref.decreaseState(knownPref) else pref.increaseState(knownPref)
+            knownPreferences[key] = knownPref
 
             inv.setItemStack(slot, createItem(key, knownPref))
             return@click
