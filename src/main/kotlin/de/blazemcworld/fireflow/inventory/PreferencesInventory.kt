@@ -12,6 +12,7 @@ import net.minestom.server.inventory.Inventory
 import net.minestom.server.inventory.InventoryType
 import net.minestom.server.inventory.click.ClickType
 import net.minestom.server.item.ItemStack
+import net.minestom.server.item.Material
 
 object PreferencesInventory {
 
@@ -25,30 +26,32 @@ object PreferencesInventory {
         val inv = Inventory(InventoryType.CHEST_1_ROW,"Preferences")
         val knownPreferences = DatabaseHelper.preferences(player)
 
-        var slot = 0
+        var index = 0
         for ((key, value) in knownPreferences) {
             if (!preferences.containsKey(key)) continue
-            inv.setItemStack(slot, createItem(key, value))
-            preferenceItemMap[slot] = key
-            slot++
+            inv.setItemStack(index, createItem(key, value))
+            preferenceItemMap[index] = key
+            index++
         }
 
-        inv.addInventoryCondition click@{ who, slot, type, result ->
+        inv.addInventoryCondition click@{ who, slot, type, _ ->
             if (player != who || slot !in preferenceItemMap) return@click
 
-            val key = preferenceItemMap[slot]!!
+            val key = preferenceItemMap[slot] ?: return@click
             if (!knownPreferences.containsKey(key)) return@click
-            if (type == ClickType.RIGHT_CLICK) knownPreferences[key] = preferences[key]!!.decreaseState(knownPreferences[key]!!)
-            else knownPreferences[key] = preferences[key]!!.increaseState(knownPreferences[key]!!)
 
-            inv.setItemStack(slot, createItem(key, knownPreferences[key]!!))
+            val pref = preferences[key] ?: return@click
+            var knownPref = knownPreferences[key] ?: return@click
+            knownPref = if (type == ClickType.RIGHT_CLICK) pref.decreaseState(knownPref) else pref.increaseState(knownPref)
+
+            inv.setItemStack(slot, createItem(key, knownPref))
             return@click
         }
 
         player.openInventory(inv)
 
         val handler = MinecraftServer.getGlobalEventHandler()
-        val node = EventNode.type("closeinv", EventFilter.INVENTORY)
+        val node = EventNode.type("closeInv", EventFilter.INVENTORY)
 
         node.addListener(InventoryCloseEvent::class.java) {
             if (it.inventory != inv) return@addListener
@@ -60,14 +63,15 @@ object PreferencesInventory {
     }
 
     private fun createItem(preference: String, value: Byte): ItemStack {
-        val lore = preferences[preference]!!.getLore()
+        val pref = preferences[preference] ?: return ItemStack.builder(Material.AIR).build()
+
+        val lore = pref.getLore()
         lore[value.toInt()] = lore[value.toInt()].color(NamedTextColor.YELLOW)
 
         return ItemStack
-            .builder(preferences[preference]!!.getState(value).getIcon())
-            .customName(preferences[preference]!!.getName())
+            .builder(pref.getState(value).getIcon())
+            .customName(pref.getName())
             .lore(lore)
             .build()
     }
-
 }
