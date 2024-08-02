@@ -78,7 +78,7 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
         if (type.insetable) {
             return Input(name, type, default, optional).also { inputs += it }
         }
-        return Input(name, type, null, optional).also { inputs += it }
+        return Input(name, type, optional=optional).also { inputs += it }
     }
 
     fun <T> output(name: String, type: ValueType<T>) = Output(name, type).also { outputs += it }
@@ -89,11 +89,10 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
             if (inputs.isNotEmpty()) {
                 lore.add(Component.text("Needs:").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))
                 for (input in inputs) {
-                    if (input.optional) lore.add(Component.text("- ").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+                    val loreLine = Component.text("- ").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
                         .append(Component.text(input.name).color(input.type.color))
-                        .append(Component.text("*").color(NamedTextColor.GRAY)))
-                    else lore.add(Component.text("- ").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
-                        .append(Component.text(input.name).color(input.type.color)))
+                    if (input.optional) loreLine.append(Component.text("*").color(NamedTextColor.GRAY))
+                    lore.add(loreLine)
                 }
             }
             if (outputs.isNotEmpty()) {

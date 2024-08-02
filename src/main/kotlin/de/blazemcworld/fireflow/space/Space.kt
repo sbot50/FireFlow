@@ -4,7 +4,6 @@ import com.google.gson.*
 import de.blazemcworld.fireflow.FireFlow
 import de.blazemcworld.fireflow.Lobby
 import de.blazemcworld.fireflow.gui.IOComponent
-import de.blazemcworld.fireflow.database.DatabaseHelper
 import de.blazemcworld.fireflow.database.table.PlayersTable
 import de.blazemcworld.fireflow.database.table.SpaceRolesTable
 import de.blazemcworld.fireflow.database.table.SpaceRolesTable.role
@@ -209,17 +208,17 @@ class Space(val id: Int) {
         globalNodeContext.onDestroy.forEach { it() }
         globalNodeContext = GlobalNodeContext(this)
         val spaceID = this.id
-        val roles = transaction {
+        val data = transaction {
             val result = SpaceRolesTable.join(PlayersTable, JoinType.INNER, SpaceRolesTable.player, PlayersTable.id)
                 .selectAll().where((space eq spaceID) and (PlayersTable.uuid inList players.map { it.uuid }))
-                .adjustSelect { select(PlayersTable.uuid, role) }
-            result.associate { it[PlayersTable.uuid] to it[role] }
+                .adjustSelect { select(PlayersTable.uuid, role, PlayersTable.preferences["reload"]!!) }
+            result.associate { it[PlayersTable.uuid] to mapOf( "role" to it[role], "reload" to it[PlayersTable.preferences["reload"]!!]) }
         }
         for (p in players) {
-            val role = roles[p.uuid]
-            if (DatabaseHelper.getPreference(p, "reload").toInt() == 2) SpaceManager.sendToSpace(p, spaceID)
-            if (DatabaseHelper.getPreference(p, "reload").toInt() == 1 && (role == SpaceRolesTable.Role.OWNER || role == SpaceRolesTable.Role.CONTRIBUTOR)) SpaceManager.sendToSpace(p, spaceID)
-            if (DatabaseHelper.getPreference(p, "reload").toInt() == 0 && role == SpaceRolesTable.Role.OWNER) SpaceManager.sendToSpace(p, spaceID)
+            val playerData = data[p.uuid] ?: continue
+            if (playerData["reload"] == 2) SpaceManager.sendToSpace(p, spaceID)
+            if (playerData["reload"] == 1 && (playerData["role"] == SpaceRolesTable.Role.OWNER || playerData["role"] == SpaceRolesTable.Role.CONTRIBUTOR)) SpaceManager.sendToSpace(p, spaceID)
+            if (playerData["reload"] == 0 && playerData["role"] == SpaceRolesTable.Role.OWNER) SpaceManager.sendToSpace(p, spaceID)
         }
     }
 

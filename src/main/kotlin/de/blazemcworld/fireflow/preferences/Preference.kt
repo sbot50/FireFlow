@@ -18,6 +18,11 @@ open class Preference(protected val name: String) {
         return (states.map { Component.text("► " + it.getName()).color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false) }).toMutableList()
     }
 
+    fun decreaseState(state: Byte): Byte {
+        if (state.toInt() - 1 < 0) return (states.size - 1).toByte()
+        return (state.toInt() - 1).toByte()
+    }
+
     fun increaseState(state: Byte): Byte {
         if (state.toInt() + 1 > states.size - 1) return 0
         return (state.toInt() + 1).toByte()

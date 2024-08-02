@@ -23,8 +23,8 @@ object IfNode : BaseNode("If Condition", Material.IRON_INGOT) {
 }
 
 object GreaterThanNode : BaseNode("Greater Than", Material.COMPARATOR) {
-    private val left = input("Left", NumberType, null, true)
-    private val right = input("Right", NumberType, null, true)
+    private val left = input("Left", NumberType, optional=true)
+    private val right = input("Right", NumberType, optional=true)
     private val condition = output("Condition", ConditionType)
 
     override fun setup(ctx: NodeContext) {
