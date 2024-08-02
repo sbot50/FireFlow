@@ -1,8 +1,6 @@
 package de.blazemcworld.fireflow.node.impl
 
 import de.blazemcworld.fireflow.node.*
-import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.minimessage.MiniMessage
 import net.minestom.server.item.Material
 
 object KillPlayerNode : BaseNode("Kill Player", Material.SKELETON_SKULL) {

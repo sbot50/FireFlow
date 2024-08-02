@@ -74,11 +74,11 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
     open val generics = emptyMap<String, ValueType<*>>()
     open val generic: GenericNode? = null
 
-    fun <T> input(name: String, type: ValueType<T>, default: T? = null): Input<T> {
+    fun <T> input(name: String, type: ValueType<T>, default: T? = null, optional: Boolean = false): Input<T> {
         if (type.insetable) {
-            return Input(name, type, default).also { inputs += it }
+            return Input(name, type, default, optional).also { inputs += it }
         }
-        return Input(name, type).also { inputs += it }
+        return Input(name, type, optional=optional).also { inputs += it }
     }
 
     fun <T> output(name: String, type: ValueType<T>) = Output(name, type).also { outputs += it }
@@ -89,8 +89,10 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
             if (inputs.isNotEmpty()) {
                 lore.add(Component.text("Needs:").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false))
                 for (input in inputs) {
-                    lore.add(Component.text("- ").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
-                        .append(Component.text(input.name).color(input.type.color)))
+                    val loreLine = Component.text("- ").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+                        .append(Component.text(input.name).color(input.type.color))
+                    if (input.optional) loreLine.append(Component.text("*").color(NamedTextColor.GRAY))
+                    lore.add(loreLine)
                 }
             }
             if (outputs.isNotEmpty()) {
@@ -127,6 +129,6 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
         val name: String
         val type: ValueType<T>
     }
-    open class Input<T>(override val name: String, override val type: ValueType<T>, val default: T? = null): IO<T>
+    open class Input<T>(override val name: String, override val type: ValueType<T>, val default: T? = null, val optional: Boolean = false): IO<T>
     open class Output<T>(override val name: String, override val type: ValueType<T>): IO<T>
 }

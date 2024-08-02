@@ -26,12 +26,12 @@ object UnpackPositionNode : BaseNode("Unpack Position", Material.CHEST) {
 }
 
 object PackPositionNode : BaseNode("Pack Position", Material.ENDER_CHEST) {
-    private val position = input("Default", PositionType)
-    private val x = input("X", NumberType)
-    private val y = input("Y", NumberType)
-    private val z = input("Z", NumberType)
-    private val yaw = input("Yaw", NumberType)
-    private val pitch = input("Pitch", NumberType)
+    private val position = input("Default", PositionType, optional=true)
+    private val x = input("X", NumberType, optional=true)
+    private val y = input("Y", NumberType, optional=true)
+    private val z = input("Z", NumberType, optional=true)
+    private val yaw = input("Yaw", NumberType, optional=true)
+    private val pitch = input("Pitch", NumberType, optional=true)
     private val newPos = output("New", PositionType)
 
     override fun setup(ctx: NodeContext) {

@@ -1,6 +1,7 @@
 package de.blazemcworld.fireflow
 
 import de.blazemcworld.fireflow.inventory.MySpacesInventory
+import de.blazemcworld.fireflow.inventory.PreferencesInventory
 import de.blazemcworld.fireflow.util.fireflowSetInstance
 import de.blazemcworld.fireflow.util.reset
 import net.kyori.adventure.text.Component
@@ -28,6 +29,15 @@ object Lobby {
             Component.text("Manage your spaces").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
             Component.text("using this item.").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
         )
+        .build()
+
+    private val PREFERENCES_ITEM = ItemStack.builder(Material.PIGLIN_BANNER_PATTERN)
+        .customName(Component.text("Preferences").color(NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false))
+        .lore(
+            Component.text("Manage your preferences").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
+            Component.text("using this item.").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+        )
+        .hideExtraTooltip()
         .build()
 
     val instance = MinecraftServer.getInstanceManager().createInstanceContainer()
@@ -60,6 +70,7 @@ object Lobby {
         events.addListener(PlayerSpawnEvent::class.java) {
             it.player.reset()
             it.player.inventory.setItemStack(0, MY_SPACES_ITEM)
+            it.player.inventory.setItemStack(8, PREFERENCES_ITEM)
         }
 
         events.apply {
@@ -75,6 +86,10 @@ object Lobby {
     private fun handleRightClick(player: Player) {
         if (player.itemInMainHand == MY_SPACES_ITEM) {
             MySpacesInventory.open(player)
+        }
+
+        if (player.itemInMainHand == PREFERENCES_ITEM) {
+            PreferencesInventory.open(player)
         }
     }
 

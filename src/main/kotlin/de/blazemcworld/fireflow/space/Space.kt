@@ -4,6 +4,10 @@ import com.google.gson.*
 import de.blazemcworld.fireflow.FireFlow
 import de.blazemcworld.fireflow.Lobby
 import de.blazemcworld.fireflow.gui.IOComponent
+import de.blazemcworld.fireflow.database.table.PlayersTable
+import de.blazemcworld.fireflow.database.table.SpaceRolesTable
+import de.blazemcworld.fireflow.database.table.SpaceRolesTable.role
+import de.blazemcworld.fireflow.database.table.SpaceRolesTable.space
 import de.blazemcworld.fireflow.gui.NodeComponent
 import de.blazemcworld.fireflow.gui.Pos2d
 import de.blazemcworld.fireflow.inventory.ToolsInventory
@@ -31,6 +35,12 @@ import net.minestom.server.instance.block.Block
 import net.minestom.server.item.ItemStack
 import net.minestom.server.item.Material
 import net.minestom.server.timer.TaskSchedule
+import org.jetbrains.exposed.sql.JoinType
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.inList
+import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
 import java.util.*
 import kotlin.math.abs
@@ -190,12 +200,26 @@ class Space(val id: Int) {
     }
 
     fun reload() {
+        val players = playInstance.players.toSet()
         for (p in playInstance.players) {
             p.sendMessage(Component.text("Space is reloading!").color(NamedTextColor.RED))
             Lobby.playerJoin(p)
         }
         globalNodeContext.onDestroy.forEach { it() }
         globalNodeContext = GlobalNodeContext(this)
+        val spaceID = this.id
+        val data = transaction {
+            val result = SpaceRolesTable.join(PlayersTable, JoinType.INNER, SpaceRolesTable.player, PlayersTable.id)
+                .selectAll().where((space eq spaceID) and (PlayersTable.uuid inList players.map { it.uuid }))
+                .adjustSelect { select(PlayersTable.uuid, role, PlayersTable.preferences["reload"]!!) }
+            result.associate { it[PlayersTable.uuid] to mapOf( "role" to it[role], "reload" to it[PlayersTable.preferences["reload"]!!]) }
+        }
+        for (p in players) {
+            val playerData = data[p.uuid] ?: continue
+            if (playerData["reload"] == 2) SpaceManager.sendToSpace(p, spaceID)
+            if (playerData["reload"] == 1 && (playerData["role"] == SpaceRolesTable.Role.OWNER || playerData["role"] == SpaceRolesTable.Role.CONTRIBUTOR)) SpaceManager.sendToSpace(p, spaceID)
+            if (playerData["reload"] == 0 && playerData["role"] == SpaceRolesTable.Role.OWNER) SpaceManager.sendToSpace(p, spaceID)
+        }
     }
 
     private fun writeType(t: ValueType<*>): JsonElement {

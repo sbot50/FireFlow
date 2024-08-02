@@ -7,6 +7,7 @@ import de.blazemcworld.fireflow.node.SignalType
 import de.blazemcworld.fireflow.node.ValueType
 import de.blazemcworld.fireflow.space.Space
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.instance.Instance
 import kotlin.math.max
 import kotlin.math.min
@@ -44,6 +45,7 @@ abstract class IOComponent(val node: NodeComponent) {
                 text.text = Component.text("⏹ " + display.substring(0..max(0,min(display.length-1, 10))) + (if (display.length > 10) "..." else "") ).color(io.type.color)
             } else {
                 text.text = Component.text("○ " + io.name).color(io.type.color)
+                if (io.optional) text.text = text.text.append(Component.text("*").color(NamedTextColor.GRAY))
             }
         }
 
