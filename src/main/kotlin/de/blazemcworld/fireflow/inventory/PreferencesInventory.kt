@@ -3,7 +3,11 @@ package de.blazemcworld.fireflow.inventory
 import de.blazemcworld.fireflow.database.DatabaseHelper
 import de.blazemcworld.fireflow.preferences.ReloadPreference
 import net.kyori.adventure.text.format.NamedTextColor
+import net.minestom.server.MinecraftServer
 import net.minestom.server.entity.Player
+import net.minestom.server.event.EventFilter
+import net.minestom.server.event.EventNode
+import net.minestom.server.event.inventory.InventoryCloseEvent
 import net.minestom.server.inventory.Inventory
 import net.minestom.server.inventory.InventoryType
 import net.minestom.server.item.ItemStack
@@ -29,7 +33,6 @@ object PreferencesInventory {
                 .customName(preferences[key]!!.getName())
                 .lore(lore)
             item.setTag(Tag.String("preference"), key)
-            item.setTag(Tag.Byte("value"), value)
             inv.setItemStack(slot, item.build())
             slot++
         }
@@ -38,10 +41,8 @@ object PreferencesInventory {
             if (player != who) return@click
             val item = inv.getItemStack(slot)
             if (!item.hasTag(Tag.String("preference"))) return@click
-
             val key = item.getTag(Tag.String("preference"))
-            if (!preferences.containsKey(key)) return@click
-            knownPreferences[key] = preferences[key]!!.increaseState(item.getTag(Tag.Byte("value")))
+            knownPreferences[key] = preferences[key]!!.increaseState(knownPreferences[key]!!)
 
             val value = knownPreferences[key]
             val lore = preferences[key]!!.getLore()
@@ -51,24 +52,22 @@ object PreferencesInventory {
                 .customName(preferences[key]!!.getName())
                 .lore(lore)
             newItem.setTag(Tag.String("preference"), key)
-            newItem.setTag(Tag.Byte("value"), value)
             inv.setItemStack(slot, newItem.build())
             return@click
         }
 
         player.openInventory(inv)
-    }
 
-    fun close(player: Player, inv: Inventory) {
-        val knownPreferences = mutableMapOf<String, Byte>()
-        for (item in inv.itemStacks) {
-            if (!item.hasTag(Tag.String("preference"))) continue
-            val key = item.getTag(Tag.String("preference"))
-            val value = item.getTag(Tag.Byte("value"))
-            knownPreferences[key] = value
+        val handler = MinecraftServer.getGlobalEventHandler()
+        val node = EventNode.type("closeinv", EventFilter.INVENTORY)
+
+        node.addListener(InventoryCloseEvent::class.java) {
+            if (it.inventory != inv) return@addListener
+            DatabaseHelper.updatePreferences(player, knownPreferences)
+            handler.removeChild(node)
         }
 
-        DatabaseHelper.updatePreferences(player, knownPreferences)
+        handler.addChild(node)
     }
 
 }

@@ -10,7 +10,6 @@ import net.kyori.adventure.text.format.TextDecoration
 import net.minestom.server.MinecraftServer
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.entity.Player
-import net.minestom.server.event.inventory.InventoryCloseEvent
 import net.minestom.server.event.inventory.InventoryPreClickEvent
 import net.minestom.server.event.item.ItemDropEvent
 import net.minestom.server.event.player.*
@@ -72,14 +71,6 @@ object Lobby {
             it.player.reset()
             it.player.inventory.setItemStack(0, MY_SPACES_ITEM)
             it.player.inventory.setItemStack(8, PREFERENCES_ITEM)
-        }
-
-        events.addListener(InventoryCloseEvent::class.java) {
-            if (it.inventory == null) return@addListener
-
-            if (it.inventory!!.title == Component.text("Preferences")) {
-                PreferencesInventory.close(it.player, it.inventory!!)
-            }
         }
 
         events.apply {
