@@ -30,6 +30,7 @@ object NodeList {
         MultiplyNumbersNode,
         OnPlayerChatNode,
         OnPlayerJoinNode,
+        OnPlayerDeathNode,
         PackPositionNode,
         PlayerPositionNode,
         PowerNumbersNode,
