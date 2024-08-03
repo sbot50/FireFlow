@@ -1,6 +1,7 @@
 package de.blazemcworld.fireflow.inventory
 
 import de.blazemcworld.fireflow.database.DatabaseHelper
+import de.blazemcworld.fireflow.preferences.AutoToolsPreference
 import de.blazemcworld.fireflow.preferences.ReloadPreference
 import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.MinecraftServer
@@ -17,7 +18,8 @@ import net.minestom.server.item.Material
 object PreferencesInventory {
 
     private val preferences = mapOf(
-        "reload" to ReloadPreference
+        "reload" to ReloadPreference,
+        "auto-tools" to AutoToolsPreference
     )
 
     fun open(player: Player) {

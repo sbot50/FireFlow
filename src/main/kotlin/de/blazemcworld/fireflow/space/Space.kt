@@ -3,6 +3,7 @@ package de.blazemcworld.fireflow.space
 import com.google.gson.*
 import de.blazemcworld.fireflow.FireFlow
 import de.blazemcworld.fireflow.Lobby
+import de.blazemcworld.fireflow.database.DatabaseHelper
 import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.database.table.PlayersTable
 import de.blazemcworld.fireflow.database.table.SpaceRolesTable
@@ -128,6 +129,15 @@ class Space(val id: Int) {
             it.player.isAllowFlying = true
             it.player.isFlying = true
             it.player.inventory.setItemStack(8, TOOLS_ITEM)
+            val preference = DatabaseHelper.getPreference(it.player, "auto-tools")
+            if (preference.toInt() == 0) {
+                var index = 0
+                for (tool in Tool.allTools) {
+                    if (index == 8) index++
+                    it.player.inventory.setItemStack(index, tool.item)
+                    index++
+                }
+            }
         }
 
         codeEvents.addListener(PlayerBlockBreakEvent::class.java) {
