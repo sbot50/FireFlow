@@ -2,6 +2,7 @@ package de.blazemcworld.fireflow
 
 import de.blazemcworld.fireflow.command.Commands
 import de.blazemcworld.fireflow.database.DatabaseHelper
+import de.blazemcworld.fireflow.node.impl.NodeList
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent
 import io.github.oshai.kotlinlogging.KotlinLogging
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -53,5 +54,6 @@ fun main() {
 
     srv.start("0.0.0.0", Config.store.port)
 
+    FireFlow.LOGGER.info { "Found ${NodeList.all.size} Node Implementations." }
     FireFlow.LOGGER.info { "Ready!" }
 }

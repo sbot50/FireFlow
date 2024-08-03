@@ -9,6 +9,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver
 import net.kyori.adventure.text.minimessage.tag.standard.StandardTags
 import net.minestom.server.coordinate.Pos
+import net.minestom.server.coordinate.Vec
 import net.minestom.server.entity.Player
 import net.minestom.server.item.Material
 import java.util.*
@@ -27,6 +28,7 @@ object AllTypes {
         dataOnly += PositionType
         dataOnly += ListType
         dataOnly += DictionaryType
+        dataOnly += VectorType
         all += dataOnly
         all += SignalType
     }
@@ -325,3 +327,33 @@ object DictionaryType : GenericType {
     }
 }
 data class DictionaryReference<K, V>(val key: ValueType<K>, val value: ValueType<V>, val store: MutableMap<K, V>)
+
+
+object VectorType : ValueType<Vec>() {
+    override val name: String = "Vector"
+    override val color: TextColor = NamedTextColor.AQUA
+    override val material: Material = Material.PRISMARINE_SHARD
+
+    override fun parse(str: String, space: Space) = null
+    override fun compareEqual(left: Vec?, right: Vec?) = left is Vec && right is Vec && left == right
+    override fun validate(something: Any?) = if (something is Vec) something else null
+    override fun deserialize(json: JsonElement, space: Space, objects: MutableMap<Int, Pair<Any?, JsonElement>>): Vec {
+        return Vec(
+            json.asJsonObject.get("x").asDouble,
+            json.asJsonObject.get("y").asDouble,
+            json.asJsonObject.get("z").asDouble
+        )
+    }
+
+    override fun stringify(v: Vec) = "Vector(${shorten(v.x)}, ${shorten(v.y)}, ${shorten(v.z)})"
+
+    private fun shorten(num: Number) = (num.toDouble() * 1000.0).roundToInt() / 1000.0
+
+    override fun serialize(v: Vec, objects: MutableMap<Any?, Pair<Int, JsonElement>>): JsonElement {
+        val obj = JsonObject()
+        obj.addProperty("x", v.x)
+        obj.addProperty("y", v.y)
+        obj.addProperty("z", v.z)
+        return obj
+    }
+}

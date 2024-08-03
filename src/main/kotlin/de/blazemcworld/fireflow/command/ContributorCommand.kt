@@ -42,7 +42,7 @@ object ContributorCommand : Command("contributor") {
             }
 
             transaction {
-                if (!SpaceRolesTable.join(PlayersTable, JoinType.INNER, SpaceRolesTable.id, PlayersTable.id).selectAll()
+                if (!SpaceRolesTable.join(PlayersTable, JoinType.INNER, SpaceRolesTable.player, PlayersTable.id).selectAll()
                     .where { (SpaceRolesTable.space eq space.id) and (PlayersTable.name eq ctx.get<String>("player")) }
                     .empty()) {
                     sender.sendError("That player already is a contributor!")
