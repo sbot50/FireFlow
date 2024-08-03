@@ -52,6 +52,8 @@ fun main() {
         it.responseData = res
     }
 
+    Thread(ConsoleHandler::run).start()
+
     srv.start("0.0.0.0", Config.store.port)
 
     FireFlow.LOGGER.info { "Found ${NodeList.all.size} Node Implementations." }

@@ -34,4 +34,5 @@ class Config(json: JsonObject) {
 
     val port = json.get("port")?.asInt ?: 25565
     val motd = json.get("motd")?.asString ?: "FireFlow Server"
+    val updateUrl = json.get("updateUrl")?.asString ?: "https://nightly.link/BlazeMCworld/FireFlow/workflows/build/main/FireFlow.zip"
 }
