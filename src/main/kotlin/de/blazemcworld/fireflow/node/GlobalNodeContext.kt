@@ -35,6 +35,7 @@ class GlobalNodeContext(val space: Space) {
         }
 
         val resetCpu = MinecraftServer.getSchedulerManager().submitTask {
+            if (!space.playInstance.isRegistered) return@submitTask TaskSchedule.stop()
             cpuTime = 0
             return@submitTask TaskSchedule.tick(1)
         }
