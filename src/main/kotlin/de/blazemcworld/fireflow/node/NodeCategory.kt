@@ -72,7 +72,7 @@ class NodeCategory(val title: String, color: TextColor, material: Material, val 
                 slot(1, GreaterThanNode)
                 slot(2, EqualNode)
             }
-            slot(6, "Players", NamedTextColor.GOLD, Material.PLAYER_HEAD, InventoryType.CHEST_4_ROW) {
+            slot(6, "Players", NamedTextColor.GOLD, Material.PLAYER_HEAD, InventoryType.CHEST_5_ROW) {
                 slot(0, SendMessageNode)
                 slot(1, PlayerPositionNode)
                 slot(2, KillPlayerNode)
@@ -107,6 +107,9 @@ class NodeCategory(val title: String, color: TextColor, material: Material, val 
                 slot(31, SwingPlayerOffHand)
                 slot(32, GetPlayerName)
                 slot(33, SpacePlayersNode)
+                slot(34, SetPlayerCanFlyNode)
+                slot(35, GetGameModeNode)
+                slot(36, SetGameModeNode)
             }
             slot(8, "Flow", NamedTextColor.BLUE, Material.WATER_BUCKET, InventoryType.CHEST_3_ROW) {
                 slot(0, ScheduleNode)
