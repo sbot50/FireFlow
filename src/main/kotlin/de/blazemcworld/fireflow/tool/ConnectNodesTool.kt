@@ -5,7 +5,6 @@ import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.gui.LineComponent
 import de.blazemcworld.fireflow.gui.Pos2d
 import de.blazemcworld.fireflow.inventory.ExtractionInventory
-import de.blazemcworld.fireflow.node.BaseNode
 import de.blazemcworld.fireflow.space.Space
 import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.MinecraftServer
@@ -122,7 +121,7 @@ object ConnectNodesTool : Tool {
             }
         }
 
-        override fun swap(): Boolean {
+        override fun swap(callback: (Player, Boolean) -> Unit): Boolean {
             // Open Extraction Menu
             ExtractionInventory.openForType(player, from?.io?.type ?: return true) {
                 space.codeNodes += ExtractedNodeComponent(it).also { node ->
@@ -135,6 +134,7 @@ object ConnectNodesTool : Tool {
                             input.insetVal = null
                         }
 
+                        callback(player, true)
                         input.node.update(space.codeInstance)
                         clearSelectionPreview()
                     }
@@ -147,6 +147,8 @@ object ConnectNodesTool : Tool {
         override fun select() {
             highlighter?.selected()
         }
+
+        override fun hasSelection() = from != null
 
         fun clearSelectionPreview() {
             from = null

@@ -35,15 +35,17 @@ interface Tool {
        fun select() {}
        fun deselect() {}
        fun use() {}
-       fun swap(): Boolean { return false}
+       fun swap(callback: (Player, Boolean) -> Unit = { _, _ ->}): Boolean { return false}
        fun chat(message: String): Boolean { return false }
+       fun hasSelection() = false
    }
 
-    class IOHighlighter(val color: TextColor, val player: Player, val space: Space, val filter: (IOComponent) -> Boolean = {true}) {
-        val box = RectangleComponent().apply {
+    class IOHighlighter(val color: TextColor, val player: Player, val space: Space, val callback: (Player, IOComponent?) -> Unit = {_, _ ->}, val filter: (IOComponent) -> Boolean = {true}) {
+        private val box = RectangleComponent().apply {
             setColor(color)
         }
-        var task: Task? = null
+        private var task: Task? = null
+        private var selected: IOComponent? = null
 
         fun selected() {
             task = MinecraftServer.getSchedulerManager().submitTask {
@@ -55,16 +57,23 @@ interface Tool {
                             box.pos = io.text.pos.plus(Pos2d(-.12, .05))
                             box.size = io.text.size().plus(Pos2d(.2, 0))
                             box.update(space.codeInstance)
+                            callback(player, io)
+                            selected = io
                             found = true
+                            break
                         }
                     }
                     if (!found) {
+                        selected = null
+                        callback(player, null)
                         box.pos = cursor
                         box.size = Pos2d(0.1, 0.1)
                         box.update(space.codeInstance)
                     }
                     return@submitTask TaskSchedule.tick(1)
                 }
+                callback(player, null)
+                selected = null
 
                 box.pos = cursor
                 box.size = Pos2d(0.1, 0.1)
@@ -73,6 +82,12 @@ interface Tool {
                 return@submitTask TaskSchedule.tick(1)
             }
         }
+
+        fun setColor(color: TextColor) = box.setColor(color)
+
+        fun hasSelection() = selected != null
+
+        fun getSelected() = selected
 
         fun deselect() {
             task?.cancel()

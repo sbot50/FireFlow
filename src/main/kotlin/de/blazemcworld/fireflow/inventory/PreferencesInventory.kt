@@ -2,6 +2,7 @@ package de.blazemcworld.fireflow.inventory
 
 import de.blazemcworld.fireflow.database.DatabaseHelper
 import de.blazemcworld.fireflow.preferences.AutoToolsPreference
+import de.blazemcworld.fireflow.preferences.MousePreference
 import de.blazemcworld.fireflow.preferences.ReloadPreference
 import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.MinecraftServer
@@ -19,7 +20,8 @@ object PreferencesInventory {
 
     private val preferences = mapOf(
         "reload" to ReloadPreference,
-        "auto-tools" to AutoToolsPreference
+        "auto-tools" to AutoToolsPreference,
+        "code-control" to MousePreference
     )
 
     fun open(player: Player) {
@@ -59,6 +61,7 @@ object PreferencesInventory {
         node.addListener(InventoryCloseEvent::class.java) {
             if (it.inventory != inv) return@addListener
             DatabaseHelper.updatePreferences(player, knownPreferences)
+            MousePreference.playerPreference[player] = knownPreferences["code-control"]
             handler.removeChild(node)
         }
 
