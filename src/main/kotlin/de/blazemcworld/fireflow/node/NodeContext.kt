@@ -1,5 +1,6 @@
 package de.blazemcworld.fireflow.node
 
+import de.blazemcworld.fireflow.gui.ExtractedNodeComponent
 import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.gui.NodeComponent
 
@@ -8,14 +9,20 @@ class NodeContext(val global: GlobalNodeContext, val component: NodeComponent) {
     private val store = HashMap<BaseNode.IO<*>, Bound<*>>()
 
     operator fun <T> get(v: BaseNode.Output<T>) = store[v] as BoundOutput<T>
+
     operator fun <T> get(v: BaseNode.Input<T>) = store[v] as BoundInput<T>
 
     init {
-        for (i in component.inputs) {
-            store[i.io] = if (i.io.type.insetable && i is IOComponent.InsetInput<*> && i.insetVal != null)
-                BoundInsetInput(i) else BoundInput(i.io)
+        if (component is ExtractedNodeComponent) {
+            store[component.extraction.output] = ExtractedOutput(component.extraction.input, component.extraction.output)
+            store[component.extraction.input] = BoundInput(component.extraction.input)
+        } else {
+            for (i in component.inputs) {
+                store[i.io] = if (i.io.type.insetable && i is IOComponent.InsetInput<*> && i.insetVal != null)
+                    BoundInsetInput(i) else BoundInput(i.io)
+            }
+            for (o in component.outputs) store[o.io] = BoundOutput(o.io)
         }
-        for (o in component.outputs) store[o.io] = BoundOutput(o.io)
     }
 
     fun computeConnections() {
@@ -30,12 +37,20 @@ class NodeContext(val global: GlobalNodeContext, val component: NodeComponent) {
         fun nodeContext() = this@NodeContext
     }
 
-    inner class BoundOutput<T>(v: BaseNode.Output<T>) : Bound<BaseNode.Output<T>>(v) {
+    open inner class BoundOutput<T>(v: BaseNode.Output<T>) : Bound<BaseNode.Output<T>>(v) {
         lateinit var connected: Set<BoundInput<*>>
-        var defaultHandler: (EvaluationContext) -> T? = { null }
+        open var defaultHandler: (EvaluationContext) -> T? = { null }
 
         override fun computeConnections() {
             connected = component.outputs.find { it.io == v }?.connections?.map { global.nodeContexts[it.node]!![it.io] }?.toSet() ?: emptySet()
+        }
+    }
+
+    inner class ExtractedOutput<I, O>(inp: BaseNode.Input<I>, v: BaseNode.Output<O>) : BoundOutput<O>(v) {
+        override var defaultHandler: (EvaluationContext) -> O? = {
+            val extraction: TypeExtraction<I, O>? = (component as? ExtractedNodeComponent)?.extraction as? TypeExtraction<I, O>?
+            val value = it[get(inp)]
+            if (value != null) extraction?.extract(value) else null
         }
     }
 
