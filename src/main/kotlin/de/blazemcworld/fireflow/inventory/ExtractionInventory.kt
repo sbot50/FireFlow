@@ -14,7 +14,7 @@ import net.minestom.server.item.ItemStack
 
 object ExtractionInventory {
     fun <T> openForType(player: Player, type: ValueType<T>, callback: (TypeExtraction<T, *>) -> Unit) {
-        val inv = Inventory(InventoryType.CHEST_3_ROW, "Extraction")
+        val inv = Inventory(invForSize(type.extractions.size), "Extraction")
         val extractions = type.extractions
 
         if (extractions.isEmpty()) {
@@ -42,6 +42,19 @@ object ExtractionInventory {
             .lore(Component.text(extraction.input.type.name).color(extraction.input.type.color).append(Component.text(" -> ").color(
                 NamedTextColor.GRAY)).append(Component.text(extraction.output.type.name).color(extraction.output.type.color)).decoration(TextDecoration.ITALIC, false))
             .build()
+    }
+
+    fun invForSize(size: Int): InventoryType {
+        val rows = (size + 8) / 9
+        return when (rows) {
+            1 -> InventoryType.CHEST_1_ROW
+            2 -> InventoryType.CHEST_2_ROW
+            3 -> InventoryType.CHEST_3_ROW
+            4 -> InventoryType.CHEST_4_ROW
+            5 -> InventoryType.CHEST_5_ROW
+            6 -> InventoryType.CHEST_6_ROW
+            else -> InventoryType.CHEST_6_ROW
+        }
     }
 
 }
