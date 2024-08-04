@@ -153,7 +153,7 @@ object MoveTool : Tool {
 
         private fun stopMoving() {
             nodes.forEach { (node, _) ->
-                node.outline.setColor(NamedTextColor.WHITE)
+                node.restoreBorder()
                 node.isBeingMoved = false
                 node.update(space.codeInstance)
             }
