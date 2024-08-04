@@ -14,7 +14,8 @@ import de.blazemcworld.fireflow.gui.Pos2d
 import de.blazemcworld.fireflow.inventory.ToolsInventory
 import de.blazemcworld.fireflow.node.*
 import de.blazemcworld.fireflow.node.impl.NodeList
-import de.blazemcworld.fireflow.tool.Tool
+import de.blazemcworld.fireflow.preferences.MousePreference
+import de.blazemcworld.fireflow.tool.*
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent
 import de.blazemcworld.fireflow.util.reset
 import net.kyori.adventure.text.Component
@@ -24,8 +25,12 @@ import net.minestom.server.MinecraftServer
 import net.minestom.server.coordinate.BlockVec
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.coordinate.Vec
+import net.minestom.server.entity.Entity
+import net.minestom.server.entity.EntityType
 import net.minestom.server.entity.GameMode
 import net.minestom.server.entity.Player
+import net.minestom.server.entity.metadata.other.InteractionMeta
+import net.minestom.server.event.entity.EntityAttackEvent
 import net.minestom.server.event.inventory.PlayerInventoryItemChangeEvent
 import net.minestom.server.event.item.ItemDropEvent
 import net.minestom.server.event.player.*
@@ -70,6 +75,7 @@ class Space(val id: Int) {
     init {
         FireFlow.LOGGER.info { "Loading Space #$id" }
         val manager = MinecraftServer.getInstanceManager()
+        val playerHighlighters = WeakHashMap<Player, Tool.IOHighlighter>()
         codeInstance = manager.createInstanceContainer()
         playInstance = manager.createInstanceContainer()
         codeInstance.timeRate = 0
@@ -117,25 +123,47 @@ class Space(val id: Int) {
         val playEvents = playInstance.eventNode()
         val codeEvents = codeInstance.eventNode()
 
+        fun changeColor(player: Player, component: IOComponent?) {
+            when (component) {
+                is IOComponent.Output -> playerHighlighters[player]?.setColor(NamedTextColor.AQUA)
+                is IOComponent.InsetInput<*> -> playerHighlighters[player]?.setColor(NamedTextColor.DARK_RED)
+                else -> playerHighlighters[player]?.setColor(NamedTextColor.GRAY)
+            }
+        }
+
         playEvents.addListener(PlayerSpawnEvent::class.java) {
             isUnused = false
             it.player.reset()
             it.player.gameMode = GameMode.SURVIVAL
         }
 
-        codeEvents.addListener(PlayerSpawnEvent::class.java) {
+        codeEvents.addListener(PlayerSpawnEvent::class.java) { it ->
             isUnused = false
             it.player.reset()
             it.player.isAllowFlying = true
             it.player.isFlying = true
-            it.player.inventory.setItemStack(8, TOOLS_ITEM)
-            val preference = DatabaseHelper.getPreference(it.player, "auto-tools")
-            if (preference.toInt() == 0) {
-                var index = 0
-                for (tool in Tool.allTools) {
-                    if (index == 8) index++
-                    it.player.inventory.setItemStack(index, tool.item)
-                    index++
+
+            if (MousePreference.playerPreference[it.player] == 1.toByte()) {
+                playerHighlighters[it.player] = Tool.IOHighlighter(NamedTextColor.GRAY, it.player, this, ::changeColor) { it is IOComponent.Output || it is IOComponent.InsetInput<*> }.also { it.selected() }
+                val entity = Entity(EntityType.INTERACTION)
+                entity.setNoGravity(true)
+                val meta = entity.entityMeta as InteractionMeta
+                meta.setNotifyAboutChanges(false)
+                meta.width = -0.5F
+                meta.height = -0.5F
+                meta.setNotifyAboutChanges(true)
+                entity.setInstance(this.codeInstance, Pos(0.0, 0.0, 0.0))
+                it.player.addPassenger(entity)
+            } else {
+                it.player.inventory.setItemStack(8, TOOLS_ITEM)
+                val preference = DatabaseHelper.getPreference(it.player, "auto-tools")
+                if (preference.toInt() == 0) {
+                    var index = 0
+                    for (tool in Tool.allTools) {
+                        if (index == 8) index++
+                        it.player.inventory.setItemStack(index, tool.item)
+                        index++
+                    }
                 }
             }
         }
@@ -166,6 +194,53 @@ class Space(val id: Int) {
             playerTools[player] = null
         }
 
+        codeEvents.addListener(EntityAttackEvent::class.java) { event ->
+            if (event.entity !is Player) return@addListener
+            val player = event.entity as Player
+            if (MousePreference.playerPreference[player] == 0.toByte()) return@addListener
+
+            if (playerTools[player] == null) DeleteTool.handler(player, this).use()
+            else {
+                playerTools[player]?.deselect()
+                playerTools[player] = null
+                if (playerHighlighters[player] == null) playerHighlighters[player] = Tool.IOHighlighter(NamedTextColor.GRAY, player, this, ::changeColor) { it is IOComponent.Output || it is IOComponent.InsetInput<*> }.also { it.selected() }
+            }
+        }
+
+        codeEvents.addListener(PlayerEntityInteractEvent::class.java) { event ->
+            if (event.hand == Player.Hand.OFF || MousePreference.playerPreference[event.player] == 0.toByte()) return@addListener
+
+            if (playerTools[event.player] == null) {
+                val highlighter = playerHighlighters[event.player]
+                if (highlighter != null && highlighter.hasSelection()) {
+                    if (highlighter.getSelected() is IOComponent.Output) {
+                        playerTools[event.player] = ConnectNodesTool.handler(event.player, this).also { it.select() }
+                        playerTools[event.player]?.use()
+                        playerHighlighters[event.player]?.deselect()
+                        playerHighlighters[event.player] = null
+                    } else {
+                        playerTools[event.player] = InsetLiteralTool.handler(event.player, this).also { it.select() }
+                        playerTools[event.player]?.use()
+                        playerTools[event.player]?.deselect()
+                        playerTools[event.player] = null
+                    }
+                } else {
+                    playerTools[event.player] = MoveTool.handler(event.player, this).also { it.select() }
+                    val tool = playerTools[event.player] ?: return@addListener
+                    tool.use()
+                    playerHighlighters[event.player]?.deselect()
+                    playerHighlighters[event.player] = null
+                }
+            } else {
+                val tool = playerTools[event.player] ?: return@addListener
+                tool.use()
+                if (tool.hasSelection()) return@addListener
+                playerTools[event.player]?.deselect()
+                playerTools[event.player] = null
+                if (playerHighlighters[event.player] == null) playerHighlighters[event.player] = Tool.IOHighlighter(NamedTextColor.GRAY, event.player, this, ::changeColor) { it is IOComponent.Output || it is IOComponent.InsetInput<*> }.also { it.selected() }
+            }
+        }
+
         codeEvents.addListener(PlayerUseItemEvent::class.java) click@{
             if (it.hand == Player.Hand.OFF) return@click
 
@@ -178,21 +253,49 @@ class Space(val id: Int) {
             playerTools[it.player]?.use()
         }
 
-        codeEvents.addListener(PlayerChatEvent::class.java) {
-            it.isCancelled = playerTools[it.player]?.chat(it.message) ?: false
+        codeEvents.addListener(PlayerChatEvent::class.java) { event ->
+            if (MousePreference.playerPreference[event.player] == 1.toByte()) {
+                val highlighter = playerHighlighters[event.player]
+                if (highlighter != null && highlighter.hasSelection()) {
+                    if (highlighter.getSelected() is IOComponent.InsetInput<*>) {
+                        InsetLiteralTool.handler(event.player, this).chat(event.message)
+                        event.isCancelled = true
+                    }
+                }
+            } else event.isCancelled = playerTools[event.player]?.chat(event.message) ?: false
         }
 
-        codeEvents.addListener(PlayerSwapItemEvent::class.java) {
-            scheduler.execute { updateTool(it.player) }
+        codeEvents.addListener(PlayerSwapItemEvent::class.java) { event ->
+            if (MousePreference.playerPreference[event.player] == 0.toByte()) scheduler.execute { updateTool(event.player) }
+            else {
+                if (playerTools[event.player] != null) return@addListener
+
+                val connectTool = ConnectNodesTool.handler(event.player, this).also { it.select() }.also { it.use() }
+                if (connectTool.hasSelection()) {
+                    playerTools[event.player] = connectTool
+                    val highlighter = playerHighlighters[event.player] ?: return@addListener
+                    highlighter.deselect()
+                    playerHighlighters[event.player] = null
+                } else {
+                    connectTool.deselect()
+                    playerTools[event.player] = null
+                    CreateNodeTool.handler(event.player, this).use()
+                }
+            }
         }
         codeEvents.addListener(PlayerInventoryItemChangeEvent::class.java) {
-            scheduler.execute { updateTool(it.player) }
+            if (MousePreference.playerPreference[it.player] == 0.toByte()) scheduler.execute { updateTool(it.player) }
         }
         codeEvents.addListener(PlayerChangeHeldSlotEvent::class.java) {
-            scheduler.execute { updateTool(it.player) }
+            if (MousePreference.playerPreference[it.player] == 0.toByte()) scheduler.execute { updateTool(it.player) }
         }
-        codeEvents.addListener(PlayerExitInstanceEvent::class.java) {
-            updateTool(it.player, quit=true)
+        codeEvents.addListener(PlayerExitInstanceEvent::class.java) { event ->
+            playerHighlighters[event.player]?.deselect()
+            playerHighlighters[event.player] = null
+            playerTools[event.player]?.deselect()
+            playerTools[event.player] = null
+            event.player.passengers.forEach { it.remove() }
+            updateTool(event.player, quit=true)
         }
 
 
@@ -219,10 +322,11 @@ class Space(val id: Int) {
         globalNodeContext = GlobalNodeContext(this)
         val spaceID = this.id
         val data = transaction {
+            val reloadPref = PlayersTable.preferences["reload"] ?: return@transaction emptyMap<UUID, Map<String, Any>>()
             val result = SpaceRolesTable.join(PlayersTable, JoinType.INNER, SpaceRolesTable.player, PlayersTable.id)
                 .selectAll().where((space eq spaceID) and (PlayersTable.uuid inList players.map { it.uuid }))
-                .adjustSelect { select(PlayersTable.uuid, role, PlayersTable.preferences["reload"]!!) }
-            result.associate { it[PlayersTable.uuid] to mapOf( "role" to it[role], "reload" to it[PlayersTable.preferences["reload"]!!]) }
+                .adjustSelect { select(PlayersTable.uuid, role, reloadPref) }
+            result.associate { it[PlayersTable.uuid] to mapOf( "role" to it[role], "reload" to it[reloadPref]) }
         }
         for (p in players) {
             val playerData = data[p.uuid] ?: continue

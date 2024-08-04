@@ -151,6 +151,8 @@ object MoveTool : Tool {
             }
         }
 
+        override fun hasSelection() = nodes.isNotEmpty()
+
         private fun stopMoving() {
             nodes.forEach { (node, _) ->
                 node.outline.setColor(NamedTextColor.WHITE)

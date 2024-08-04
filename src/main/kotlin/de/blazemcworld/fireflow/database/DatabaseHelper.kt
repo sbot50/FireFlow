@@ -6,6 +6,7 @@ import de.blazemcworld.fireflow.Config
 import de.blazemcworld.fireflow.database.table.PlayersTable
 import de.blazemcworld.fireflow.database.table.SpaceRolesTable
 import de.blazemcworld.fireflow.database.table.SpacesTable
+import de.blazemcworld.fireflow.preferences.MousePreference
 import net.minestom.server.entity.Player
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -31,6 +32,7 @@ object DatabaseHelper {
                     it[name] = player.username
                 }
             }
+            MousePreference.playerPreference[player] = getPreference(player, "code-control")
         }
     }
 
@@ -50,14 +52,14 @@ object DatabaseHelper {
     }
 
     fun getPreference(player: Player, preference: String): Byte {
-        return preferences(player)[preference]!!
+        return preferences(player)[preference] ?: 0
     }
 
     fun updatePreferences(player: Player, preferences: Map<String, Byte>) {
         transaction {
             PlayersTable.update({ PlayersTable.uuid eq player.uuid }) {
                 for (entry in preferences) {
-                    it[PlayersTable.preferences[entry.key]!!] = entry.value
+                    it[PlayersTable.preferences[entry.key] ?: continue] = entry.value
                 }
             }
         }

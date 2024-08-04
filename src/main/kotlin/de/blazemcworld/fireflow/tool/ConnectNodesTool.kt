@@ -120,6 +120,8 @@ object ConnectNodesTool : Tool {
             highlighter?.selected()
         }
 
+        override fun hasSelection() = from != null
+
         fun clearSelectionPreview() {
             from = null
             previewLine.remove()
