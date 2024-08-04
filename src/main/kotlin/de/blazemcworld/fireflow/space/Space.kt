@@ -9,6 +9,7 @@ import de.blazemcworld.fireflow.database.table.PlayersTable
 import de.blazemcworld.fireflow.database.table.SpaceRolesTable
 import de.blazemcworld.fireflow.database.table.SpaceRolesTable.role
 import de.blazemcworld.fireflow.database.table.SpaceRolesTable.space
+import de.blazemcworld.fireflow.gui.ExtractedNodeComponent
 import de.blazemcworld.fireflow.gui.NodeComponent
 import de.blazemcworld.fireflow.gui.Pos2d
 import de.blazemcworld.fireflow.inventory.ToolsInventory
@@ -282,6 +283,7 @@ class Space(val id: Int) {
                     CreateNodeTool.handler(event.player, this).use()
                 }
             }
+            it.isCancelled = playerTools[it.player]?.swap() ?: false
         }
         codeEvents.addListener(PlayerInventoryItemChangeEvent::class.java) {
             if (MousePreference.playerPreference[it.player] == 0.toByte()) scheduler.execute { updateTool(it.player) }
@@ -390,6 +392,9 @@ class Space(val id: Int) {
             if (node.node is FunctionCallNode) {
                 nodeJson.addProperty("fn", 1)
             }
+            if (node is ExtractedNodeComponent) {
+                nodeJson.addProperty("ex", node.extraction.formalName)
+            }
 
             val insetJson = JsonObject()
             var totalInsets = 0
@@ -488,6 +493,11 @@ class Space(val id: Int) {
             if (nodeJson !is JsonObject) throw IllegalStateException("Expected only json objects in node array.")
 
             val comp = newNodes[id] ?: run {
+                if (nodeJson.has("ex")) {
+                    TypeExtraction.list.get(nodeJson.get("ex").asString)?.let { extraction ->
+                        return@run ExtractedNodeComponent(extraction)
+                    }
+                }
                 if (nodeJson.has("g")) {
                     val type = NodeList.all.find { it is GenericNode && it.title == nodeJson.get("id").asString } as GenericNode? ?: return@run null
 

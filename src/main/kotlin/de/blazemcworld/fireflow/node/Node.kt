@@ -74,6 +74,12 @@ abstract class BaseNode(title: String, material: Material) : Node(title, materia
     open val generics = emptyMap<String, ValueType<*>>()
     open val generic: GenericNode? = null
 
+    companion object {
+        val VOID = object : BaseNode("Void", Material.BARRIER) {
+            override fun setup(ctx: NodeContext) {}
+        }
+    }
+
     fun <T> input(name: String, type: ValueType<T>, default: T? = null, optional: Boolean = false): Input<T> {
         if (type.insetable) {
             return Input(name, type, default, optional).also { inputs += it }

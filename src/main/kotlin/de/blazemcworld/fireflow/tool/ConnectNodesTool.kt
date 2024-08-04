@@ -1,8 +1,11 @@
 package de.blazemcworld.fireflow.tool
 
+import de.blazemcworld.fireflow.gui.ExtractedNodeComponent
 import de.blazemcworld.fireflow.gui.IOComponent
 import de.blazemcworld.fireflow.gui.LineComponent
 import de.blazemcworld.fireflow.gui.Pos2d
+import de.blazemcworld.fireflow.inventory.ExtractionInventory
+import de.blazemcworld.fireflow.node.BaseNode
 import de.blazemcworld.fireflow.space.Space
 import net.kyori.adventure.text.format.NamedTextColor
 import net.minestom.server.MinecraftServer
@@ -15,7 +18,10 @@ object ConnectNodesTool : Tool {
     override val item = item(Material.BREEZE_ROD,
         "Connect Nodes", NamedTextColor.AQUA,
         "Used for connecting node",
-        "inputs and outputs."
+        "inputs and outputs.",
+        "",
+        "Press 'F' to extract a",
+        "value from an output."
     )
 
     override fun handler(player: Player, space: Space) = object : Tool.Handler {
@@ -114,6 +120,28 @@ object ConnectNodesTool : Tool {
                 previewLine.start = cursor
                 previewLine.color = it.io.type.color
             }
+        }
+
+        override fun swap(): Boolean {
+            // Open Extraction Menu
+            ExtractionInventory.openForType(player, from?.io?.type ?: return true) {
+                space.codeNodes += ExtractedNodeComponent(it).also { node ->
+                    node.pos = space.codeCursor(player)
+                    node.update(space.codeInstance)
+
+                    val input = node.inputs[0]
+                    if (from?.connect(input, relays) == true) {
+                        if (input is IOComponent.InsetInput<*> && input.insetVal != null) {
+                            input.insetVal = null
+                        }
+
+                        input.node.update(space.codeInstance)
+                        clearSelectionPreview()
+                    }
+                }
+            }
+
+            return true
         }
 
         override fun select() {

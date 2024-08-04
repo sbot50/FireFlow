@@ -35,6 +35,7 @@ interface Tool {
        fun select() {}
        fun deselect() {}
        fun use() {}
+       fun swap(): Boolean { return false}
        fun chat(message: String): Boolean { return false }
        fun hasSelection() = false
    }
