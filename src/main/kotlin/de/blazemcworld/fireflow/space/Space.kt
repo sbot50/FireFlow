@@ -266,10 +266,25 @@ class Space(val id: Int) {
             } else event.isCancelled = playerTools[event.player]?.chat(event.message) ?: false
         }
 
+        fun swapCallback(player: Player, remove: Boolean) {
+            if (remove) {
+                playerTools[player]?.deselect()
+                playerTools[player] = null
+                playerHighlighters[player] = Tool.IOHighlighter(NamedTextColor.GRAY, player, this, ::changeColor) { it is IOComponent.Output || it is IOComponent.InsetInput<*> }.also { it.selected() }
+            }
+        }
+
         codeEvents.addListener(PlayerSwapItemEvent::class.java) { event ->
-            if (MousePreference.playerPreference[event.player] == 0.toByte()) scheduler.execute { updateTool(event.player) }
-            else {
-                if (playerTools[event.player] != null) return@addListener
+            if (MousePreference.playerPreference[event.player] == 0.toByte()) {
+                scheduler.execute { updateTool(event.player) }
+                event.isCancelled = playerTools[event.player]?.swap() ?: false
+            } else {
+                if (playerTools[event.player] != null) {
+                    val tool = playerTools[event.player] ?: return@addListener
+                    if (tool.tool !is ConnectNodesTool) return@addListener
+                    tool.swap(::swapCallback)
+                    return@addListener
+                }
 
                 val connectTool = ConnectNodesTool.handler(event.player, this).also { it.select() }.also { it.use() }
                 if (connectTool.hasSelection()) {
@@ -283,7 +298,6 @@ class Space(val id: Int) {
                     CreateNodeTool.handler(event.player, this).use()
                 }
             }
-            it.isCancelled = playerTools[it.player]?.swap() ?: false
         }
         codeEvents.addListener(PlayerInventoryItemChangeEvent::class.java) {
             if (MousePreference.playerPreference[it.player] == 0.toByte()) scheduler.execute { updateTool(it.player) }
