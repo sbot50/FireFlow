@@ -11,6 +11,7 @@ import net.kyori.adventure.text.minimessage.tag.standard.StandardTags
 import net.minestom.server.coordinate.Pos
 import net.minestom.server.coordinate.Vec
 import net.minestom.server.entity.Player
+import net.minestom.server.entity.attribute.Attribute
 import net.minestom.server.item.Material
 import java.util.*
 import kotlin.collections.HashMap
@@ -89,8 +90,21 @@ object PlayerType : ValueType<PlayerReference>() {
         TypeExtraction(Material.ANVIL, "UUID", this, TextType) { it.uuid.toString() },
         TypeExtraction(Material.NAME_TAG, "Username", this, TextType) { it.resolve()?.username ?: "Offline Player" },
         TypeExtraction(Material.GOLDEN_APPLE, "Health", this, NumberType) { it.resolve()?.health?.toDouble() ?: 0.0 },
+        TypeExtraction(Material.GOLDEN_APPLE, "Max Health", this, NumberType) { it.resolve()?.getAttribute(Attribute.GENERIC_MAX_HEALTH)?.value ?: 0.0 },
         TypeExtraction(Material.COOKED_CHICKEN, "Food Level", this, NumberType) { it.resolve()?.food?.toDouble() ?: 0.0 },
         TypeExtraction(Material.COOKED_MUTTON, "Saturation", this, NumberType) { it.resolve()?.foodSaturation?.toDouble() ?: 0.0 },
+        TypeExtraction(Material.BLAZE_POWDER, "Fire Ticks", this, NumberType) { it.resolve()?.fireTicks?.toDouble() ?: 0.0 },
+        TypeExtraction(Material.OAK_SAPLING, "Alive Ticks", this, NumberType) { it.resolve()?.aliveTicks?.toDouble() ?: 0.0 },
+        TypeExtraction(Material.SPIDER_EYE, "Eye Height", this, NumberType) { it.resolve()?.eyeHeight ?: 0.0 },
+        TypeExtraction(Material.ELYTRA, "Flying Speed", this, NumberType) { it.resolve()?.flyingSpeed?.toDouble() ?: 0.0 },
+        TypeExtraction(Material.LEATHER_BOOTS, "Walking Speed", this, NumberType) { it.resolve()?.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED)?.value ?: 0.0 },
+        TypeExtraction(Material.NETHERITE_SWORD, "Attack Damage", this, NumberType) { it.resolve()?.getAttribute(Attribute.GENERIC_ATTACK_DAMAGE)?.value ?: 0.0 },
+        TypeExtraction(Material.DIAMOND_CHESTPLATE, "Armor", this, NumberType) { it.resolve()?.getAttribute(Attribute.GENERIC_ARMOR)?.value ?: 0.0 },
+        TypeExtraction(Material.NETHERITE_CHESTPLATE, "Armor Toughness", this, NumberType) { it.resolve()?.getAttribute(Attribute.GENERIC_ARMOR_TOUGHNESS)?.value ?: 0.0 },
+        TypeExtraction(Material.SHIELD, "Knockback Resistance", this, NumberType) { it.resolve()?.getAttribute(Attribute.GENERIC_KNOCKBACK_RESISTANCE)?.value ?: 0.0 },
+        TypeExtraction(Material.ARROW, "Stuck Arrows", this, NumberType) { it.resolve()?.arrowCount?.toDouble() ?: 0.0 },
+        TypeExtraction(Material.SLIME_BALL, "Held Slot", this, NumberType) { it.resolve()?.heldSlot?.toDouble() ?: 0.0 },
+        TypeExtraction(Material.ORANGE_DYE, "Latency", this, NumberType) { it.resolve()?.latency?.toDouble() ?: 0.0 },
         TypeExtraction(Material.EXPERIENCE_BOTTLE, "Experience Points", this, NumberType) { it.resolve()?.exp?.toDouble() ?: 0.0 },
         TypeExtraction(Material.EXPERIENCE_BOTTLE, "Experience Level", this, NumberType) { it.resolve()?.level?.toDouble() ?: 0.0 },
         TypeExtraction(Material.COMPASS, "Position", this, PositionType) { it.resolve()?.position ?: Pos(0.0, 0.0, 0.0, 0.0f, 0.0f) },
@@ -99,11 +113,13 @@ object PlayerType : ValueType<PlayerReference>() {
         // When item types come into play, we can add these
         TypeExtraction(Material.RED_DYE, "Is Dead", this, ConditionType) { it.resolve()?.isDead ?: false },
         TypeExtraction(Material.LIME_DYE, "Is Online", this, ConditionType) { it.resolve() != null },
-        TypeExtraction(Material.ELYTRA, "Is Flying", this, ConditionType) { it.resolve()?.isFlying ?: false },
+        TypeExtraction(Material.NETHERITE_BOOTS, "Is Flying", this, ConditionType) { it.resolve()?.isFlying ?: false },
         TypeExtraction(Material.CHAINMAIL_LEGGINGS, "Is Sneaking", this, ConditionType) { it.resolve()?.isSneaking ?: false },
         TypeExtraction(Material.DIAMOND_BOOTS, "Is Sprinting", this, ConditionType) { it.resolve()?.isSprinting ?: false },
         TypeExtraction(Material.OAK_PRESSURE_PLATE, "Is Grounded", this, ConditionType) { it.resolve()?.isOnGround ?: false },
         TypeExtraction(Material.COOKED_BEEF, "Is Eating", this, ConditionType) { it.resolve()?.isEating ?: false },
+        TypeExtraction(Material.ELYTRA, "Is Gliding", this, ConditionType) { it.resolve()?.isFlyingWithElytra ?: false },
+        TypeExtraction(Material.COMMAND_BLOCK_MINECART, "Can Fly", this, ConditionType) { it.resolve()?.isAllowFlying ?: false },
     )
 
     override fun parse(str: String, space: Space) = kotlin.runCatching { PlayerReference(UUID.fromString(str), space) }.getOrNull()
@@ -145,14 +161,24 @@ object NumberType : ValueType<Double>() {
     override val material: Material = Material.SLIME_BALL
     override val insetable = true
     override val extractions: MutableList<TypeExtraction<Double, *>> = mutableListOf(
-        TypeExtraction(Material.NAME_TAG, "As String", this, TextType) { it.toString() },
+        TypeExtraction(Material.NAME_TAG, "As Text", this, TextType) { it.toString() },
         TypeExtraction(Material.GOLDEN_APPLE, "Absolute Value", this, NumberType) { abs(it) },
         TypeExtraction(Material.ANVIL, "Ceil", this, NumberType) { kotlin.math.ceil(it) },
         TypeExtraction(Material.IRON_INGOT, "Round", this, NumberType) { kotlin.math.round(it) },
         TypeExtraction(Material.LIGHT_WEIGHTED_PRESSURE_PLATE, "Floor", this, NumberType) { kotlin.math.floor(it) },
-        TypeExtraction(Material.DIAMOND, "Square", this, NumberType) { it * it },
-        TypeExtraction(Material.EMERALD, "Square Root", this, NumberType) { kotlin.math.sqrt(it) },
-        TypeExtraction(Material.REDSTONE, "Negate", this, NumberType) { -it }
+        TypeExtraction(Material.IRON_BLOCK, "Square", this, NumberType) { it * it },
+        TypeExtraction(Material.IRON_NUGGET, "Square Root", this, NumberType) { kotlin.math.sqrt(it) },
+        TypeExtraction(Material.REDSTONE, "Negate", this, NumberType) { -it },
+        TypeExtraction(Material.GLOWSTONE_DUST, "Increment", this, NumberType) { it + 1 },
+        TypeExtraction(Material.GUNPOWDER, "Decrement", this, NumberType) { it - 1 },
+        TypeExtraction(Material.OAK_LOG, "Log", this, NumberType) { kotlin.math.log(it, 10.0) },
+        TypeExtraction(Material.BIRCH_LOG, "Ln", this, NumberType) { kotlin.math.ln(it) },
+        TypeExtraction(Material.LIME_DYE, "Sine", this, NumberType) { kotlin.math.sin(it) },
+        TypeExtraction(Material.PINK_DYE, "Cosine", this, NumberType) { kotlin.math.cos(it) },
+        TypeExtraction(Material.LIGHT_BLUE_DYE, "Tangent", this, NumberType) { kotlin.math.tan(it) },
+        TypeExtraction(Material.GREEN_DYE, "Arc Sine", this, NumberType) { kotlin.math.asin(it) },
+        TypeExtraction(Material.PURPLE_DYE, "Arc Cosine", this, NumberType) { kotlin.math.acos(it) },
+        TypeExtraction(Material.BLUE_DYE, "Arc Tangent", this, NumberType) { kotlin.math.atan(it) },
     )
 
     override fun parse(str: String, space: Space) = str.toDoubleOrNull()
@@ -176,7 +202,7 @@ object ConditionType : ValueType<Boolean>() {
     override val material: Material = Material.ANVIL
     override val insetable = true
     override val extractions: MutableList<TypeExtraction<Boolean, *>> = mutableListOf(
-        TypeExtraction(Material.NAME_TAG, "As String", this, TextType) { it.toString() },
+        TypeExtraction(Material.NAME_TAG, "As Text", this, TextType) { it.toString() },
         TypeExtraction(Material.REDSTONE, "Not", this, ConditionType) { !it }
     )
 
@@ -200,6 +226,7 @@ object TextType : ValueType<String>() {
     override val insetable = true
     override val extractions: MutableList<TypeExtraction<String, *>> = mutableListOf(
         TypeExtraction(Material.NAME_TAG, "As Message", this, MessageType) { Component.text(it) },
+        TypeExtraction(Material.LEAD, "Length", this, NumberType) { it.length.toDouble() },
         TypeExtraction(Material.INK_SAC, "Format MiniMessage", this, MessageType) { Component.text(mm.serialize(Component.text(it))) },
         TypeExtraction(Material.PAPER, "Remove Padding Spaces", this, TextType) { it.trim() },
         TypeExtraction(Material.HEAVY_WEIGHTED_PRESSURE_PLATE, "To Lower Case", this, TextType) { it.lowercase(Locale.getDefault()) },
@@ -240,6 +267,7 @@ object MessageType : ValueType<Component>() {
     override val insetable = true
     override val extractions: MutableList<TypeExtraction<Component, *>> = mutableListOf(
         TypeExtraction(Material.NAME_TAG, "As Text", this, TextType) { it.toString() },
+        TypeExtraction(Material.LEAD, "Length", this, NumberType) { it.toString().length.toDouble() },
         TypeExtraction(Material.INK_SAC, "Format MiniMessage", this, MessageType) { mm.deserialize(it.toString()) },
         TypeExtraction(Material.WHITE_DYE, "Strip Formatting", this, MessageType) { Component.text(mm.stripTags(it.toString())) },
         TypeExtraction(Material.HEAVY_WEIGHTED_PRESSURE_PLATE, "To Lower Case", this, MessageType) { Component.text(it.toString().lowercase(Locale.getDefault())) },
@@ -261,10 +289,10 @@ object MessageType : ValueType<Component>() {
 
 object PositionType : ValueType<Pos>() {
     override val name: String = "Position"
-    override val color: TextColor = NamedTextColor.YELLOW
+    override val color: TextColor = NamedTextColor.DARK_AQUA
     override val material: Material = Material.FILLED_MAP
     override val extractions: MutableList<TypeExtraction<Pos, *>> = mutableListOf(
-        TypeExtraction(Material.NAME_TAG, "As String", this, TextType) { "(${shorten(it.x)}, ${shorten(it.y)}, ${shorten(it.z)}, ${shorten(it.pitch)}, ${shorten(it.yaw)})" },
+        TypeExtraction(Material.NAME_TAG, "As Text", this, TextType) { "(${shorten(it.x)}, ${shorten(it.y)}, ${shorten(it.z)}, ${shorten(it.pitch)}, ${shorten(it.yaw)})" },
         TypeExtraction(Material.COMPASS, "Positional Vector", this, VectorType) { Vec(it.x, it.y, it.z) },
         TypeExtraction(Material.PRISMARINE_SHARD, "Directional Vector", this, VectorType) { Vec(it.pitch.toDouble(), it.yaw.toDouble(), 0.0) },
         TypeExtraction(Material.CONDUIT, "Corner Position", this, PositionType) { Pos(it.x.toInt().toDouble(), it.y.toInt().toDouble(), it.z.toInt().toDouble(), it.pitch, it.yaw) },
@@ -417,7 +445,7 @@ object VectorType : ValueType<Vec>() {
     override val color: TextColor = NamedTextColor.AQUA
     override val material: Material = Material.PRISMARINE_SHARD
     override val extractions: MutableList<TypeExtraction<Vec, *>> = mutableListOf(
-        TypeExtraction(Material.NAME_TAG, "As String", this, TextType) { "<${shorten(it.x)}, ${shorten(it.y)}, ${shorten(it.z)}>" },
+        TypeExtraction(Material.NAME_TAG, "As Text", this, TextType) { "<${shorten(it.x)}, ${shorten(it.y)}, ${shorten(it.z)}>" },
         TypeExtraction(Material.COMPASS, "As Position", this, PositionType) { Pos(it.x, it.y, it.z, 0.0f, 0.0f) },
         TypeExtraction(Material.STONE, "Normalize", this, VectorType) { it.normalize() },
         TypeExtraction(Material.REDSTONE, "Invert", this, VectorType) { it.mul(-1.0) },
