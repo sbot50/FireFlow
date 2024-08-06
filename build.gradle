@@ -1,0 +1,33 @@
+plugins {
+    id 'java'
+    id "io.github.goooler.shadow" version "8.1.7"
+}
+
+group = 'de.blazemcworld'
+version = '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // minestom
+    implementation("net.minestom:minestom-snapshots:7b180172ce")
+
+    // minimessage
+    implementation("net.kyori:adventure-text-minimessage:4.17.0")
+
+    // asm
+    implementation("org.ow2.asm:asm:9.7")
+    implementation("org.ow2.asm:asm-tree:9.7")
+
+    // logging
+    implementation("org.apache.logging.log4j:log4j-slf4j2-impl:2.23.1")
+    implementation("org.apache.logging.log4j:log4j-core:2.23.1")
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'de.blazemcworld.fireflow.FireFlow'
+    }
+}
