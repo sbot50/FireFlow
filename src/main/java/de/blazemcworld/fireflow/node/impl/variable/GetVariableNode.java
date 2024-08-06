@@ -5,8 +5,8 @@ import de.blazemcworld.fireflow.compiler.instruction.MultiInstruction;
 import de.blazemcworld.fireflow.node.Node;
 import de.blazemcworld.fireflow.node.NodeInput;
 import de.blazemcworld.fireflow.node.NodeOutput;
-import de.blazemcworld.fireflow.values.TextValue;
-import de.blazemcworld.fireflow.values.Value;
+import de.blazemcworld.fireflow.value.TextValue;
+import de.blazemcworld.fireflow.value.Value;
 import it.unimi.dsi.fastutil.Pair;
 import org.objectweb.asm.Type;
 

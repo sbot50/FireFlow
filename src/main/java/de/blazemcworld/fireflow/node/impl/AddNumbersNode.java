@@ -5,7 +5,7 @@ import de.blazemcworld.fireflow.compiler.instruction.RawInstruction;
 import de.blazemcworld.fireflow.node.Node;
 import de.blazemcworld.fireflow.node.NodeInput;
 import de.blazemcworld.fireflow.node.NodeOutput;
-import de.blazemcworld.fireflow.values.NumberValue;
+import de.blazemcworld.fireflow.value.NumberValue;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnNode;

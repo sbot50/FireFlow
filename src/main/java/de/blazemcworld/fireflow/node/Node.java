@@ -1,6 +1,6 @@
 package de.blazemcworld.fireflow.node;
 
-import de.blazemcworld.fireflow.values.Value;
+import de.blazemcworld.fireflow.value.Value;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -2,8 +2,8 @@ package de.blazemcworld.fireflow.node;
 
 import de.blazemcworld.fireflow.compiler.NodeCompiler;
 import de.blazemcworld.fireflow.compiler.instruction.Instruction;
-import de.blazemcworld.fireflow.values.SignalValue;
-import de.blazemcworld.fireflow.values.Value;
+import de.blazemcworld.fireflow.value.SignalValue;
+import de.blazemcworld.fireflow.value.Value;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
 

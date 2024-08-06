@@ -1,4 +1,4 @@
-package de.blazemcworld.fireflow.values;
+package de.blazemcworld.fireflow.value;
 
 import de.blazemcworld.fireflow.compiler.NodeCompiler;
 import de.blazemcworld.fireflow.compiler.instruction.Instruction;

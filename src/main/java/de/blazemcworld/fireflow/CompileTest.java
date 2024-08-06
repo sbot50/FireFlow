@@ -11,8 +11,8 @@ import de.blazemcworld.fireflow.node.impl.lists.ListAppendNode;
 import de.blazemcworld.fireflow.node.impl.variable.GetVariableNode;
 import de.blazemcworld.fireflow.node.impl.variable.LocalVariableScope;
 import de.blazemcworld.fireflow.node.impl.variable.SetVariableNode;
-import de.blazemcworld.fireflow.values.ListValue;
-import de.blazemcworld.fireflow.values.NumberValue;
+import de.blazemcworld.fireflow.value.ListValue;
+import de.blazemcworld.fireflow.value.NumberValue;
 
 import java.lang.reflect.InvocationTargetException;
 
