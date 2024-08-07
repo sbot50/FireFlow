@@ -9,7 +9,7 @@ import org.objectweb.asm.tree.InsnList;
 
 public class NodeInput implements Instruction {
     private final String name;
-    private final Value type;
+    public final Value type;
     private NodeOutput source;
     private Object inset;
     private Instruction instruction;

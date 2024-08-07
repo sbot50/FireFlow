@@ -4,6 +4,8 @@ import de.blazemcworld.fireflow.compiler.NodeCompiler;
 import de.blazemcworld.fireflow.compiler.instruction.Instruction;
 import de.blazemcworld.fireflow.compiler.instruction.MultiInstruction;
 import de.blazemcworld.fireflow.compiler.instruction.RawInstruction;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
@@ -12,6 +14,16 @@ public class NumberValue implements Value {
 
     public static NumberValue INSTANCE = new NumberValue();
     private NumberValue() {}
+
+    @Override
+    public String getName() {
+        return "Number";
+    }
+
+    @Override
+    public TextColor getColor() {
+        return NamedTextColor.RED;
+    }
 
     @Override
     public Type getType() {

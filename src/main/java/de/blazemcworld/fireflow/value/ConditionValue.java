@@ -4,6 +4,8 @@ import de.blazemcworld.fireflow.compiler.NodeCompiler;
 import de.blazemcworld.fireflow.compiler.instruction.Instruction;
 import de.blazemcworld.fireflow.compiler.instruction.MultiInstruction;
 import de.blazemcworld.fireflow.compiler.instruction.RawInstruction;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
@@ -12,6 +14,16 @@ public class ConditionValue implements Value {
 
     public static ConditionValue INSTANCE = new ConditionValue();
     private ConditionValue() {}
+
+    @Override
+    public String getName() {
+        return "Condition";
+    }
+
+    @Override
+    public TextColor getColor() {
+        return NamedTextColor.LIGHT_PURPLE;
+    }
 
     @Override
     public Type getType() {
@@ -43,9 +55,9 @@ public class ConditionValue implements Value {
 
     @Override
     public Instruction wrapPrimitive(Instruction value) {
-        return new MultiInstruction(Type.getType(Double.class),
+        return new MultiInstruction(Type.getType(Boolean.class),
                 value,
-                new RawInstruction(Type.getType(Double.class),
+                new RawInstruction(Type.getType(Boolean.class),
                         new MethodInsnNode(Opcodes.INVOKESTATIC, "java/lang/Boolean", "valueOf", "(Z)Ljava/lang/Boolean;")
                 )
         );

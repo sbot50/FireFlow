@@ -4,6 +4,7 @@ import de.blazemcworld.fireflow.compiler.NodeCompiler;
 import de.blazemcworld.fireflow.compiler.instruction.Instruction;
 import de.blazemcworld.fireflow.compiler.instruction.MultiInstruction;
 import de.blazemcworld.fireflow.compiler.instruction.RawInstruction;
+import net.kyori.adventure.text.format.TextColor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
@@ -22,6 +23,16 @@ public class ListValue implements Value {
 
     public static ListValue get(Value type) {
         return cache.computeIfAbsent(type, ListValue::new);
+    }
+
+    @Override
+    public String getName() {
+        return "List<" + type.getName() + ">";
+    }
+
+    @Override
+    public TextColor getColor() {
+        return type.getColor();
     }
 
     @Override

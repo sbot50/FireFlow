@@ -1,19 +1,27 @@
 package de.blazemcworld.fireflow;
 
+import de.blazemcworld.fireflow.commands.CodeCommand;
+import de.blazemcworld.fireflow.commands.LobbyCommand;
+import de.blazemcworld.fireflow.commands.PlayCommand;
+import de.blazemcworld.fireflow.util.Config;
+import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.coordinate.BlockVec;
+import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.GameMode;
-import net.minestom.server.entity.Player;
-import net.minestom.server.event.EventNode;
+import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
-import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.event.player.PlayerDisconnectEvent;
+import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.extras.MojangAuth;
-import net.minestom.server.instance.InstanceContainer;
-import net.minestom.server.instance.LightingChunk;
-import net.minestom.server.instance.block.Block;
+import net.minestom.server.ping.ResponseData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
 
 public class FireFlow {
 
@@ -23,32 +31,38 @@ public class FireFlow {
         LOGGER.info("Starting...");
         MinecraftServer server = MinecraftServer.init();
 
+        MinecraftServer.setBrandName("FireFlow");
         MojangAuth.init();
         ConsoleHandler.init();
 
-        InstanceContainer inst = MinecraftServer.getInstanceManager().createInstanceContainer();
+        CommandManager cmds = MinecraftServer.getCommandManager();
+        cmds.register(new PlayCommand());
+        cmds.register(new CodeCommand());
+        cmds.register(new LobbyCommand());
 
-        inst.setChunkSupplier(LightingChunk::new);
-        inst.setGenerator(unit -> {
-            if (unit.absoluteStart().z() != 16.0) return;
-            unit.modifier().fill(
-                new BlockVec(0, 0, 0).add(unit.absoluteStart()),
-                new BlockVec(16, 128, 1).add(unit.absoluteStart()),
-                Block.POLISHED_BLACKSTONE
-            );
-        });
+        GlobalEventHandler events = MinecraftServer.getGlobalEventHandler();
 
-        EventNode<InstanceEvent> events = inst.eventNode();
-
-        events.addListener(PlayerSpawnEvent.class, event -> {
-            Player player = event.getPlayer();
-            player.setAllowFlying(true);
-            player.setFlying(true);
-        });
-
-        MinecraftServer.getGlobalEventHandler().addListener(AsyncPlayerConfigurationEvent.class, event -> {
-            event.setSpawningInstance(inst);
+        events.addListener(AsyncPlayerConfigurationEvent.class, event -> {
+            event.setSpawningInstance(Lobby.instance);
             event.getPlayer().setGameMode(GameMode.CREATIVE);
+        });
+
+        events.addListener(PlayerDisconnectEvent.class, event -> {
+            MinecraftServer.getGlobalEventHandler().call(new PlayerExitInstanceEvent(event.getPlayer()));
+        });
+
+        events.addListener(ServerListPingEvent.class, event -> {
+            ResponseData res = new ResponseData();
+            res.setDescription(MiniMessage.miniMessage().deserialize(Config.store.motd()));
+
+            try {
+                Path favicon = Path.of("favicon.png");
+                if (Files.exists(favicon)) res.setFavicon("data:image/png;base64," + Base64.getEncoder().encodeToString(Files.readAllBytes(favicon)));
+            } catch (IOException e) {
+                LOGGER.error(e);
+            }
+
+            event.setResponseData(res);
         });
 
         server.start("0.0.0.0", 25565);

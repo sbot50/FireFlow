@@ -15,8 +15,8 @@ import org.objectweb.asm.tree.LabelNode;
 
 public class WhileNode extends Node {
     public WhileNode() {
-        super("Set Number Variable");
-        NodeInput signal = input("Condition", SignalValue.INSTANCE);
+        super("While Loop");
+        NodeInput signal = input("Signal", SignalValue.INSTANCE);
         NodeInput condition = input("Condition", ConditionValue.INSTANCE);
         NodeOutput loop = output("Loop", SignalValue.INSTANCE);
         NodeOutput next = output("Next", SignalValue.INSTANCE);

@@ -2,12 +2,24 @@ package de.blazemcworld.fireflow.value;
 
 import de.blazemcworld.fireflow.compiler.NodeCompiler;
 import de.blazemcworld.fireflow.compiler.instruction.Instruction;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
 
 public class SignalValue implements Value {
     public static SignalValue INSTANCE = new SignalValue();
     private SignalValue() {}
+
+    @Override
+    public String getName() {
+        return "Signal";
+    }
+
+    @Override
+    public TextColor getColor() {
+        return NamedTextColor.AQUA;
+    }
 
     @Override
     public Type getType() {

@@ -17,7 +17,7 @@ import java.util.List;
 public class ListAppendNode extends Node {
 
     public ListAppendNode(Value type) {
-        super("Append to List");
+        super("Append to List(" + type.getName() + ")");
 
         ListValue listType = ListValue.get(type);
         NodeInput signal = input("Signal", SignalValue.INSTANCE);
