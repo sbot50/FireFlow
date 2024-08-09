@@ -3,6 +3,7 @@ package de.blazemcworld.fireflow;
 import de.blazemcworld.fireflow.commands.CodeCommand;
 import de.blazemcworld.fireflow.commands.LobbyCommand;
 import de.blazemcworld.fireflow.commands.PlayCommand;
+import de.blazemcworld.fireflow.commands.ReloadCommand;
 import de.blazemcworld.fireflow.util.Config;
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -39,6 +40,7 @@ public class FireFlow {
         cmds.register(new PlayCommand());
         cmds.register(new CodeCommand());
         cmds.register(new LobbyCommand());
+        cmds.register(new ReloadCommand());
 
         GlobalEventHandler events = MinecraftServer.getGlobalEventHandler();
 

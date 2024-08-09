@@ -70,7 +70,14 @@ public class NodeCategoryWidget implements Widget {
             ButtonWidget btn = new ButtonWidget(pos, inst, Component.text(entry.first()));
             btn.rightClick = (player, editor) -> {
                 editor.remove(this);
-                editor.widgets.add(new NodeWidget(originPos, inst, entry.second().get()));
+                Node node = entry.second().get();
+                if (node.possibleGenerics().isEmpty()) {
+                    editor.widgets.add(new NodeWidget(originPos, inst, node));
+                } else {
+                    GenericSelectorWidget.choose(originPos, editor, node.possibleGenerics(), generics -> {
+                        editor.widgets.add(new NodeWidget(originPos, inst, node.fromGenerics(generics)));
+                    });
+                }
             };
             btn.leftClick = (player, editor) -> editor.remove(this);
             buttons.add(btn);

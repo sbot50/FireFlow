@@ -20,5 +20,6 @@ public class Config {
         }
     }
 
-    public record Store(String motd) {}
+    public record Store(String motd, LimitsConfig limits) {}
+    public record LimitsConfig(long cpuPerTick) {}
 }

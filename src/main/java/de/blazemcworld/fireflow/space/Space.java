@@ -1,6 +1,7 @@
 package de.blazemcworld.fireflow.space;
 
 import de.blazemcworld.fireflow.editor.CodeEditor;
+import de.blazemcworld.fireflow.evaluation.CodeEvaluator;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.event.EventNode;
@@ -22,6 +23,7 @@ public class Space {
     public final Task saveTask;
     private boolean isUnused = false;
     private final CodeEditor editor;
+    private CodeEvaluator evaluator;
 
     public Space(int id) {
         this.id = id;
@@ -54,7 +56,7 @@ public class Space {
         code.setTimeRate(0);
 
         EventNode<InstanceEvent> playEvents = play.eventNode();
-        EventNode<InstanceEvent> codeEvents = play.eventNode();
+        EventNode<InstanceEvent> codeEvents = code.eventNode();
 
         playEvents.addListener(PlayerSpawnEvent.class, event -> {
             isUnused = false;
@@ -64,6 +66,7 @@ public class Space {
         });
 
         editor = new CodeEditor(this);
+        evaluator = new CodeEvaluator(this, editor);
 
         saveTask = MinecraftServer.getSchedulerManager().scheduleTask(() -> {
             if (isUnused) {
@@ -89,6 +92,11 @@ public class Space {
 
     private void save() {
         play.saveChunksToStorage();
+        editor.save();
     }
 
+    public void reload() {
+        evaluator.stop(true);
+        evaluator = new CodeEvaluator(this, editor);
+    }
 }
