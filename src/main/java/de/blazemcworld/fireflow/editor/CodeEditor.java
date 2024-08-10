@@ -1,16 +1,15 @@
 package de.blazemcworld.fireflow.editor;
 
 import de.blazemcworld.fireflow.FireFlow;
-import de.blazemcworld.fireflow.editor.widget.NodeCategoryWidget;
-import de.blazemcworld.fireflow.editor.widget.NodeInputWidget;
-import de.blazemcworld.fireflow.editor.widget.NodeWidget;
-import de.blazemcworld.fireflow.editor.widget.WireWidget;
+import de.blazemcworld.fireflow.editor.action.CreateSelectionAction;
+import de.blazemcworld.fireflow.editor.widget.*;
 import de.blazemcworld.fireflow.node.Node;
 import de.blazemcworld.fireflow.node.NodeCategory;
 import de.blazemcworld.fireflow.node.NodeList;
 import de.blazemcworld.fireflow.space.Space;
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
 import de.blazemcworld.fireflow.value.SignalValue;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -81,7 +80,7 @@ public class CodeEditor {
             }
             Widget selected = getWidget(event.getPlayer(), cursor);
             if (selected == null) {
-                widgets.add(new NodeCategoryWidget(cursor, inst, NodeCategory.ROOT));
+                this.setAction(event.getPlayer(), new CreateSelectionAction(inst, cursor, NamedTextColor.AQUA, event.getPlayer(), this));
                 return;
             }
             selected.rightClick(cursor, event.getPlayer(), this);
@@ -94,7 +93,10 @@ public class CodeEditor {
                 return;
             }
             Widget selected = getWidget(event.getPlayer(), cursor);
-            if (selected == null) return;
+            if (selected == null) {
+                widgets.add(new NodeCategoryWidget(cursor, inst, NodeCategory.ROOT));
+                return;
+            }
             selected.swapItem(cursor, event.getPlayer(), this);
         });
 
@@ -281,6 +283,17 @@ public class CodeEditor {
         List<Node> list = new ArrayList<>();
         for (Widget w : widgets) {
             if (w instanceof NodeWidget node) list.add(node.node);
+        }
+        return list;
+    }
+
+    public List<NodeWidget> getNodesInBound(Bounds bounds) {
+        List<NodeWidget> list = new ArrayList<>();
+        for (Widget w : widgets) {
+            if (w instanceof NodeWidget node) {
+                Bounds nodeBounds = node.getBounds();
+                if (bounds.includes2d(nodeBounds.min) && bounds.includes2d(nodeBounds.max)) list.add(node);
+            }
         }
         return list;
     }
