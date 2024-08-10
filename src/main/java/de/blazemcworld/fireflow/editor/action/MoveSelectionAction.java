@@ -6,7 +6,6 @@ import de.blazemcworld.fireflow.editor.EditorAction;
 import de.blazemcworld.fireflow.editor.widget.NodeWidget;
 import de.blazemcworld.fireflow.editor.widget.RectWidget;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.InstanceContainer;
@@ -14,7 +13,7 @@ import net.minestom.server.instance.InstanceContainer;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateSelectionAction implements EditorAction {
+public class MoveSelectionAction implements EditorAction {
 
     private final RectWidget rect;
     private Vec start;
@@ -22,12 +21,12 @@ public class CreateSelectionAction implements EditorAction {
     private final Player player;
     private final Map<NodeWidget, Vec> nodes = new HashMap<>();
 
-    public CreateSelectionAction(InstanceContainer inst, Vec start, TextColor color, Player player, CodeEditor editor) {
+    public MoveSelectionAction(InstanceContainer inst, Vec start, Player player, CodeEditor editor) {
         this.player = player;
         this.editor = editor;
         this.rect = new RectWidget(inst, new Bounds(start, start));
         this.start = start;
-        rect.color(color);
+        rect.color(NamedTextColor.AQUA);
     }
 
     @Override
