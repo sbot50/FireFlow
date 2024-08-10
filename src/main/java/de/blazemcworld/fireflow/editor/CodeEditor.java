@@ -1,18 +1,18 @@
 package de.blazemcworld.fireflow.editor;
 
 import de.blazemcworld.fireflow.FireFlow;
-import de.blazemcworld.fireflow.editor.action.CreateSelectionAction;
+import de.blazemcworld.fireflow.editor.action.MoveSelectionAction;
 import de.blazemcworld.fireflow.editor.widget.NodeCategoryWidget;
 import de.blazemcworld.fireflow.editor.widget.NodeInputWidget;
 import de.blazemcworld.fireflow.editor.widget.NodeWidget;
 import de.blazemcworld.fireflow.editor.widget.WireWidget;
+import de.blazemcworld.fireflow.editor.action.DeleteSelectionAction;
 import de.blazemcworld.fireflow.node.Node;
 import de.blazemcworld.fireflow.node.NodeCategory;
 import de.blazemcworld.fireflow.node.NodeList;
 import de.blazemcworld.fireflow.space.Space;
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
 import de.blazemcworld.fireflow.value.SignalValue;
-import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -83,7 +83,7 @@ public class CodeEditor {
             }
             Widget selected = getWidget(event.getPlayer(), cursor);
             if (selected == null) {
-                this.setAction(event.getPlayer(), new CreateSelectionAction(inst, cursor, NamedTextColor.AQUA, event.getPlayer(), this));
+                this.setAction(event.getPlayer(), new MoveSelectionAction(inst, cursor, event.getPlayer(), this));
                 return;
             }
             selected.rightClick(cursor, event.getPlayer(), this);
@@ -111,7 +111,10 @@ public class CodeEditor {
                     return;
                 }
                 Widget selected = getWidget(player, cursor);
-                if (selected == null) return;
+                if (selected == null) {
+                    this.setAction(player, new DeleteSelectionAction(inst, cursor, player, this));
+                    return;
+                }
                 selected.leftClick(cursor, player, this);
             }
         });
