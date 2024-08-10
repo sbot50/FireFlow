@@ -50,11 +50,12 @@ public class DeleteSelectionAction implements EditorAction {
         }
         start = cursor;
         rect.remove();
-        if (nodes.isEmpty()) editor.setAction(player, null);
-        else {
-            if (nodes.size() >= 5) DeleteInventory.open(player, nodes.size(), this::callback);
-            else callback(true);
+        if (nodes.isEmpty()) {
+            editor.setAction(player, null);
+            return;
         }
+        if (nodes.size() >= 5) DeleteInventory.open(player, nodes.size(), this::callback);
+        else callback(true);
     }
 
     @Override
