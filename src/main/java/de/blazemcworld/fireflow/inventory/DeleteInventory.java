@@ -1,6 +1,5 @@
 package de.blazemcworld.fireflow.inventory;
 
-import de.blazemcworld.fireflow.editor.action.DeleteSelectionAction;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -16,10 +15,12 @@ import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 
+import java.util.function.Consumer;
+
 public class DeleteInventory {
 
-    public static void open(Player player, DeleteSelectionAction.Callback callback) {
-        Inventory inv = new Inventory(InventoryType.CHEST_1_ROW, "Delete 5+ nodes?");
+    public static void open(Player player, int amount, Consumer<Boolean> callback) {
+        Inventory inv = new Inventory(InventoryType.CHEST_1_ROW, "Delete " + amount + " nodes?");
 
         inv.setItemStack(3, ItemStack.builder(Material.EMERALD)
                 .customName(Component.text("Yes").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GREEN))
@@ -39,16 +40,16 @@ public class DeleteInventory {
         player.openInventory(inv);
 
         inv.addInventoryCondition((who, slot, type, result) -> {
-            if (who == null) return;
+            if (who != player) return;
 
             switch (slot) {
                 case 3 -> {
                     who.closeInventory();
-                    callback.execute(true);
+                    callback.accept(true);
                 }
                 case 5 -> {
                     who.closeInventory();
-                    callback.execute(false);
+                    callback.accept(false);
                 }
             }
         });
@@ -58,7 +59,7 @@ public class DeleteInventory {
 
         node.addListener(InventoryCloseEvent.class, event -> {
             if (event.getInventory() != inv) return;
-            callback.execute(false);
+            callback.accept(false);
             handler.removeChild(node);
         });
 

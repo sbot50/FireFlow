@@ -30,9 +30,16 @@ public class DeleteSelectionAction implements EditorAction {
         rect.color(NamedTextColor.RED);
     }
 
-    @FunctionalInterface
-    public interface Callback {
-        void execute(Boolean delete);
+    private void callback(boolean delete) {
+        if (delete) {
+            for (NodeWidget node : nodes.keySet()) {
+                node.remove();
+                editor.remove(node);
+            }
+            nodes.clear();
+            rect.remove();
+        }
+        editor.setAction(player, null);
     }
 
     @Override
@@ -45,19 +52,8 @@ public class DeleteSelectionAction implements EditorAction {
         rect.remove();
         if (nodes.isEmpty()) editor.setAction(player, null);
         else {
-            Callback callback = (delete) -> {
-                if (delete) {
-                    for (NodeWidget node : nodes.keySet()) {
-                        node.remove();
-                        editor.remove(node);
-                    }
-                    nodes.clear();
-                    rect.remove();
-                }
-                editor.setAction(player, null);
-            };
-            if (nodes.size() >= 5) DeleteInventory.open(player, callback);
-            else callback.execute(true);
+            if (nodes.size() >= 5) DeleteInventory.open(player, nodes.size(), this::callback);
+            else callback(true);
         }
     }
 
