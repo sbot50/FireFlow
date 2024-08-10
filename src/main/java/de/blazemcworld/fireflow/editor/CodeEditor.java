@@ -2,7 +2,10 @@ package de.blazemcworld.fireflow.editor;
 
 import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.editor.action.CreateSelectionAction;
-import de.blazemcworld.fireflow.editor.widget.*;
+import de.blazemcworld.fireflow.editor.widget.NodeCategoryWidget;
+import de.blazemcworld.fireflow.editor.widget.NodeInputWidget;
+import de.blazemcworld.fireflow.editor.widget.NodeWidget;
+import de.blazemcworld.fireflow.editor.widget.WireWidget;
 import de.blazemcworld.fireflow.node.Node;
 import de.blazemcworld.fireflow.node.NodeCategory;
 import de.blazemcworld.fireflow.node.NodeList;
@@ -277,6 +280,8 @@ public class CodeEditor {
         }
 
         for (Runnable r : connectNodes) r.run();
+
+        while (widgets.contains(null)) widgets.remove(null);
     }
 
     public List<Node> getNodes() {
