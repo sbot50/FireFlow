@@ -5,6 +5,7 @@ import de.blazemcworld.fireflow.editor.CodeEditor;
 import de.blazemcworld.fireflow.editor.Widget;
 import de.blazemcworld.fireflow.editor.action.CreateWireAction;
 import de.blazemcworld.fireflow.editor.action.MoveNodeAction;
+import de.blazemcworld.fireflow.node.ExtractionNode;
 import de.blazemcworld.fireflow.node.Node;
 import de.blazemcworld.fireflow.node.NodeInput;
 import de.blazemcworld.fireflow.node.NodeOutput;
@@ -37,7 +38,7 @@ public class NodeWidget implements Widget {
     }
 
     public void update(boolean init) {
-        double inputWidth = 0;
+        double inputWidth = 0.1;
         for (NodeInput input : node.inputs) {
             String text;
             if (input.getInset() != null) {
@@ -47,12 +48,16 @@ public class NodeWidget implements Widget {
             }
             inputWidth = Math.max(inputWidth, TextWidth.calculate(text, false) / 40);
         }
-        double outputWidth = 0;
+        double outputWidth = 0.1;
         for (NodeOutput output : node.outputs) {
             outputWidth = Math.max(outputWidth, TextWidth.calculate(output.getName() + " ○", false) / 40);
         }
         double titleWidth = TextWidth.calculate(node.name, false) / 40;
-        
+
+        if (node instanceof ExtractionNode) {
+            inputWidth = titleWidth * 0.5 + 0.1;
+            outputWidth = titleWidth * 0.5 + 0.1;
+        }
         if (titleWidth > inputWidth + outputWidth) {
             double scale = titleWidth / (inputWidth + outputWidth);
             inputWidth *= scale;
@@ -66,9 +71,11 @@ public class NodeWidget implements Widget {
             title.position = titlePos;
             title.update();
         }
+        int maxIO = Math.max(node.inputs.size(), node.outputs.size());
+        if (node instanceof ExtractionNode) maxIO = 0;
         bounds = new Bounds(
                 origin.add(inputWidth + 0.2, 0.7, 0),
-                origin.add(-outputWidth - 0.2, -Math.max(node.inputs.size(), node.outputs.size()) * 0.3 + 0.2, 0)
+                origin.add(-outputWidth - 0.2, -maxIO * 0.3 + 0.25, 0)
         );
         if (init) {
             border = new RectWidget(inst, bounds);
@@ -77,6 +84,7 @@ public class NodeWidget implements Widget {
         }
 
         Vec pos = origin.add(inputWidth + 0.1, 0, 0);
+        if (node instanceof ExtractionNode) pos = origin.add(titleWidth * 0.5 + 0.2, 0.3, 0);
         int index = 0;
         for (NodeInput input : node.inputs) {
             if (init) {
@@ -93,6 +101,7 @@ public class NodeWidget implements Widget {
         }
         index = 0;
         pos = origin.add(-outputWidth - 0.1, 0, 0);
+        if (node instanceof ExtractionNode) pos = origin.add(-titleWidth * 0.5 - 0.2, 0.3, 0);
         for (NodeOutput output : node.outputs) {
             if (init) {
                 NodeOutputWidget btn = new NodeOutputWidget(pos.add(TextWidth.calculate(output.getName() + " ○", false) / 40, 0, 0), inst, Component.text(output.getName() + " ○").color(output.type.getColor()), output, this);

@@ -105,6 +105,7 @@ public class WireWidget implements Widget {
                 created.to = cursor;
                 line.from = cursor;
                 lines.add(index, created);
+                dragRelay(index, player, editor);
                 return;
             }
             index++;

@@ -12,4 +12,5 @@ public interface Widget {
     default void leftClick(Vec cursor, Player player, CodeEditor editor) {}
     default void rightClick(Vec cursor, Player player, CodeEditor editor) {}
     default void chat(Vec cursor, PlayerChatEvent event, CodeEditor editor) {}
+    default void swapItem(Vec cursor, Player player, CodeEditor codeEditor) {}
 }

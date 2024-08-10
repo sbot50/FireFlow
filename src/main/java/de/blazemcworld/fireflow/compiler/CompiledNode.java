@@ -67,7 +67,7 @@ public abstract class CompiledNode {
         } catch (Exception err) {
             if (err instanceof InvocationTargetException invoke) {
                 if (invoke.getTargetException() instanceof CpuLimitException) {
-                    FireFlow.LOGGER.warn("Reached cpu limit for Space #{}!", space.id);
+                    FireFlow.LOGGER.warn("Reached cpu limit for Space #{}!", space.info.id);
                     evaluator.stop(false);
                     return;
                 }

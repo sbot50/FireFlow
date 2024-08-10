@@ -15,6 +15,7 @@ import net.minestom.server.instance.InstanceContainer;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public class NodeCategoryWidget implements Widget {
@@ -22,6 +23,7 @@ public class NodeCategoryWidget implements Widget {
     private final List<ButtonWidget> buttons = new ArrayList<>();
     private final RectWidget border;
     private final Bounds bounds;
+    public Consumer<NodeWidget> selectCallback = null;
 
     public NodeCategoryWidget(Vec pos, InstanceContainer inst, NodeCategory category) {
         Vec originPos = pos;
@@ -72,10 +74,14 @@ public class NodeCategoryWidget implements Widget {
                 editor.remove(this);
                 Node node = entry.second().get();
                 if (node.possibleGenerics().isEmpty()) {
-                    editor.widgets.add(new NodeWidget(originPos, inst, node));
+                    NodeWidget widget = new NodeWidget(originPos, inst, node);
+                    editor.widgets.add(widget);
+                    if (selectCallback != null) selectCallback.accept(widget);
                 } else {
                     GenericSelectorWidget.choose(originPos, editor, node.possibleGenerics(), generics -> {
-                        editor.widgets.add(new NodeWidget(originPos, inst, node.fromGenerics(generics)));
+                        NodeWidget widget = new NodeWidget(originPos, inst, node.fromGenerics(generics));
+                        editor.widgets.add(widget);
+                        if (selectCallback != null) selectCallback.accept(widget);
                     });
                 }
             };

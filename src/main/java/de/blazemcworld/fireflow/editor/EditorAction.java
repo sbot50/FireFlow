@@ -10,4 +10,5 @@ public interface EditorAction {
     default void tick(Vec cursor) {}
     default void stop() {}
     default void chat(Vec cursor, PlayerChatEvent event) {}
+    default void swapItem(Vec cursor) {}
 }

@@ -1,10 +1,13 @@
 package de.blazemcworld.fireflow.editor.action;
 
+import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.editor.Bounds;
 import de.blazemcworld.fireflow.editor.CodeEditor;
 import de.blazemcworld.fireflow.editor.EditorAction;
 import de.blazemcworld.fireflow.editor.Widget;
 import de.blazemcworld.fireflow.editor.widget.*;
+import de.blazemcworld.fireflow.node.ExtractionNode;
+import de.blazemcworld.fireflow.node.NodeCategory;
 import de.blazemcworld.fireflow.node.NodeInput;
 import de.blazemcworld.fireflow.node.NodeOutput;
 import de.blazemcworld.fireflow.value.SignalValue;
@@ -98,6 +101,31 @@ public class CreateWireAction implements EditorAction {
     public void leftClick(Vec cursor) {
         if (lines.size() <= 1) editor.setAction(player, null);
             else lines.pop().remove();
+    }
+
+    @Override
+    public void swapItem(Vec cursor) {
+        if (nodeOutput == null || nodeOutput.type == SignalValue.INSTANCE) return;
+        NodeCategory category = NodeCategory.EXTRACTIONS.get(nodeOutput.type);
+        if (category == null) return;
+
+        NodeCategoryWidget selector = new NodeCategoryWidget(cursor, editor.inst, category);
+        editor.widgets.add(selector);
+        editor.setAction(player, null);
+
+        List<Vec> relays = new ArrayList<>();
+        for (LineWidget w : lines) relays.add(w.to);
+        relays.removeLast();
+        selector.selectCallback = (widget) -> {
+            if (widget.node instanceof ExtractionNode extraction) {
+                extraction.input.connectValue(nodeOutput);
+                NodeOutputWidget outputWidget = (NodeOutputWidget) origin;
+                outputWidget.disconnect();
+                widget.inputs.getFirst().addWire(new WireWidget(editor.inst, widget.inputs.getFirst(), outputWidget, relays));
+            } else {
+                FireFlow.LOGGER.error("Node {} is not an extraction node!", widget.node);
+            }
+        };
     }
 
     @Override

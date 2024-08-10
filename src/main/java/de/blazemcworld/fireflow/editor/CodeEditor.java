@@ -19,10 +19,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.InteractionMeta;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
-import net.minestom.server.event.player.PlayerChatEvent;
-import net.minestom.server.event.player.PlayerEntityInteractEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
-import net.minestom.server.event.player.PlayerTickEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.network.NetworkBuffer;
@@ -45,7 +42,7 @@ public class CodeEditor {
     private final Path filePath;
 
     public CodeEditor(Space space) {
-        filePath = Path.of("spaces").resolve(String.valueOf(space.id)).resolve("code.bin");
+        filePath = Path.of("spaces").resolve(String.valueOf(space.info.id)).resolve("code.bin");
         inst = space.code;
         load();
 
@@ -88,6 +85,17 @@ public class CodeEditor {
                 return;
             }
             selected.rightClick(cursor, event.getPlayer(), this);
+        });
+
+        events.addListener(PlayerSwapItemEvent.class, event -> {
+            Vec cursor = getCursor(event.getPlayer());
+            if (actions.containsKey(event.getPlayer())) {
+                actions.get(event.getPlayer()).swapItem(cursor);
+                return;
+            }
+            Widget selected = getWidget(event.getPlayer(), cursor);
+            if (selected == null) return;
+            selected.swapItem(cursor, event.getPlayer(), this);
         });
 
         events.addListener(EntityAttackEvent.class, event -> {
@@ -136,7 +144,12 @@ public class CodeEditor {
         Vec start = player.getPosition().asVec().add(0.0, player.getEyeHeight(), -16);
         double dist = -start.dot(new Vec(0, 0, -1)) / norm;
         if (dist < 0) return Vec.ZERO.withZ(15.999);
-        return start.add(player.getPosition().direction().mul(dist)).withZ(15.999);
+        Vec out = start.add(player.getPosition().direction().mul(dist)).withZ(15.999);
+        if (out.y() > 99999) out = out.withY(99999);
+        if (out.y() < -99999) out = out.withY(-99999);
+        if (out.x() > 99999) out = out.withX(99999);
+        if (out.x() < -99999) out = out.withX(-99999);
+        return out;
     }
 
 

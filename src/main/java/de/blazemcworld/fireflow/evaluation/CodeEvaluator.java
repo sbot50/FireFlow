@@ -33,10 +33,10 @@ public class CodeEvaluator {
     public CodeEvaluator(Space space, CodeEditor editor) {
         this.editor = editor;
         this.space = space;
-        events = EventNode.type("space-" + space.id, EventFilter.INSTANCE);
+        events = EventNode.type("space-" + space.info.id, EventFilter.INSTANCE);
         space.play.eventNode().addChild(events);
         List<Node> nodes = editor.getNodes();
-        compiler = new NodeCompiler("Space" + space.id);
+        compiler = new NodeCompiler("Space" + space.info.id);
         for (Node node : nodes) {
             node.register(this);
         }

@@ -35,12 +35,14 @@ public class PlayerValue implements Value {
 
     @Override
     public Type getType() {
-        return Type.getType(String.class);
+        return Type.getType(Reference.class);
     }
 
     @Override
     public InsnList compile(NodeCompiler ctx, Object inset) {
-        throw new IllegalStateException("Player values can not be inset!");
+        InsnList out = new InsnList();
+        out.add(new FieldInsnNode(Opcodes.GETSTATIC, "de/blazemcworld/fireflow/value/PlayerValue$Reference", "UNKNOWN", "Lde/blazemcworld/fireflow/value/PlayerValue$Reference;"));
+        return out;
     }
 
     @Override
@@ -83,9 +85,12 @@ public class PlayerValue implements Value {
         throw new IllegalStateException("Player values can not be inset!");
     }
 
-    public static Instruction use(Instruction player, Instruction action) {
+    public static Instruction use(Instruction player, Instruction action, Instruction otherwise) {
         LabelNode fail = new LabelNode();
         LabelNode end = new LabelNode();
+        if (otherwise == null) {
+            otherwise = new RawInstruction(Type.VOID_TYPE);
+        }
         return new MultiInstruction(Type.VOID_TYPE,
                 new InstanceMethodInstruction(Reference.class, player, "resolve", Type.getType(Player.class), List.of()),
                 new RawInstruction(Type.getType(Player.class), new InsnNode(Opcodes.DUP)),
@@ -94,6 +99,7 @@ public class PlayerValue implements Value {
                 new RawInstruction(Type.VOID_TYPE, new JumpInsnNode(Opcodes.GOTO, end)),
                 new RawInstruction(Type.VOID_TYPE, fail),
                 new RawInstruction(Type.VOID_TYPE, new InsnNode(Opcodes.POP)),
+                otherwise,
                 new RawInstruction(Type.VOID_TYPE, end)
         );
     }

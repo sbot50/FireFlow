@@ -32,7 +32,7 @@ public class SendMessageNode extends Node {
                                 "sendMessage",
                                 "(Lnet/kyori/adventure/text/Component;)V"
                         ))
-                )),
+                ), null),
                 next
         ));
     }

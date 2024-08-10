@@ -17,22 +17,22 @@ import net.minestom.server.timer.TaskSchedule;
 
 public class Space {
 
-    public final int id;
     public final InstanceContainer play;
     public final InstanceContainer code;
     public final Task saveTask;
+    public final SpaceInfo info;
     private boolean isUnused = false;
     private final CodeEditor editor;
     private CodeEvaluator evaluator;
 
-    public Space(int id) {
-        this.id = id;
+    public Space(SpaceInfo info) {
+        this.info = info;
 
         InstanceManager manager = MinecraftServer.getInstanceManager();
         play = manager.createInstanceContainer();
         code = manager.createInstanceContainer();
 
-        play.setChunkLoader(new AnvilLoader("spaces/" + id));
+        play.setChunkLoader(new AnvilLoader("spaces/" + info.id));
 
         play.setChunkSupplier(LightingChunk::new);
         code.setChunkSupplier(LightingChunk::new);
@@ -71,7 +71,7 @@ public class Space {
         saveTask = MinecraftServer.getSchedulerManager().scheduleTask(() -> {
             if (isUnused) {
                 unregister();
-                SpaceManager.forget(id);
+                SpaceManager.forget(info.id);
                 return TaskSchedule.stop();
             }
             if (play.getPlayers().isEmpty() && code.getPlayers().isEmpty()) {
