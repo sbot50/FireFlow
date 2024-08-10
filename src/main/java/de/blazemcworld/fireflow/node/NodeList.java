@@ -6,9 +6,7 @@ import de.blazemcworld.fireflow.node.impl.WhileNode;
 import de.blazemcworld.fireflow.node.impl.event.PlayerJoinEvent;
 import de.blazemcworld.fireflow.node.impl.extraction.player.PlayerUUIDNode;
 import de.blazemcworld.fireflow.node.impl.extraction.text.TextToMessageNode;
-import de.blazemcworld.fireflow.node.impl.variable.GetVariableNode;
-import de.blazemcworld.fireflow.node.impl.variable.LocalVariableScope;
-import de.blazemcworld.fireflow.node.impl.variable.SetVariableNode;
+import de.blazemcworld.fireflow.node.impl.variable.*;
 import de.blazemcworld.fireflow.value.NumberValue;
 
 import java.util.HashMap;
@@ -24,12 +22,16 @@ public class NodeList {
                 // Sorted alphabetically
                 // TIP: Sort the lines automatically using your ide
                 () -> new GetVariableNode(LocalVariableScope.INSTANCE, NumberValue.INSTANCE),
+                () -> new GetVariableNode(PersistentVariableScope.INSTANCE, NumberValue.INSTANCE),
+                () -> new GetVariableNode(SpaceVariableScope.INSTANCE, NumberValue.INSTANCE),
                 () -> new SetVariableNode(LocalVariableScope.INSTANCE, NumberValue.INSTANCE),
+                () -> new SetVariableNode(PersistentVariableScope.INSTANCE, NumberValue.INSTANCE),
+                () -> new SetVariableNode(SpaceVariableScope.INSTANCE, NumberValue.INSTANCE),
                 AddNumbersNode::new,
                 PlayerJoinEvent::new,
                 PlayerUUIDNode::new,
-                TextToMessageNode::new,
                 SendMessageNode::new,
+                TextToMessageNode::new,
                 WhileNode::new
         );
 
