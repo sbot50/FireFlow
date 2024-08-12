@@ -79,8 +79,9 @@ public class NodeInput implements Instruction {
         return type.getType();
     }
 
-    public void withDefault(Object value) {
+    public NodeInput withDefault(Object value) {
         defaultValue = value;
+        return this;
     }
 
     public boolean hasDefault() {

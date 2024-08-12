@@ -3,13 +3,27 @@ package de.blazemcworld.fireflow.node;
 import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.compiler.FunctionDefinition;
 import de.blazemcworld.fireflow.editor.CodeEditor;
-import de.blazemcworld.fireflow.node.impl.AddNumbersNode;
+import de.blazemcworld.fireflow.node.impl.IfNode;
+import de.blazemcworld.fireflow.node.impl.ScheduleNode;
+import de.blazemcworld.fireflow.node.impl.ValuesEqualNode;
 import de.blazemcworld.fireflow.node.impl.WhileNode;
-import de.blazemcworld.fireflow.node.impl.event.PlayerJoinEvent;
+import de.blazemcworld.fireflow.node.impl.event.PlayerInteractEventNode;
+import de.blazemcworld.fireflow.node.impl.event.PlayerJoinEventNode;
+import de.blazemcworld.fireflow.node.impl.extraction.number.NumberToTextNode;
+import de.blazemcworld.fireflow.node.impl.extraction.player.PlayerNameNode;
 import de.blazemcworld.fireflow.node.impl.extraction.player.PlayerUUIDNode;
-import de.blazemcworld.fireflow.node.impl.extraction.text.FormatToMessageNode;
+import de.blazemcworld.fireflow.node.impl.extraction.text.FormatTextToMessageNode;
 import de.blazemcworld.fireflow.node.impl.extraction.text.TextToMessageNode;
+import de.blazemcworld.fireflow.node.impl.number.AddNumbersNode;
+import de.blazemcworld.fireflow.node.impl.number.DivideNumbersNode;
+import de.blazemcworld.fireflow.node.impl.number.MultiplyNumbersNode;
+import de.blazemcworld.fireflow.node.impl.number.SubtractNumbersNode;
+import de.blazemcworld.fireflow.node.impl.number.comparison.GreaterEqualThanNode;
+import de.blazemcworld.fireflow.node.impl.number.comparison.GreaterThanNode;
+import de.blazemcworld.fireflow.node.impl.number.comparison.LessEqualThanNode;
+import de.blazemcworld.fireflow.node.impl.number.comparison.LessThanNode;
 import de.blazemcworld.fireflow.node.impl.player.*;
+import de.blazemcworld.fireflow.node.impl.text.ConcatTextsNode;
 import de.blazemcworld.fireflow.node.impl.variable.*;
 import de.blazemcworld.fireflow.value.NumberValue;
 import de.blazemcworld.fireflow.value.PlayerValue;
@@ -24,8 +38,12 @@ import java.util.function.Supplier;
 public class NodeCategory {
 
     public static final NodeCategory ROOT = new NodeCategory("Root", List.of(
-            AddNumbersNode::new,
-            PlayerJoinEvent::new,
+            () -> new ValuesEqualNode(NumberValue.INSTANCE),
+            ConcatTextsNode::new,
+            IfNode::new,
+            PlayerInteractEventNode::new,
+            PlayerJoinEventNode::new,
+            ScheduleNode::new,
             WhileNode::new
     ));
 
@@ -53,15 +71,31 @@ public class NodeCategory {
             SetPlayerSaturationNode::new
     ));
 
+    public static final NodeCategory NUMBERS = new NodeCategory("Numbers", ROOT, List.of(
+            AddNumbersNode::new,
+            DivideNumbersNode::new,
+            GreaterEqualThanNode::new,
+            GreaterThanNode::new,
+            LessEqualThanNode::new,
+            LessThanNode::new,
+            MultiplyNumbersNode::new,
+            SubtractNumbersNode::new
+    ));
+
     public static final Map<Value, NodeCategory> EXTRACTIONS = new HashMap<>();
 
     public static final NodeCategory PLAYER_EXTRACTIONS = new NodeCategory("Player Extractions", PlayerValue.INSTANCE, List.of(
-            PlayerUUIDNode::new
+            PlayerUUIDNode::new,
+            PlayerNameNode::new
     ));
 
     public static final NodeCategory TEXT_EXTRACTIONS = new NodeCategory("Text Extractions", TextValue.INSTANCE, List.of(
-            FormatToMessageNode::new,
+            FormatTextToMessageNode::new,
             TextToMessageNode::new
+    ));
+
+    public static final NodeCategory NUMBER_EXTRACTIONS = new NodeCategory("Number Extractions", NumberValue.INSTANCE, List.of(
+            NumberToTextNode::new
     ));
 
 

@@ -9,7 +9,7 @@ import net.kyori.adventure.text.Component;
 
 public class TextToMessageNode extends ExtractionNode {
     public TextToMessageNode() {
-        super("To Message", TextValue.INSTANCE, MessageValue.INSTANCE);
+        super("Text to Message", TextValue.INSTANCE, MessageValue.INSTANCE);
 
         loadJava(TextToMessageNode.class);
     }

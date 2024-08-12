@@ -7,11 +7,11 @@ import de.blazemcworld.fireflow.value.MessageValue;
 import de.blazemcworld.fireflow.value.TextValue;
 import net.kyori.adventure.text.Component;
 
-public class FormatToMessageNode extends ExtractionNode {
-    public FormatToMessageNode() {
-        super("Format Message", TextValue.INSTANCE, MessageValue.INSTANCE);
+public class FormatTextToMessageNode extends ExtractionNode {
+    public FormatTextToMessageNode() {
+        super("Format Text to Message", TextValue.INSTANCE, MessageValue.INSTANCE);
 
-        loadJava(FormatToMessageNode.class);
+        loadJava(FormatTextToMessageNode.class);
     }
 
     @FlowValueOutput("")
