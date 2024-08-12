@@ -15,7 +15,7 @@ public class SetPlayerHealthNode extends Node {
 
         input("Signal", SignalValue.INSTANCE);
         input("Player", PlayerValue.INSTANCE);
-        input("Health", NumberValue.INSTANCE);
+        input("Health", NumberValue.INSTANCE).withDefault(20);
         output("Next", SignalValue.INSTANCE);
 
         loadJava(SetPlayerHealthNode.class);

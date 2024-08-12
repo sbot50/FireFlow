@@ -12,6 +12,7 @@ public class NodeInput implements Instruction {
     public final Value type;
     private NodeOutput source;
     private Object inset;
+    private Object defaultValue;
     private Instruction instruction;
 
     public NodeInput(String name, Value type) {
@@ -67,11 +68,22 @@ public class NodeInput implements Instruction {
         if (source != null) {
             return ctx.compile(source, usedVars);
         }
-        return type.compile(ctx, inset);
+        if (inset != null) {
+            return type.compile(ctx, inset);
+        }
+        return type.compile(ctx, defaultValue);
     }
 
     @Override
     public Type returnType() {
         return type.getType();
+    }
+
+    public void withDefault(Object value) {
+        defaultValue = value;
+    }
+
+    public boolean hasDefault() {
+        return defaultValue != null;
     }
 }

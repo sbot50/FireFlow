@@ -15,7 +15,7 @@ public class SetAllowPlayerFlyingNode extends Node {
 
         input("Signal", SignalValue.INSTANCE);
         input("Player", PlayerValue.INSTANCE);
-        input("State", ConditionValue.INSTANCE);
+        input("State", ConditionValue.INSTANCE).withDefault(true);
         output("Next", SignalValue.INSTANCE);
 
         loadJava(SetAllowPlayerFlyingNode.class);
