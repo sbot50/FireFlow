@@ -7,6 +7,7 @@ import de.blazemcworld.fireflow.node.impl.AddNumbersNode;
 import de.blazemcworld.fireflow.node.impl.WhileNode;
 import de.blazemcworld.fireflow.node.impl.event.PlayerJoinEvent;
 import de.blazemcworld.fireflow.node.impl.extraction.player.PlayerUUIDNode;
+import de.blazemcworld.fireflow.node.impl.extraction.text.FormatToMessageNode;
 import de.blazemcworld.fireflow.node.impl.extraction.text.TextToMessageNode;
 import de.blazemcworld.fireflow.node.impl.player.*;
 import de.blazemcworld.fireflow.node.impl.variable.*;
@@ -25,7 +26,6 @@ public class NodeCategory {
     public static final NodeCategory ROOT = new NodeCategory("Root", List.of(
             AddNumbersNode::new,
             PlayerJoinEvent::new,
-            SendMessageNode::new,
             WhileNode::new
     ));
 
@@ -42,6 +42,7 @@ public class NodeCategory {
             ClearTitleNode::new,
             KillPlayerNode::new,
             SendActionBarNode::new,
+            SendMessageNode::new,
             SendTitleNode::new,
             SetAllowPlayerFlyingNode::new,
             SetExperienceNode::new,
@@ -59,7 +60,8 @@ public class NodeCategory {
     ));
 
     public static final NodeCategory TEXT_EXTRACTIONS = new NodeCategory("Text Extractions", TextValue.INSTANCE, List.of(
-        TextToMessageNode::new
+            FormatToMessageNode::new,
+            TextToMessageNode::new
     ));
 
 
@@ -69,6 +71,7 @@ public class NodeCategory {
     public final @Nullable Value extractionType;
     public final List<Pair<String, Supplier<Node>>> nodes = new ArrayList<>();
     public final List<NodeCategory> subcategories = new ArrayList<>();
+
     public NodeCategory(String name, @Nullable NodeCategory parent, boolean isFunctions, @Nullable Value extractionType, List<Supplier<Node>> nodes) {
         this.name = name;
         this.parent = parent;

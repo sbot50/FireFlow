@@ -60,12 +60,12 @@ public class NodeInput implements Instruction {
     }
 
     @Override
-    public InsnList compile(NodeCompiler ctx) {
+    public InsnList compile(NodeCompiler ctx, int usedVars) {
         if (type == SignalValue.INSTANCE) {
-            return ctx.compile(instruction);
+            return ctx.compile(instruction, usedVars);
         }
         if (source != null) {
-            return ctx.compile(source);
+            return ctx.compile(source, usedVars);
         }
         return type.compile(ctx, inset);
     }

@@ -1,25 +1,33 @@
 package de.blazemcworld.fireflow.node.impl;
 
-import de.blazemcworld.fireflow.compiler.instruction.MultiInstruction;
-import de.blazemcworld.fireflow.compiler.instruction.RawInstruction;
 import de.blazemcworld.fireflow.node.Node;
-import de.blazemcworld.fireflow.node.NodeInput;
-import de.blazemcworld.fireflow.node.NodeOutput;
+import de.blazemcworld.fireflow.node.annotation.FlowValueInput;
+import de.blazemcworld.fireflow.node.annotation.FlowValueOutput;
 import de.blazemcworld.fireflow.value.NumberValue;
-import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
-import org.objectweb.asm.tree.InsnNode;
 
 public class AddNumbersNode extends Node {
     public AddNumbersNode() {
         super("Add Numbers");
-        NodeInput left = input("Left", NumberValue.INSTANCE);
-        NodeInput right = input("Right", NumberValue.INSTANCE);
-        NodeOutput result = output("Result", NumberValue.INSTANCE);
-        
-        result.setInstruction(new MultiInstruction(
-                Type.DOUBLE_TYPE, left, right,
-                new RawInstruction(Type.DOUBLE_TYPE, new InsnNode(Opcodes.DADD))
-        ));
+
+        input("Left", NumberValue.INSTANCE);
+        input("Right", NumberValue.INSTANCE);
+        output("Result", NumberValue.INSTANCE);
+
+        loadJava(AddNumbersNode.class);
+    }
+
+    @FlowValueOutput("Result")
+    private static double add() {
+        return left() + right();
+    }
+
+    @FlowValueInput("Left")
+    private static double left() {
+        throw new IllegalStateException();
+    }
+
+    @FlowValueInput("Right")
+    private static double right() {
+        throw new IllegalStateException();
     }
 }

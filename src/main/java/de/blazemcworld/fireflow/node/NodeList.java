@@ -4,6 +4,7 @@ import de.blazemcworld.fireflow.node.impl.AddNumbersNode;
 import de.blazemcworld.fireflow.node.impl.WhileNode;
 import de.blazemcworld.fireflow.node.impl.event.PlayerJoinEvent;
 import de.blazemcworld.fireflow.node.impl.extraction.player.PlayerUUIDNode;
+import de.blazemcworld.fireflow.node.impl.extraction.text.FormatToMessageNode;
 import de.blazemcworld.fireflow.node.impl.extraction.text.TextToMessageNode;
 import de.blazemcworld.fireflow.node.impl.player.*;
 import de.blazemcworld.fireflow.node.impl.variable.*;
@@ -27,23 +28,24 @@ public class NodeList {
                 () -> new SetVariableNode(LocalVariableScope.INSTANCE, NumberValue.INSTANCE),
                 () -> new SetVariableNode(PersistentVariableScope.INSTANCE, NumberValue.INSTANCE),
                 () -> new SetVariableNode(SpaceVariableScope.INSTANCE, NumberValue.INSTANCE),
-                        AddNumbersNode::new,
-                        ClearTitleNode::new,
-                        KillPlayerNode::new,
-                        PlayerJoinEvent::new,
-                        PlayerUUIDNode::new,
-                        SendActionBarNode::new,
-                        SendMessageNode::new,
-                        SendTitleNode::new,
-                        SetAllowPlayerFlyingNode::new,
-                        SetExperienceNode::new,
-                        SetLevelNode::new,
-                        SetPlayerFlyingNode::new,
-                        SetPlayerFoodNode::new,
-                        SetPlayerHealthNode::new,
-                        SetPlayerSaturationNode::new,
-                        TextToMessageNode::new,
-                        WhileNode::new
+                AddNumbersNode::new,
+                ClearTitleNode::new,
+                FormatToMessageNode::new,
+                KillPlayerNode::new,
+                PlayerJoinEvent::new,
+                PlayerUUIDNode::new,
+                SendActionBarNode::new,
+                SendMessageNode::new,
+                SendTitleNode::new,
+                SetAllowPlayerFlyingNode::new,
+                SetExperienceNode::new,
+                SetLevelNode::new,
+                SetPlayerFlyingNode::new,
+                SetPlayerFoodNode::new,
+                SetPlayerHealthNode::new,
+                SetPlayerSaturationNode::new,
+                TextToMessageNode::new,
+                WhileNode::new
         );
 
         for (Supplier<Node> each : all) {

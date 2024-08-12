@@ -7,16 +7,16 @@ import de.blazemcworld.fireflow.value.MessageValue;
 import de.blazemcworld.fireflow.value.TextValue;
 import net.kyori.adventure.text.Component;
 
-public class TextToMessageNode extends ExtractionNode {
-    public TextToMessageNode() {
-        super("To Message", TextValue.INSTANCE, MessageValue.INSTANCE);
+public class FormatToMessageNode extends ExtractionNode {
+    public FormatToMessageNode() {
+        super("Format Message", TextValue.INSTANCE, MessageValue.INSTANCE);
 
-        loadJava(TextToMessageNode.class);
+        loadJava(FormatToMessageNode.class);
     }
 
     @FlowValueOutput("")
     private static Component output() {
-        return Component.text(input());
+        return MessageValue.MM.deserialize(input());
     }
 
     @FlowValueInput("")
