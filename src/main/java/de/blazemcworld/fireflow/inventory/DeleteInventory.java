@@ -1,6 +1,7 @@
 package de.blazemcworld.fireflow.inventory;
 
 import de.blazemcworld.fireflow.preferences.PlayerIndex;
+import de.blazemcworld.fireflow.preferences.Preference;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -53,7 +54,7 @@ public class DeleteInventory {
                     callback.accept(false);
                 }
                 case 8 -> {
-                    PlayerIndex.get(player).preferences.put("preference-delete", 1);
+                    PlayerIndex.get(player).preferences.put(Preference.DELETE, 1);
                     who.closeInventory();
                     callback.accept(true);
                 }
