@@ -34,9 +34,9 @@ public class PreferencesInventory {
         Inventory inv = new Inventory(InventoryType.CHEST_1_ROW, "Preferences");
 
         var index = 0;
-        for (Map.Entry<Preference, Integer> entry : preferences.entrySet()) {
-            inv.setItemStack(index, createItem(entry.getKey(), entry.getValue()));
-            preferenceItemMap.add(entry.getKey());
+        for (Preference pref : Preference.values()) {
+            inv.setItemStack(index, createItem(pref, preferences.getOrDefault(pref, 0)));
+            preferenceItemMap.add(pref);
             index++;
         }
 
@@ -44,9 +44,9 @@ public class PreferencesInventory {
             if (player != who || preferenceItemMap.size() <= slot) return;
 
             Preference pref = preferenceItemMap.get(slot);
-            int state;
-            if (type == ClickType.LEFT_CLICK) state = pref.increaseState(PlayerIndex.get(player).preferences.get(pref));
-            else state = pref.decreaseState(PlayerIndex.get(player).preferences.get(pref));
+            int state = preferences.getOrDefault(pref, 0);
+            if (type == ClickType.LEFT_CLICK) state = pref.increaseState(state);
+            else state = pref.decreaseState(state);
             preferences.put(pref, state);
 
             inv.setItemStack(slot, createItem(pref, state));
