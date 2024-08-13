@@ -49,12 +49,6 @@ public class NodeCategory {
             CreatePositionNode::new,
             CreateVectorNode::new,
             IfNode::new,
-            PlayerChatEventNode::new,
-            PlayerInteractEventNode::new,
-            PlayerJoinEventNode::new,
-            PlayerLeaveEventNode::new,
-            PlayerPunchPlayerEventNode::new,
-            PlayerStartFlyingEventNode::new,
             PositionToVectorNode::new,
             ScaleVectorNode::new,
             ScheduleNode::new,
@@ -109,6 +103,7 @@ public class NodeCategory {
 
     public static final NodeCategory LISTS = new NodeCategory("Lists", ROOT, List.of(
             () -> new EmptyListNode(NumberValue.INSTANCE),
+            () -> new ForeachNode(NumberValue.INSTANCE),
             () -> new ListAppendNode(NumberValue.INSTANCE),
             () -> new ListContainsNode(NumberValue.INSTANCE),
             () -> new ListFindValueNode(NumberValue.INSTANCE),
@@ -127,14 +122,27 @@ public class NodeCategory {
             () -> new EmptyDictionaryNode(NumberValue.INSTANCE, NumberValue.INSTANCE)
     ));
 
+    public static final NodeCategory EVENTS = new NodeCategory("Events", ROOT, List.of(
+            PlayerChatEventNode::new,
+            PlayerInteractEventNode::new,
+            PlayerJoinEventNode::new,
+            PlayerLeaveEventNode::new,
+            PlayerPunchPlayerEventNode::new,
+            PlayerSneakEventNode::new,
+            PlayerStartFlyingEventNode::new,
+            PlayerStopFlyingEventNode::new,
+            PlayerUnsneakEventNode::new
+    ));
+
     public static final Map<Value, NodeCategory> EXTRACTIONS = new HashMap<>();
 
     public static final NodeCategory PLAYER_EXTRACTIONS = new NodeCategory("Player Extractions", PlayerValue.INSTANCE, List.of(
+            PlayerIsOnGroundNode::new,
+            PlayerIsPlayingNode::new,
+            PlayerIsSneakingNode::new,
             PlayerNameNode::new,
             PlayerPositionNode::new,
-            PlayerUUIDNode::new,
-            PlayerIsPlayingNode::new,
-            PlayerIsOnGroundNode::new
+            PlayerUUIDNode::new
     ));
 
     public static final NodeCategory TEXT_EXTRACTIONS = new NodeCategory("Text Extractions", TextValue.INSTANCE, List.of(
