@@ -126,7 +126,7 @@ public abstract class Node {
 
                         Instruction insn = convertJava(classNode, clazz, m);
                         if (m.getReturnType() == Object.class) {
-                            insn = output.type.cast(output);
+                            insn = output.type.cast(insn);
                         }
                         output.setInstruction(new MultiInstruction(output.type.getType(), insn));
                     }
@@ -175,6 +175,28 @@ public abstract class Node {
                     }
                 }
                 if (insn instanceof VarInsnNode v) {
+                    int which = v.var;
+                    maxVar = Math.max(maxVar, which);
+                    all.add(new Instruction() {
+                        @Override
+                        public void prepare(NodeCompiler ctx) {}
+
+                        @Override
+                        public InsnList compile(NodeCompiler ctx, int usedVars) {
+                            InsnList out = new InsnList();
+                            v.var = which + usedVars;
+                            out.add(v);
+                            return out;
+                        }
+
+                        @Override
+                        public Type returnType() {
+                            return null;
+                        }
+                    });
+                    continue;
+                }
+                if (insn instanceof IincInsnNode v) {
                     int which = v.var;
                     maxVar = Math.max(maxVar, which);
                     all.add(new Instruction() {

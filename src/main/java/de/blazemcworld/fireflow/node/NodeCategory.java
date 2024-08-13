@@ -7,28 +7,34 @@ import de.blazemcworld.fireflow.node.impl.IfNode;
 import de.blazemcworld.fireflow.node.impl.ScheduleNode;
 import de.blazemcworld.fireflow.node.impl.ValuesEqualNode;
 import de.blazemcworld.fireflow.node.impl.WhileNode;
-import de.blazemcworld.fireflow.node.impl.event.PlayerInteractEventNode;
-import de.blazemcworld.fireflow.node.impl.event.PlayerJoinEventNode;
+import de.blazemcworld.fireflow.node.impl.dictionary.DictionaryGetNode;
+import de.blazemcworld.fireflow.node.impl.dictionary.DictionaryKeysNode;
+import de.blazemcworld.fireflow.node.impl.dictionary.DictionarySetNode;
+import de.blazemcworld.fireflow.node.impl.dictionary.EmptyDictionaryNode;
+import de.blazemcworld.fireflow.node.impl.event.*;
 import de.blazemcworld.fireflow.node.impl.extraction.number.NumberToTextNode;
-import de.blazemcworld.fireflow.node.impl.extraction.player.PlayerNameNode;
-import de.blazemcworld.fireflow.node.impl.extraction.player.PlayerUUIDNode;
+import de.blazemcworld.fireflow.node.impl.extraction.player.*;
+import de.blazemcworld.fireflow.node.impl.extraction.position.*;
 import de.blazemcworld.fireflow.node.impl.extraction.text.FormatTextToMessageNode;
 import de.blazemcworld.fireflow.node.impl.extraction.text.TextToMessageNode;
-import de.blazemcworld.fireflow.node.impl.number.AddNumbersNode;
-import de.blazemcworld.fireflow.node.impl.number.DivideNumbersNode;
-import de.blazemcworld.fireflow.node.impl.number.MultiplyNumbersNode;
-import de.blazemcworld.fireflow.node.impl.number.SubtractNumbersNode;
+import de.blazemcworld.fireflow.node.impl.extraction.vector.*;
+import de.blazemcworld.fireflow.node.impl.list.*;
+import de.blazemcworld.fireflow.node.impl.number.*;
 import de.blazemcworld.fireflow.node.impl.number.comparison.GreaterEqualThanNode;
 import de.blazemcworld.fireflow.node.impl.number.comparison.GreaterThanNode;
 import de.blazemcworld.fireflow.node.impl.number.comparison.LessEqualThanNode;
 import de.blazemcworld.fireflow.node.impl.number.comparison.LessThanNode;
 import de.blazemcworld.fireflow.node.impl.player.*;
+import de.blazemcworld.fireflow.node.impl.position.CreatePositionNode;
+import de.blazemcworld.fireflow.node.impl.position.PositionToVectorNode;
+import de.blazemcworld.fireflow.node.impl.position.ShiftPositionVectorNode;
+import de.blazemcworld.fireflow.node.impl.position.ShiftPositionXYZNode;
 import de.blazemcworld.fireflow.node.impl.text.ConcatTextsNode;
 import de.blazemcworld.fireflow.node.impl.variable.*;
-import de.blazemcworld.fireflow.value.NumberValue;
-import de.blazemcworld.fireflow.value.PlayerValue;
-import de.blazemcworld.fireflow.value.TextValue;
-import de.blazemcworld.fireflow.value.Value;
+import de.blazemcworld.fireflow.node.impl.vector.CreateVectorNode;
+import de.blazemcworld.fireflow.node.impl.vector.ScaleVectorNode;
+import de.blazemcworld.fireflow.node.impl.vector.VectorToPositionNode;
+import de.blazemcworld.fireflow.value.*;
 import it.unimi.dsi.fastutil.Pair;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,10 +46,21 @@ public class NodeCategory {
     public static final NodeCategory ROOT = new NodeCategory("Root", List.of(
             () -> new ValuesEqualNode(NumberValue.INSTANCE),
             ConcatTextsNode::new,
+            CreatePositionNode::new,
+            CreateVectorNode::new,
             IfNode::new,
+            PlayerChatEventNode::new,
             PlayerInteractEventNode::new,
             PlayerJoinEventNode::new,
+            PlayerLeaveEventNode::new,
+            PlayerPunchPlayerEventNode::new,
+            PlayerStartFlyingEventNode::new,
+            PositionToVectorNode::new,
+            ScaleVectorNode::new,
             ScheduleNode::new,
+            ShiftPositionVectorNode::new,
+            ShiftPositionXYZNode::new,
+            VectorToPositionNode::new,
             WhileNode::new
     ));
 
@@ -58,17 +75,24 @@ public class NodeCategory {
 
     public static final NodeCategory PLAYERS = new NodeCategory("Players", ROOT, List.of(
             ClearTitleNode::new,
+            DisplayPlayerDamageAnimationNode::new,
             KillPlayerNode::new,
+            KnockBackPlayerNode::new,
             SendActionBarNode::new,
             SendMessageNode::new,
             SendTitleNode::new,
             SetAllowPlayerFlyingNode::new,
             SetExperienceNode::new,
+            SetGamemodeNode::new,
             SetLevelNode::new,
+            SetPlayerElytraFlyingNode::new,
+            SetPlayerFireTicksNode::new,
             SetPlayerFlyingNode::new,
             SetPlayerFoodNode::new,
             SetPlayerHealthNode::new,
-            SetPlayerSaturationNode::new
+            SetPlayerSaturationNode::new,
+            SetPlayerVelocityNode::new,
+            TeleportPlayerNode::new
     ));
 
     public static final NodeCategory NUMBERS = new NodeCategory("Numbers", ROOT, List.of(
@@ -79,14 +103,38 @@ public class NodeCategory {
             LessEqualThanNode::new,
             LessThanNode::new,
             MultiplyNumbersNode::new,
+            RandomNumberNode::new,
             SubtractNumbersNode::new
+    ));
+
+    public static final NodeCategory LISTS = new NodeCategory("Lists", ROOT, List.of(
+            () -> new EmptyListNode(NumberValue.INSTANCE),
+            () -> new ListAppendNode(NumberValue.INSTANCE),
+            () -> new ListContainsNode(NumberValue.INSTANCE),
+            () -> new ListFindValueNode(NumberValue.INSTANCE),
+            () -> new ListGetNode(NumberValue.INSTANCE),
+            () -> new ListGetNode(NumberValue.INSTANCE),
+            () -> new ListInsertNode(NumberValue.INSTANCE),
+            () -> new ListRemoveAtNode(NumberValue.INSTANCE),
+            () -> new ListRemoveValueNode(NumberValue.INSTANCE),
+            () -> new RandomListValueNode(NumberValue.INSTANCE)
+    ));
+
+    public static final NodeCategory DICTIONARIES = new NodeCategory("Dictionaries", ROOT, List.of(
+            () -> new DictionaryGetNode(NumberValue.INSTANCE, NumberValue.INSTANCE),
+            () -> new DictionaryKeysNode(NumberValue.INSTANCE, NumberValue.INSTANCE),
+            () -> new DictionarySetNode(NumberValue.INSTANCE, NumberValue.INSTANCE),
+            () -> new EmptyDictionaryNode(NumberValue.INSTANCE, NumberValue.INSTANCE)
     ));
 
     public static final Map<Value, NodeCategory> EXTRACTIONS = new HashMap<>();
 
     public static final NodeCategory PLAYER_EXTRACTIONS = new NodeCategory("Player Extractions", PlayerValue.INSTANCE, List.of(
+            PlayerNameNode::new,
+            PlayerPositionNode::new,
             PlayerUUIDNode::new,
-            PlayerNameNode::new
+            PlayerIsPlayingNode::new,
+            PlayerIsOnGroundNode::new
     ));
 
     public static final NodeCategory TEXT_EXTRACTIONS = new NodeCategory("Text Extractions", TextValue.INSTANCE, List.of(
@@ -98,6 +146,22 @@ public class NodeCategory {
             NumberToTextNode::new
     ));
 
+    public static final NodeCategory VECTOR_EXTRACTIONS = new NodeCategory("Vector Extractions", VectorValue.INSTANCE, List.of(
+            NormalizedVectorNode::new,
+            VectorLengthNode::new,
+            VectorXNode::new,
+            VectorYNode::new,
+            VectorZNode::new
+    ));
+
+    public static final NodeCategory POSITION_EXTRACTIONS = new NodeCategory("Position Extractions", PositionValue.INSTANCE, List.of(
+            PositionFacingDirectionNode::new,
+            PositionPitchNode::new,
+            PositionXNode::new,
+            PositionYNode::new,
+            PositionYawNode::new,
+            PositionZNode::new
+    ));
 
     public final String name;
     public final @Nullable NodeCategory parent;

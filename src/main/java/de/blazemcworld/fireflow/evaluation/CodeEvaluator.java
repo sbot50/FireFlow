@@ -79,6 +79,7 @@ public class CodeEvaluator {
         try {
             CompiledNode ctx = compiledClass.getDeclaredConstructor().newInstance();
             ctx.evaluator = this;
+            ctx.space = space;
             return ctx;
         } catch (InstantiationException | IllegalAccessException | InvocationTargetException |
                  NoSuchMethodException e) {
