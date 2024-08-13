@@ -9,11 +9,14 @@ public class AllValues {
 
     public static final List<Value> dataOnly = List.of(
             ConditionValue.INSTANCE,
+            DictionaryValue.get(NumberValue.INSTANCE, NumberValue.INSTANCE),
             ListValue.get(NumberValue.INSTANCE),
             MessageValue.INSTANCE,
             NumberValue.INSTANCE,
             PlayerValue.INSTANCE,
-            TextValue.INSTANCE
+            PositionValue.INSTANCE,
+            TextValue.INSTANCE,
+            VectorValue.INSTANCE
     );
 
     public static final List<Value> any = new ArrayList<>();

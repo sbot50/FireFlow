@@ -12,7 +12,6 @@ public class NodeOutput implements Instruction {
     public final Value type;
     public NodeInput target;
     private Instruction instruction = null;
-    public final String id = Node.allocateId();
 
     public NodeOutput(String name, Value type) {
         this.name = name;
@@ -45,13 +44,13 @@ public class NodeOutput implements Instruction {
     }
 
     @Override
-    public InsnList compile(NodeCompiler ctx) {
+    public InsnList compile(NodeCompiler ctx, int usedVars) {
         if (type == SignalValue.INSTANCE) {
             if (target == null) return new InsnList();
-            return ctx.compile(target);
+            return ctx.compile(target, usedVars);
         }
         if (instruction != null) {
-            return ctx.compile(instruction);
+            return ctx.compile(instruction, usedVars);
         }
         throw new IllegalStateException("Missing instructions on value output!");
     }

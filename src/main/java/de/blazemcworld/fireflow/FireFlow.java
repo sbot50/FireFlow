@@ -4,6 +4,7 @@ import de.blazemcworld.fireflow.commands.*;
 import de.blazemcworld.fireflow.network.ApiServer;
 import de.blazemcworld.fireflow.network.RemoteInfo;
 import de.blazemcworld.fireflow.preferences.PlayerIndex;
+import de.blazemcworld.fireflow.node.NodeList;
 import de.blazemcworld.fireflow.space.SpacesIndex;
 import de.blazemcworld.fireflow.util.Config;
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
@@ -38,6 +39,8 @@ public class FireFlow {
         ConsoleHandler.init();
         SpacesIndex.init();
         PlayerIndex.init();
+
+        LOGGER.info("Found {} nodes!", NodeList.nodes.size());
 
         CommandManager cmds = MinecraftServer.getCommandManager();
         cmds.register(new PlayCommand());

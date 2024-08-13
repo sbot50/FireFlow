@@ -3,17 +3,38 @@ package de.blazemcworld.fireflow.node;
 import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.compiler.FunctionDefinition;
 import de.blazemcworld.fireflow.editor.CodeEditor;
-import de.blazemcworld.fireflow.node.impl.AddNumbersNode;
+import de.blazemcworld.fireflow.node.impl.IfNode;
+import de.blazemcworld.fireflow.node.impl.ScheduleNode;
+import de.blazemcworld.fireflow.node.impl.ValuesEqualNode;
 import de.blazemcworld.fireflow.node.impl.WhileNode;
-import de.blazemcworld.fireflow.node.impl.event.PlayerJoinEvent;
-import de.blazemcworld.fireflow.node.impl.extraction.player.PlayerUUIDNode;
+import de.blazemcworld.fireflow.node.impl.dictionary.DictionaryGetNode;
+import de.blazemcworld.fireflow.node.impl.dictionary.DictionaryKeysNode;
+import de.blazemcworld.fireflow.node.impl.dictionary.DictionarySetNode;
+import de.blazemcworld.fireflow.node.impl.dictionary.EmptyDictionaryNode;
+import de.blazemcworld.fireflow.node.impl.event.*;
+import de.blazemcworld.fireflow.node.impl.extraction.number.NumberToTextNode;
+import de.blazemcworld.fireflow.node.impl.extraction.player.*;
+import de.blazemcworld.fireflow.node.impl.extraction.position.*;
+import de.blazemcworld.fireflow.node.impl.extraction.text.FormatTextToMessageNode;
 import de.blazemcworld.fireflow.node.impl.extraction.text.TextToMessageNode;
+import de.blazemcworld.fireflow.node.impl.extraction.vector.*;
+import de.blazemcworld.fireflow.node.impl.list.*;
+import de.blazemcworld.fireflow.node.impl.number.*;
+import de.blazemcworld.fireflow.node.impl.number.comparison.GreaterEqualThanNode;
+import de.blazemcworld.fireflow.node.impl.number.comparison.GreaterThanNode;
+import de.blazemcworld.fireflow.node.impl.number.comparison.LessEqualThanNode;
+import de.blazemcworld.fireflow.node.impl.number.comparison.LessThanNode;
 import de.blazemcworld.fireflow.node.impl.player.*;
+import de.blazemcworld.fireflow.node.impl.position.CreatePositionNode;
+import de.blazemcworld.fireflow.node.impl.position.PositionToVectorNode;
+import de.blazemcworld.fireflow.node.impl.position.ShiftPositionVectorNode;
+import de.blazemcworld.fireflow.node.impl.position.ShiftPositionXYZNode;
+import de.blazemcworld.fireflow.node.impl.text.ConcatTextsNode;
 import de.blazemcworld.fireflow.node.impl.variable.*;
-import de.blazemcworld.fireflow.value.NumberValue;
-import de.blazemcworld.fireflow.value.PlayerValue;
-import de.blazemcworld.fireflow.value.TextValue;
-import de.blazemcworld.fireflow.value.Value;
+import de.blazemcworld.fireflow.node.impl.vector.CreateVectorNode;
+import de.blazemcworld.fireflow.node.impl.vector.ScaleVectorNode;
+import de.blazemcworld.fireflow.node.impl.vector.VectorToPositionNode;
+import de.blazemcworld.fireflow.value.*;
 import it.unimi.dsi.fastutil.Pair;
 import org.jetbrains.annotations.Nullable;
 
@@ -23,9 +44,17 @@ import java.util.function.Supplier;
 public class NodeCategory {
 
     public static final NodeCategory ROOT = new NodeCategory("Root", List.of(
-            AddNumbersNode::new,
-            PlayerJoinEvent::new,
-            SendMessageNode::new,
+            () -> new ValuesEqualNode(NumberValue.INSTANCE),
+            ConcatTextsNode::new,
+            CreatePositionNode::new,
+            CreateVectorNode::new,
+            IfNode::new,
+            PositionToVectorNode::new,
+            ScaleVectorNode::new,
+            ScheduleNode::new,
+            ShiftPositionVectorNode::new,
+            ShiftPositionXYZNode::new,
+            VectorToPositionNode::new,
             WhileNode::new
     ));
 
@@ -40,28 +69,107 @@ public class NodeCategory {
 
     public static final NodeCategory PLAYERS = new NodeCategory("Players", ROOT, List.of(
             ClearTitleNode::new,
+            DisplayPlayerDamageAnimationNode::new,
             KillPlayerNode::new,
+            KnockBackPlayerNode::new,
             SendActionBarNode::new,
+            SendMessageNode::new,
             SendTitleNode::new,
             SetAllowPlayerFlyingNode::new,
             SetExperienceNode::new,
+            SetGamemodeNode::new,
             SetLevelNode::new,
+            SetPlayerElytraFlyingNode::new,
+            SetPlayerFireTicksNode::new,
             SetPlayerFlyingNode::new,
             SetPlayerFoodNode::new,
             SetPlayerHealthNode::new,
-            SetPlayerSaturationNode::new
+            SetPlayerSaturationNode::new,
+            SetPlayerVelocityNode::new,
+            TeleportPlayerNode::new
+    ));
+
+    public static final NodeCategory NUMBERS = new NodeCategory("Numbers", ROOT, List.of(
+            AddNumbersNode::new,
+            DivideNumbersNode::new,
+            GreaterEqualThanNode::new,
+            GreaterThanNode::new,
+            LessEqualThanNode::new,
+            LessThanNode::new,
+            MultiplyNumbersNode::new,
+            RandomNumberNode::new,
+            SubtractNumbersNode::new
+    ));
+
+    public static final NodeCategory LISTS = new NodeCategory("Lists", ROOT, List.of(
+            () -> new EmptyListNode(NumberValue.INSTANCE),
+            () -> new ForeachNode(NumberValue.INSTANCE),
+            () -> new ListAppendNode(NumberValue.INSTANCE),
+            () -> new ListContainsNode(NumberValue.INSTANCE),
+            () -> new ListFindValueNode(NumberValue.INSTANCE),
+            () -> new ListGetNode(NumberValue.INSTANCE),
+            () -> new ListGetNode(NumberValue.INSTANCE),
+            () -> new ListInsertNode(NumberValue.INSTANCE),
+            () -> new ListRemoveAtNode(NumberValue.INSTANCE),
+            () -> new ListRemoveValueNode(NumberValue.INSTANCE),
+            () -> new RandomListValueNode(NumberValue.INSTANCE)
+    ));
+
+    public static final NodeCategory DICTIONARIES = new NodeCategory("Dictionaries", ROOT, List.of(
+            () -> new DictionaryGetNode(NumberValue.INSTANCE, NumberValue.INSTANCE),
+            () -> new DictionaryKeysNode(NumberValue.INSTANCE, NumberValue.INSTANCE),
+            () -> new DictionarySetNode(NumberValue.INSTANCE, NumberValue.INSTANCE),
+            () -> new EmptyDictionaryNode(NumberValue.INSTANCE, NumberValue.INSTANCE)
+    ));
+
+    public static final NodeCategory EVENTS = new NodeCategory("Events", ROOT, List.of(
+            PlayerChatEventNode::new,
+            PlayerInteractEventNode::new,
+            PlayerJoinEventNode::new,
+            PlayerLeaveEventNode::new,
+            PlayerPunchPlayerEventNode::new,
+            PlayerSneakEventNode::new,
+            PlayerStartFlyingEventNode::new,
+            PlayerStopFlyingEventNode::new,
+            PlayerUnsneakEventNode::new
     ));
 
     public static final Map<Value, NodeCategory> EXTRACTIONS = new HashMap<>();
 
     public static final NodeCategory PLAYER_EXTRACTIONS = new NodeCategory("Player Extractions", PlayerValue.INSTANCE, List.of(
+            PlayerIsOnGroundNode::new,
+            PlayerIsPlayingNode::new,
+            PlayerIsSneakingNode::new,
+            PlayerNameNode::new,
+            PlayerPositionNode::new,
             PlayerUUIDNode::new
     ));
 
     public static final NodeCategory TEXT_EXTRACTIONS = new NodeCategory("Text Extractions", TextValue.INSTANCE, List.of(
-        TextToMessageNode::new
+            FormatTextToMessageNode::new,
+            TextToMessageNode::new
     ));
 
+    public static final NodeCategory NUMBER_EXTRACTIONS = new NodeCategory("Number Extractions", NumberValue.INSTANCE, List.of(
+            NumberToTextNode::new
+    ));
+
+    public static final NodeCategory VECTOR_EXTRACTIONS = new NodeCategory("Vector Extractions", VectorValue.INSTANCE, List.of(
+            NormalizedVectorNode::new,
+            VectorLengthNode::new,
+            VectorXNode::new,
+            VectorYNode::new,
+            VectorZNode::new
+    ));
+
+    public static final NodeCategory POSITION_EXTRACTIONS = new NodeCategory("Position Extractions", PositionValue.INSTANCE, List.of(
+            PositionFacingDirectionNode::new,
+            PositionPitchNode::new,
+            PositionXNode::new,
+            PositionYNode::new,
+            PositionYawNode::new,
+            PositionZNode::new
+    ));
 
     public final String name;
     public final @Nullable NodeCategory parent;
@@ -69,6 +177,7 @@ public class NodeCategory {
     public final @Nullable Value extractionType;
     public final List<Pair<String, Supplier<Node>>> nodes = new ArrayList<>();
     public final List<NodeCategory> subcategories = new ArrayList<>();
+
     public NodeCategory(String name, @Nullable NodeCategory parent, boolean isFunctions, @Nullable Value extractionType, List<Supplier<Node>> nodes) {
         this.name = name;
         this.parent = parent;
