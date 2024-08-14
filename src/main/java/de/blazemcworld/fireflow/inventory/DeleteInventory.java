@@ -1,5 +1,7 @@
 package de.blazemcworld.fireflow.inventory;
 
+import de.blazemcworld.fireflow.preferences.PlayerIndex;
+import de.blazemcworld.fireflow.preferences.Preference;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -31,11 +33,11 @@ public class DeleteInventory {
                 .customName(Component.text("No").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.RED))
                 .build());
 
-//        inv.setItemStack(8, ItemStack.builder(Material.BARRIER)
-//                .customName(Component.text("Never ask me this again").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.DARK_RED))
-//                .lore(Component.text("WARNING: This will delete the selected nodes!").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.RED),
-//                        Component.text("Can be reverted in the preference menu").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY))
-//                .build());
+        inv.setItemStack(8, ItemStack.builder(Material.BARRIER)
+                .customName(Component.text("Never ask me this again").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.DARK_RED))
+                .lore(Component.text("WARNING: This will delete the selected nodes!").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.RED),
+                        Component.text("Can be reverted in the preference menu").decoration(TextDecoration.ITALIC, false).color(NamedTextColor.GRAY))
+                .build());
 
         player.openInventory(inv);
 
@@ -50,6 +52,11 @@ public class DeleteInventory {
                 case 5 -> {
                     who.closeInventory();
                     callback.accept(false);
+                }
+                case 8 -> {
+                    PlayerIndex.get(player).preferences.put(Preference.DELETE, 1);
+                    who.closeInventory();
+                    callback.accept(true);
                 }
             }
         });

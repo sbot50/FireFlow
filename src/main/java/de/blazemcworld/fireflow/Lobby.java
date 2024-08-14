@@ -1,6 +1,7 @@
 package de.blazemcworld.fireflow;
 
 import de.blazemcworld.fireflow.inventory.MySpacesInventory;
+import de.blazemcworld.fireflow.inventory.PreferencesInventory;
 import de.blazemcworld.fireflow.inventory.ServerListInventory;
 import de.blazemcworld.fireflow.inventory.SpacesListInventory;
 import de.blazemcworld.fireflow.network.RemoteInfo;
@@ -64,6 +65,15 @@ public class Lobby {
             )
             .build();
 
+    private static final ItemStack PREFERENCES_ITEM = ItemStack.builder(Material.PIGLIN_BANNER_PATTERN)
+            .customName(Component.text("Preferences").color(NamedTextColor.YELLOW).decoration(TextDecoration.ITALIC, false))
+            .lore(
+                    Component.text("Manage your preferences").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false),
+                    Component.text("using this item.").color(NamedTextColor.GRAY).decoration(TextDecoration.ITALIC, false)
+            )
+            .hideExtraTooltip()
+            .build();
+
     static {
         instance.setChunkSupplier(LightingChunk::new);
 
@@ -89,7 +99,10 @@ public class Lobby {
             PlayerInventory inv = player.getInventory();
             inv.setItemStack(0, MY_SPACES);
             inv.setItemStack(4, ACTIVE_SPACES);
-            if (Config.store.network().enabled()) inv.setItemStack(8, OTHER_SERVERS);
+            if (Config.store.network().enabled()) {
+                inv.setItemStack(7, PREFERENCES_ITEM);
+                inv.setItemStack(8, OTHER_SERVERS);
+            } else inv.setItemStack(8, PREFERENCES_ITEM);
 
             player.getPlayerConnection().fetchCookie("fireflow_code_space").thenAccept(bytes -> {
                 if (bytes == null || bytes.length == 0) return;
@@ -144,6 +157,9 @@ public class Lobby {
         }
         if (event.getPlayer().getItemInMainHand().isSimilar(OTHER_SERVERS)) {
             ServerListInventory.open(event.getPlayer());
+        }
+        if (event.getPlayer().getItemInMainHand().isSimilar(PREFERENCES_ITEM)) {
+            PreferencesInventory.open(event.getPlayer());
         }
     }
 

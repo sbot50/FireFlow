@@ -6,6 +6,8 @@ import de.blazemcworld.fireflow.editor.EditorAction;
 import de.blazemcworld.fireflow.editor.widget.NodeWidget;
 import de.blazemcworld.fireflow.editor.widget.RectWidget;
 import de.blazemcworld.fireflow.inventory.DeleteInventory;
+import de.blazemcworld.fireflow.preferences.PlayerIndex;
+import de.blazemcworld.fireflow.preferences.Preference;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
@@ -54,7 +56,10 @@ public class DeleteSelectionAction implements EditorAction {
             editor.setAction(player, null);
             return;
         }
-        if (nodes.size() >= 5) DeleteInventory.open(player, nodes.size(), this::callback);
+        if (nodes.size() >= 5) {
+            if (PlayerIndex.get(player).preferences.get(Preference.DELETE) == 0) DeleteInventory.open(player, nodes.size(), this::callback);
+            else callback(true);
+        }
         else callback(true);
     }
 
