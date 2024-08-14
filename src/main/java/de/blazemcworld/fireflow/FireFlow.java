@@ -3,8 +3,8 @@ package de.blazemcworld.fireflow;
 import de.blazemcworld.fireflow.commands.*;
 import de.blazemcworld.fireflow.network.ApiServer;
 import de.blazemcworld.fireflow.network.RemoteInfo;
-import de.blazemcworld.fireflow.preferences.PlayerIndex;
 import de.blazemcworld.fireflow.node.NodeList;
+import de.blazemcworld.fireflow.preferences.PlayerIndex;
 import de.blazemcworld.fireflow.space.SpacesIndex;
 import de.blazemcworld.fireflow.util.Config;
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
@@ -63,7 +63,6 @@ public class FireFlow {
         events.addListener(AsyncPlayerConfigurationEvent.class, event -> {
             event.setSpawningInstance(Lobby.instance);
             event.getPlayer().setGameMode(GameMode.CREATIVE);
-            PlayerIndex.add(event.getPlayer());
         });
 
         events.addListener(PlayerDisconnectEvent.class, event -> {

@@ -16,7 +16,7 @@ public enum Preference {
             new PreferenceState("Off", Material.REDSTONE_BLOCK)
     })
     ;
-    private final PreferenceState[] states;
+    public final PreferenceState[] states;
     private final String desc;
 
     Preference(String desc, PreferenceState[] states) {
@@ -25,13 +25,8 @@ public enum Preference {
     }
 
     public Component getDesc() {
-        return Component.text(desc)
-                .color(NamedTextColor.GREEN)
+        return Component.text(desc).color(NamedTextColor.GREEN)
                 .decoration(TextDecoration.ITALIC, false);
-    }
-
-    public PreferenceState getState(int value) {
-        return states[value];
     }
 
     public List<Component> getLore() {
@@ -40,14 +35,6 @@ public enum Preference {
                         .color(NamedTextColor.GRAY)
                         .decoration(TextDecoration.ITALIC, false))
                 .collect(Collectors.toCollection(ArrayList::new));
-    }
-
-    public int decreaseState(int state) {
-        return Math.floorMod(state - 1, states.length);
-    }
-
-    public int increaseState(int state) {
-        return (state + 1) % states.length;
     }
 
     public record PreferenceState(String name, Material icon) {

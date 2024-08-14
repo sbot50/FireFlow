@@ -9,14 +9,13 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.WeakHashMap;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
 
 public class PlayerIndex {
 
-    public static WeakHashMap<Player, PlayerInfo> playerMap = new WeakHashMap<>();
-    public static final List<PlayerInfo> players = new ArrayList<>();
+    public static final Map<UUID, PlayerInfo> players = new HashMap<>();
     private static final Path playerIndex = Path.of("player_index.bin");
 
     public static void init() {
@@ -30,29 +29,17 @@ public class PlayerIndex {
         });
     }
 
-    public static void add(Player player) {
-        for (PlayerInfo info : players) {
-            if (info.uuid.equals(player.getUuid())) {
-                playerMap.put(player, info);
-                return;
-            }
-        }
-        PlayerInfo info = new PlayerInfo();
-        info.uuid = player.getUuid();
-        playerMap.put(player, info);
-        players.add(info);
-    }
-
     public static PlayerInfo get(Player player) {
-        return playerMap.get(player);
+        return players.computeIfAbsent(player.getUuid(), id -> new PlayerInfo());
     }
 
     private static void write() {
         NetworkBuffer buffer = new NetworkBuffer();
 
         buffer.write(NetworkBuffer.INT, players.size());
-        for (PlayerInfo info : players) {
-            info.write(buffer);
+        for (Map.Entry<UUID, PlayerInfo> entry : players.entrySet()) {
+            buffer.write(NetworkBuffer.UUID, entry.getKey());
+            entry.getValue().write(buffer);
         }
 
         try {
@@ -72,9 +59,10 @@ public class PlayerIndex {
 
         int count = buffer.read(NetworkBuffer.INT);
         for (int i = 0; i < count; i++) {
+            UUID uuid = buffer.read(NetworkBuffer.UUID);
             PlayerInfo info = new PlayerInfo();
             info.read(buffer);
-            players.add(info);
+            players.put(uuid, info);
         }
     }
 
