@@ -1,0 +1,15 @@
+{
+  "motd": "Welcome to FireFlow!",
+  "port": 25565,
+  "limits": {
+    "cpuPerTick": 10000000,
+    "spacesPerPlayer": 5,
+    "totalSpaces": 50
+  },
+  "network": {
+    "enabled": false,
+    "port": 2756,
+    "sources": [],
+    "mcHost": ""
+  }
+}
