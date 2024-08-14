@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import de.blazemcworld.fireflow.FireFlow;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -14,7 +15,14 @@ public class Config {
 
     private static Store readConfig() {
         try {
-            Store store = new Gson().fromJson(Files.readString(Path.of("config.json")), Store.class);
+            Path configPath = Path.of("config.json");
+            if (!Files.exists(configPath)) {
+                try (InputStream resource = FireFlow.class.getClassLoader().getResourceAsStream("defaultConfig.json")) {
+                    if (resource == null) throw new IOException("Could not read config file, please report this to the developers!");
+                    Files.write(configPath, resource.readAllBytes());
+                }
+            }
+            Store store = new Gson().fromJson(Files.readString(configPath), Store.class);
             if (store.motd == null) FireFlow.LOGGER.warn("'motd' in config is not set!");
             if (store.port == 0) FireFlow.LOGGER.warn("Invalid 'port' in config.json!");
 
@@ -40,7 +48,7 @@ public class Config {
                 }
             }
             return store;
-        } catch (IOException e) {
+        } catch (Exception e) {
             FireFlow.LOGGER.error("Error reading config.json!");
             throw new RuntimeException(e);
         }
