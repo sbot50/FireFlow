@@ -10,5 +10,6 @@ public class SpaceCommand extends Command {
         addSubcommand(new SetIconCommand());
         addSubcommand(new VariablesCommand());
         addSubcommand(new ContributorCommand());
+        addSubcommand(new SetVarCommand());
     }
 }

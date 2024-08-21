@@ -25,8 +25,15 @@ public class SetVarCommand extends Command {
                 sender.sendMessage(Messages.error("You are not the owner nor a contributor of this space!"));
                 return;
             }
-            //space.info.title = ctx.get("setvar");
-            //sender.sendMessage(Messages.success("Changed space title!"));
+            for (Value v : AllValues.dataOnly) {
+                if (!v.canInset() || ctx.get(v.getBaseName()) == null) continue;
+                if (v.prepareInset(ctx.get("value")) != null) {
+                    space.variables.put(ctx.get("varname"), v.prepareInset(ctx.get("value")));
+                    sender.sendMessage(Messages.success("Set variable \"" + ctx.get("varname") + "\" to '" + ctx.get("value") + "'!"));
+                } else sender.sendMessage(Messages.error("Invalid value for literal of type \"" + v.getBaseName() + "\"!"));
+                return;
+            }
+            sender.sendMessage(Messages.error("Couldn't find literal value!"));
         } else {
             sender.sendMessage(Messages.error("Only players can do this!"));
         }

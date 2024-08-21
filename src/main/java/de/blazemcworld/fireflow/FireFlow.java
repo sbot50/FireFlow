@@ -49,7 +49,6 @@ public class FireFlow {
         cmds.register(new ReloadCommand());
         cmds.register(new JoinCommand());
         cmds.register(new SpaceCommand());
-        cmds.register(new SetVarCommand());
 
         if (Config.store.network().enabled()) {
             ApiServer.init();
