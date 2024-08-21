@@ -40,7 +40,7 @@ public class SetVarCommand extends Command {
     }
 
     public SetVarCommand() {
-        super("setvar");
+        super("set");
         for (Value v : AllValues.dataOnly) {
             if (v.canInset()) {
                 addSyntax(
