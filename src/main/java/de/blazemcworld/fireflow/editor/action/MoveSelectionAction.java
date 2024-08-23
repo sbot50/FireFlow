@@ -19,7 +19,7 @@ public class MoveSelectionAction implements EditorAction {
     private Vec start;
     private final CodeEditor editor;
     private final Player player;
-    private final Map<NodeWidget, Vec> nodes = new HashMap<>();
+    private Map<NodeWidget, Vec> nodes = new HashMap<>();
 
     public MoveSelectionAction(InstanceContainer inst, Vec start, Player player, CodeEditor editor) {
         this.player = player;
@@ -47,6 +47,20 @@ public class MoveSelectionAction implements EditorAction {
     @Override
     public void leftClick(Vec cursor) {
         editor.setAction(player, null);
+    }
+
+    @Override
+    public void swapItem(Vec cursor) {
+        Map<NodeWidget, Vec> newNodes = new HashMap<>();
+        for (NodeWidget node : nodes.keySet()) {
+            NodeWidget newNode = node.cloneWidget();
+            newNode.border.color(NamedTextColor.GREEN);
+            editor.widgets.add(newNode);
+            newNodes.put(newNode, nodes.get(node));
+            node.border.color(NamedTextColor.WHITE);
+            node.update(false);
+        }
+        nodes = newNodes;
     }
 
     @Override

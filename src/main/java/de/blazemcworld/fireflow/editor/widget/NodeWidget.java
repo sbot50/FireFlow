@@ -216,5 +216,21 @@ public class NodeWidget implements Widget {
         border.remove();
     }
 
+    public NodeWidget cloneWidget() {
+        NodeWidget newNode = new NodeWidget(origin, inst, node);
+        for (NodeInputWidget input : inputs) {
+            NodeInput inputClone = new NodeInput(input.input.getName(), input.input.getType());
+            NodeInputWidget clone = new NodeInputWidget(input.position, inst, input.text(), inputClone, newNode);
+            newNode.inputs.add(clone);
+        }
+        for (NodeOutputWidget output : outputs) {
+            NodeOutput outputClone = new NodeOutput(output.output.getName(), output.output.getType());
+            NodeOutputWidget clone = new NodeOutputWidget(output.position, inst, output.text(), outputClone, newNode);
+            newNode.outputs.add(clone);
+        }
+        newNode.update(true);
+        return newNode;
+    }
+
     public Bounds getBounds() { return bounds; }
 }
