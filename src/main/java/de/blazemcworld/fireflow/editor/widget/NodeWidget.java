@@ -6,10 +6,7 @@ import de.blazemcworld.fireflow.editor.CodeEditor;
 import de.blazemcworld.fireflow.editor.Widget;
 import de.blazemcworld.fireflow.editor.action.CreateWireAction;
 import de.blazemcworld.fireflow.editor.action.MoveNodeAction;
-import de.blazemcworld.fireflow.node.ExtractionNode;
-import de.blazemcworld.fireflow.node.Node;
-import de.blazemcworld.fireflow.node.NodeInput;
-import de.blazemcworld.fireflow.node.NodeOutput;
+import de.blazemcworld.fireflow.node.*;
 import de.blazemcworld.fireflow.util.Messages;
 import de.blazemcworld.fireflow.util.TextWidth;
 import de.blazemcworld.fireflow.value.AllValues;
@@ -217,19 +214,11 @@ public class NodeWidget implements Widget {
     }
 
     public NodeWidget cloneWidget() {
-        NodeWidget newNode = new NodeWidget(origin, inst, node);
-        for (NodeInputWidget input : inputs) {
-            NodeInput inputClone = new NodeInput(input.input.getName(), input.input.getType());
-            NodeInputWidget clone = new NodeInputWidget(input.position, inst, input.text(), inputClone, newNode);
-            newNode.inputs.add(clone);
-        }
-        for (NodeOutputWidget output : outputs) {
-            NodeOutput outputClone = new NodeOutput(output.output.getName(), output.output.getType());
-            NodeOutputWidget clone = new NodeOutputWidget(output.position, inst, output.text(), outputClone, newNode);
-            newNode.outputs.add(clone);
-        }
-        newNode.update(true);
-        return newNode;
+        Node newNode = NodeList.nodes.get(node.getBaseName()).get();
+        newNode = newNode.fromGenerics(node.generics());
+        NodeWidget newNodeWidget = new NodeWidget(origin, inst, newNode);
+        newNodeWidget.update(false);
+        return newNodeWidget;
     }
 
     public Bounds getBounds() { return bounds; }
