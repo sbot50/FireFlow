@@ -18,6 +18,7 @@ import de.blazemcworld.fireflow.node.impl.extraction.position.*;
 import de.blazemcworld.fireflow.node.impl.extraction.text.FormatTextToMessageNode;
 import de.blazemcworld.fireflow.node.impl.extraction.text.TextToMessageNode;
 import de.blazemcworld.fireflow.node.impl.extraction.vector.*;
+import de.blazemcworld.fireflow.node.impl.item.ItemBuilderNode;
 import de.blazemcworld.fireflow.node.impl.list.*;
 import de.blazemcworld.fireflow.node.impl.number.*;
 import de.blazemcworld.fireflow.node.impl.number.comparison.GreaterEqualThanNode;
@@ -65,6 +66,11 @@ public class NodeCategory {
             () -> new SetVariableNode(LocalVariableScope.INSTANCE, NumberValue.INSTANCE),
             () -> new SetVariableNode(PersistentVariableScope.INSTANCE, NumberValue.INSTANCE),
             () -> new SetVariableNode(SpaceVariableScope.INSTANCE, NumberValue.INSTANCE)
+    ));
+
+    public static final NodeCategory ITEMS = new NodeCategory("Items", ROOT, List.of(
+            ItemBuilderNode::new,
+            GiveItemNode::new
     ));
 
     public static final NodeCategory PLAYERS = new NodeCategory("Players", ROOT, List.of(

@@ -16,7 +16,10 @@ public class AllValues {
             PlayerValue.INSTANCE,
             PositionValue.INSTANCE,
             TextValue.INSTANCE,
-            VectorValue.INSTANCE
+            VectorValue.INSTANCE,
+            EnchantmentValue.INSTANCE,
+            MaterialValue.INSTANCE,
+            ItemValue.INSTANCE
     );
 
     public static final List<Value> any = new ArrayList<>();

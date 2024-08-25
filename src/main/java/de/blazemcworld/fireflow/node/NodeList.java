@@ -15,6 +15,7 @@ import de.blazemcworld.fireflow.node.impl.extraction.position.*;
 import de.blazemcworld.fireflow.node.impl.extraction.text.FormatTextToMessageNode;
 import de.blazemcworld.fireflow.node.impl.extraction.text.TextToMessageNode;
 import de.blazemcworld.fireflow.node.impl.extraction.vector.*;
+import de.blazemcworld.fireflow.node.impl.item.ItemBuilderNode;
 import de.blazemcworld.fireflow.node.impl.list.*;
 import de.blazemcworld.fireflow.node.impl.number.*;
 import de.blazemcworld.fireflow.node.impl.number.comparison.GreaterEqualThanNode;
@@ -75,9 +76,11 @@ public class NodeList {
                 DisplayPlayerDamageAnimationNode::new,
                 DivideNumbersNode::new,
                 FormatTextToMessageNode::new,
+                GiveItemNode::new,
                 GreaterEqualThanNode::new,
                 GreaterThanNode::new,
                 IfNode::new,
+                ItemBuilderNode::new,
                 KillPlayerNode::new,
                 KnockBackPlayerNode::new,
                 LessEqualThanNode::new,
