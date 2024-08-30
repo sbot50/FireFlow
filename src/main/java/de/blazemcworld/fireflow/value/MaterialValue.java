@@ -11,6 +11,13 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import static de.blazemcworld.fireflow.util.CamelCase.camelCase;
+import static de.blazemcworld.fireflow.util.Levenshtein.calculateAndSmartSort;
+import static de.blazemcworld.fireflow.util.Levenshtein.smartSort;
+
 public class MaterialValue implements Value {
     public static final Value INSTANCE = new MaterialValue();
 
@@ -33,12 +40,17 @@ public class MaterialValue implements Value {
     }
 
     @Override
+    public boolean typeCheck(Object value) {
+        return value instanceof Material;
+    }
+
+    @Override
     public InsnList compile(NodeCompiler ctx, Object inset) {
         InsnList out = new InsnList();
         Material mat = Material.AIR;
         if (inset instanceof Material casted) mat = casted;
         out.add(new LdcInsnNode(mat.namespace().asString()));
-        out.add(new MethodInsnNode(Opcodes.INVOKEINTERFACE, "net/minestom/server/item/Material", "fromNamespaceId", "(Ljava/lang/Object;)Lnet/minestom/server/item/Material;"));
+        out.add(new MethodInsnNode(Opcodes.INVOKESTATIC, "net/minestom/server/item/Material", "fromNamespaceId", "(Ljava/lang/String;)Lnet/minestom/server/item/Material;", true));
         return out;
     }
 
@@ -68,14 +80,29 @@ public class MaterialValue implements Value {
     }
 
     @Override
+    public String formatInset(Object inset) {
+        if (!(inset instanceof Material)) return String.valueOf(inset);
+        return camelCase(((Material) inset).name().split(":")[1].replaceAll("_", " "));
+    }
+
+    @Override
     public Object prepareInset(String value) {
         value = value.replaceAll(" ", "_").toLowerCase();
-        for (Material material : Material.values()) {
-            if (material.name().equals(value)) {
-                return material;
-            }
+        if (Material.fromNamespaceId(value) == null) return null;
+        return Material.fromNamespaceId(value);
+    }
+
+    @Override
+    public List<String> getSuggestions(String message) {
+        List<String> list = new ArrayList<>();
+        for (Material mat : Material.values()) {
+            if (!mat.name().toLowerCase().contains(message.toLowerCase().replace(" ", "_"))) continue;
+            list.add(camelCase(mat.name().split(":")[1].replaceAll("_", " ")));
         }
-        return null;
+        if (list.size() > 30) list = smartSort(message, list.toArray(String[]::new)).subList(0, 30);
+        list = calculateAndSmartSort(message, list.toArray(String[]::new));
+        if (list.size() > 5) list = list.subList(0, 5);
+        return list;
     }
 
     @Override

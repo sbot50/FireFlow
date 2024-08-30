@@ -51,6 +51,11 @@ public class MessageValue implements Value {
     }
 
     @Override
+    public boolean typeCheck(Object value) {
+        return value instanceof Component;
+    }
+
+    @Override
     public InsnList compile(NodeCompiler ctx, Object inset) {
         InsnList out = new InsnList();
 
@@ -91,6 +96,12 @@ public class MessageValue implements Value {
     @Override
     public Instruction wrapPrimitive(Instruction value) {
         return value;
+    }
+
+    @Override
+    public String formatInset(Object inset) {
+        if (!(inset instanceof Component)) return String.valueOf(inset);
+        return MM.serialize((Component) inset);
     }
 
     @Override

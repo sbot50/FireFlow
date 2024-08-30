@@ -9,13 +9,17 @@ import de.blazemcworld.fireflow.node.impl.dictionary.DictionaryKeysNode;
 import de.blazemcworld.fireflow.node.impl.dictionary.DictionarySetNode;
 import de.blazemcworld.fireflow.node.impl.dictionary.EmptyDictionaryNode;
 import de.blazemcworld.fireflow.node.impl.event.*;
+import de.blazemcworld.fireflow.node.impl.extraction.enchant.EnchantID;
+import de.blazemcworld.fireflow.node.impl.extraction.enchant.EnchantName;
+import de.blazemcworld.fireflow.node.impl.extraction.item.*;
+import de.blazemcworld.fireflow.node.impl.extraction.material.MaterialName;
 import de.blazemcworld.fireflow.node.impl.extraction.number.NumberToTextNode;
 import de.blazemcworld.fireflow.node.impl.extraction.player.*;
 import de.blazemcworld.fireflow.node.impl.extraction.position.*;
 import de.blazemcworld.fireflow.node.impl.extraction.text.FormatTextToMessageNode;
 import de.blazemcworld.fireflow.node.impl.extraction.text.TextToMessageNode;
 import de.blazemcworld.fireflow.node.impl.extraction.vector.*;
-import de.blazemcworld.fireflow.node.impl.item.ItemBuilderNode;
+import de.blazemcworld.fireflow.node.impl.item.*;
 import de.blazemcworld.fireflow.node.impl.list.*;
 import de.blazemcworld.fireflow.node.impl.number.*;
 import de.blazemcworld.fireflow.node.impl.number.comparison.GreaterEqualThanNode;
@@ -68,6 +72,7 @@ public class NodeList {
                 () -> new SetVariableNode(PersistentVariableScope.INSTANCE, NumberValue.INSTANCE),
                 () -> new SetVariableNode(SpaceVariableScope.INSTANCE, NumberValue.INSTANCE),
                 () -> new ValuesEqualNode(NumberValue.INSTANCE),
+                AddItemLoreNode::new,
                 AddNumbersNode::new,
                 ClearTitleNode::new,
                 ConcatTextsNode::new,
@@ -75,16 +80,26 @@ public class NodeList {
                 CreateVectorNode::new,
                 DisplayPlayerDamageAnimationNode::new,
                 DivideNumbersNode::new,
+                EnchantID::new,
+                EnchantItemNode::new,
+                EnchantName::new,
                 FormatTextToMessageNode::new,
                 GiveItemNode::new,
                 GreaterEqualThanNode::new,
                 GreaterThanNode::new,
                 IfNode::new,
+                InsertItemLoreNode::new,
                 ItemBuilderNode::new,
+                ItemCount::new,
+                ItemEnchants::new,
+                ItemLore::new,
+                ItemMaterial::new,
+                ItemName::new,
                 KillPlayerNode::new,
                 KnockBackPlayerNode::new,
                 LessEqualThanNode::new,
                 LessThanNode::new,
+                MaterialName::new,
                 MultiplyNumbersNode::new,
                 NormalizedVectorNode::new,
                 NumberToTextNode::new,
@@ -111,6 +126,8 @@ public class NodeList {
                 PositionYawNode::new,
                 PositionZNode::new,
                 RandomNumberNode::new,
+                RemoveEnchantItemNode::new,
+                RemoveItemLoreNode::new,
                 ScaleVectorNode::new,
                 ScheduleNode::new,
                 SendActionBarNode::new,
@@ -119,6 +136,11 @@ public class NodeList {
                 SetAllowPlayerFlyingNode::new,
                 SetExperienceNode::new,
                 SetGamemodeNode::new,
+                SetItemAmountNode::new,
+                SetItemEnchantsNode::new,
+                SetItemLoreNode::new,
+                SetItemMaterialNode::new,
+                SetItemNameNode::new,
                 SetLevelNode::new,
                 SetPlayerElytraFlyingNode::new,
                 SetPlayerFireTicksNode::new,

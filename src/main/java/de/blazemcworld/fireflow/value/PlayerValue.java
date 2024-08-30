@@ -34,6 +34,11 @@ public class PlayerValue implements Value {
     }
 
     @Override
+    public boolean typeCheck(Object value) {
+        return value instanceof Reference;
+    }
+
+    @Override
     public Type getType() {
         return Type.getType(Reference.class);
     }
@@ -68,6 +73,14 @@ public class PlayerValue implements Value {
     @Override
     public Instruction wrapPrimitive(Instruction value) {
         return value;
+    }
+
+    @Override
+    public String formatInset(Object inset) {
+        if (!(inset instanceof Reference p)) return String.valueOf(inset);
+        Player player = p.resolve();
+        if (player == null) return "Offline Player (" + p.uuid() + ")";
+        return player.getUsername() + " (" + p.uuid() + ")";
     }
 
     @Override

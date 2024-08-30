@@ -12,6 +12,8 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
+import static de.blazemcworld.fireflow.util.NumTools.shorten;
+
 public class PositionValue implements Value {
 
     public static final PositionValue INSTANCE = new PositionValue();
@@ -27,6 +29,11 @@ public class PositionValue implements Value {
     @Override
     public TextColor getColor() {
         return NamedTextColor.BLUE;
+    }
+
+    @Override
+    public boolean typeCheck(Object value) {
+        return value instanceof Pos;
     }
 
     @Override
@@ -65,6 +72,12 @@ public class PositionValue implements Value {
     @Override
     public Instruction wrapPrimitive(Instruction value) {
         return value;
+    }
+
+    @Override
+    public String formatInset(Object inset) {
+        if (!(inset instanceof Pos p)) return String.valueOf(inset);
+        return "Position (" + shorten(p.x()) + ", " + shorten(p.y()) + ", " + shorten(p.z()) + ", " + shorten(p.pitch()) + ", " + shorten(p.yaw()) + ")";
     }
 
     @Override

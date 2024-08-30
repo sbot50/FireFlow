@@ -42,6 +42,11 @@ public class ListValue implements Value {
     }
 
     @Override
+    public boolean typeCheck(Object value) {
+        return value instanceof List<?>;
+    }
+
+    @Override
     public InsnList compile(NodeCompiler ctx, Object inset) {
         if (inset != null) throw new IllegalStateException("List values can not be inset!");
         InsnList out = new InsnList();
@@ -76,6 +81,12 @@ public class ListValue implements Value {
     @Override
     public Instruction wrapPrimitive(Instruction value) {
         return value;
+    }
+
+    @Override
+    public String formatInset(Object inset) {
+        if (!(inset instanceof List<?> l)) return String.valueOf(inset);
+        return "List (" + l.size() + " values)";
     }
 
     @Override

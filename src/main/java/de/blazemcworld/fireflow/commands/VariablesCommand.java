@@ -3,18 +3,16 @@ package de.blazemcworld.fireflow.commands;
 import de.blazemcworld.fireflow.space.Space;
 import de.blazemcworld.fireflow.space.SpaceManager;
 import de.blazemcworld.fireflow.util.Messages;
-import de.blazemcworld.fireflow.value.MessageValue;
-import de.blazemcworld.fireflow.value.PlayerValue;
+import de.blazemcworld.fireflow.value.AllValues;
+import de.blazemcworld.fireflow.value.Value;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentString;
-import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -54,7 +52,7 @@ public class VariablesCommand extends Command {
                 if (variable.getKey().toLowerCase().contains(filter)) {
                     sender.sendMessage(Component.text(variable.getKey()).color(NamedTextColor.GREEN)
                             .append(Component.text(" - ").color(NamedTextColor.GRAY))
-                            .append(Component.text(stringify(variable.getValue())).color(NamedTextColor.GREEN))
+                            .append(stringify(variable.getValue()))
                     );
                     count++;
                     if (count > 100) {
@@ -69,34 +67,19 @@ public class VariablesCommand extends Command {
         }
     }
 
-    private String stringify(Object value) {
-        if (value instanceof List<?> l) {
-            return "List (" + l.size() + " values)";
-        }
-        if (value instanceof PlayerValue.Reference p) {
-            Player player = p.resolve();
-            if (player == null) {
-                return "Offline Player (" + p.uuid() + ")";
-            } else {
-                return player.getUsername() + " (" + p.uuid() + ")";
+    private Component stringify(Object value) {
+        String s = String.valueOf(value);
+        TextColor c = NamedTextColor.YELLOW;
+
+        for (Value v : AllValues.dataOnly) {
+            System.out.println(value.getClass());
+            if (v.typeCheck(value)) {
+                s = v.formatInset(value);
+                c = v.getColor();
+                break;
             }
         }
-        if (value instanceof Component c) {
-            return MessageValue.MM.serialize(c);
-        }
-        if (value instanceof Pos p) {
-            return "Position (" + shorten(p.x()) + ", " + shorten(p.y()) + ", " + shorten(p.z()) + ", " + shorten(p.pitch()) + ", " + shorten(p.yaw()) + ")";
-        }
-        if (value instanceof Vec v) {
-            return "Vector (" + shorten(v.x()) + ", " + shorten(v.y()) + ", " + shorten(v.z()) + ")";
-        }
-        if (value instanceof Map<?,?> m) {
-            return "Dictionary (" + m.size() + " entries)";
-        }
-        return String.valueOf(value);
-    }
 
-    private String shorten(double v) {
-        return String.format("%.3f", v);
+        return Component.text(s).color(c);
     }
 }

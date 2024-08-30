@@ -7,6 +7,7 @@ import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.network.NetworkBuffer;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.InsnList;
+import sun.misc.Signal;
 
 public class SignalValue implements Value {
     public static SignalValue INSTANCE = new SignalValue();
@@ -20,6 +21,11 @@ public class SignalValue implements Value {
     @Override
     public TextColor getColor() {
         return NamedTextColor.AQUA;
+    }
+
+    @Override
+    public boolean typeCheck(Object value) {
+        return value instanceof Signal;
     }
 
     @Override

@@ -12,6 +12,8 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
+import static de.blazemcworld.fireflow.util.NumTools.shorten;
+
 public class VectorValue implements Value {
 
     public static final VectorValue INSTANCE = new VectorValue();
@@ -32,6 +34,11 @@ public class VectorValue implements Value {
     @Override
     public Type getType() {
         return Type.getType(Vec.class);
+    }
+
+    @Override
+    public boolean typeCheck(Object value) {
+        return value instanceof Vec;
     }
 
     @Override
@@ -65,6 +72,12 @@ public class VectorValue implements Value {
     @Override
     public Instruction wrapPrimitive(Instruction value) {
         return value;
+    }
+
+    @Override
+    public String formatInset(Object inset) {
+        if (!(inset instanceof Vec v)) return String.valueOf(inset);
+        return "Vector (" + shorten(v.x()) + ", " + shorten(v.y()) + ", " + shorten(v.z()) + ")";
     }
 
     @Override

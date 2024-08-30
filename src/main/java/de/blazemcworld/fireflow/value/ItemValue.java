@@ -11,6 +11,8 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
+import static de.blazemcworld.fireflow.util.CamelCase.camelCase;
+
 public class ItemValue implements Value {
     public static final Value INSTANCE = new ItemValue();
 
@@ -30,6 +32,11 @@ public class ItemValue implements Value {
     @Override
     public Type getType() {
         return Type.getType(ItemStack.class);
+    }
+
+    @Override
+    public boolean typeCheck(Object value) {
+        return value instanceof ItemStack;
     }
 
     @Override
@@ -63,6 +70,13 @@ public class ItemValue implements Value {
     @Override
     public Instruction wrapPrimitive(Instruction value) {
         return value;
+    }
+
+    @Override
+    public String formatInset(Object inset) {
+        if (!(inset instanceof ItemStack)) return String.valueOf(inset);
+        String name = camelCase(((ItemStack ) inset).material().name().split(":")[1].replaceAll("_", " "));
+        return name + " x" + ((ItemStack) inset).amount();
     }
 
     @Override

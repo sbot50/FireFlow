@@ -32,6 +32,11 @@ public class ConditionValue implements Value {
     }
 
     @Override
+    public boolean typeCheck(Object value) {
+        return value instanceof Boolean;
+    }
+
+    @Override
     public InsnList compile(NodeCompiler ctx, Object inset) {
         InsnList out = new InsnList();
         out.add(new LdcInsnNode(inset == Boolean.TRUE));
