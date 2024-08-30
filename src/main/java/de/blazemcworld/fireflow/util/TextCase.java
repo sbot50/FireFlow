@@ -2,7 +2,7 @@ package de.blazemcworld.fireflow.util;
 
 import net.minestom.server.utils.NamespaceID;
 
-public class CamelCase {
+public class TextCase {
 
     public static String namespaceToName(NamespaceID id) {
         return camelCase(id.path().replaceAll("_", " "));

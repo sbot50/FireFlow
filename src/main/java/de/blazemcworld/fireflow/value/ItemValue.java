@@ -4,14 +4,13 @@ import de.blazemcworld.fireflow.compiler.NodeCompiler;
 import de.blazemcworld.fireflow.compiler.instruction.Instruction;
 import de.blazemcworld.fireflow.compiler.instruction.MultiInstruction;
 import de.blazemcworld.fireflow.compiler.instruction.RawInstruction;
+import de.blazemcworld.fireflow.util.TextCase;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.NetworkBuffer;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
-
-import static de.blazemcworld.fireflow.util.CamelCase.namespaceToName;
 
 public class ItemValue implements Value {
     public static final Value INSTANCE = new ItemValue();
@@ -75,7 +74,7 @@ public class ItemValue implements Value {
     @Override
     public String formatInset(Object inset) {
         if (!(inset instanceof ItemStack)) return String.valueOf(inset);
-        String name = namespaceToName(((ItemStack ) inset).material().namespace());
+        String name = TextCase.namespaceToName(((ItemStack ) inset).material().namespace());
         return name + " x" + ((ItemStack) inset).amount();
     }
 

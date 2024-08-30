@@ -4,6 +4,7 @@ import de.blazemcworld.fireflow.compiler.NodeCompiler;
 import de.blazemcworld.fireflow.compiler.instruction.Instruction;
 import de.blazemcworld.fireflow.compiler.instruction.MultiInstruction;
 import de.blazemcworld.fireflow.compiler.instruction.RawInstruction;
+import de.blazemcworld.fireflow.util.TextCase;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.NetworkBuffer;
@@ -14,7 +15,6 @@ import org.objectweb.asm.tree.*;
 import java.util.ArrayList;
 import java.util.List;
 
-import static de.blazemcworld.fireflow.util.CamelCase.namespaceToName;
 import static de.blazemcworld.fireflow.util.Levenshtein.calculateAndSmartSort;
 import static de.blazemcworld.fireflow.util.Levenshtein.smartSort;
 
@@ -82,7 +82,7 @@ public class MaterialValue implements Value {
     @Override
     public String formatInset(Object inset) {
         if (!(inset instanceof Material)) return String.valueOf(inset);
-        return namespaceToName(((Material) inset).namespace());
+        return TextCase.namespaceToName(((Material) inset).namespace());
     }
 
     @Override
@@ -97,7 +97,7 @@ public class MaterialValue implements Value {
         List<String> list = new ArrayList<>();
         for (Material mat : Material.values()) {
             if (!mat.name().toLowerCase().contains(message.toLowerCase().replace(" ", "_"))) continue;
-            list.add(namespaceToName(mat.namespace()));
+            list.add(TextCase.namespaceToName(mat.namespace()));
         }
         if (list.size() > 30) list = smartSort(message, list.toArray(String[]::new)).subList(0, 30);
         list = calculateAndSmartSort(message, list.toArray(String[]::new));

@@ -4,6 +4,7 @@ import de.blazemcworld.fireflow.compiler.NodeCompiler;
 import de.blazemcworld.fireflow.compiler.instruction.Instruction;
 import de.blazemcworld.fireflow.compiler.instruction.MultiInstruction;
 import de.blazemcworld.fireflow.compiler.instruction.RawInstruction;
+import de.blazemcworld.fireflow.util.TextCase;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
@@ -18,7 +19,6 @@ import org.objectweb.asm.tree.*;
 import java.util.List;
 import java.util.Objects;
 
-import static de.blazemcworld.fireflow.util.CamelCase.namespaceToName;
 import static de.blazemcworld.fireflow.util.Levenshtein.calculateAndSmartSort;
 import static de.blazemcworld.fireflow.util.Levenshtein.smartSort;
 
@@ -96,7 +96,7 @@ public class EnchantmentValue implements Value {
     @Override
     public String formatInset(Object inset) {
         if (!(inset instanceof NamespaceID)) return String.valueOf(inset);
-        return namespaceToName((NamespaceID) inset);
+        return TextCase.namespaceToName((NamespaceID) inset);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class EnchantmentValue implements Value {
         List<String> list = REGISTRY.values().stream()
                 .map(REGISTRY::getKey)
                 .filter(Objects::nonNull)
-                .map(key -> namespaceToName(key.namespace()))
+                .map(key -> TextCase.namespaceToName(key.namespace()))
                 .toList();
         if (list.size() > 30) list = smartSort(message, list.toArray(String[]::new)).subList(0, 30);
         list = calculateAndSmartSort(message, list.toArray(String[]::new));

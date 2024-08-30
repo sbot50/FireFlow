@@ -3,11 +3,10 @@ package de.blazemcworld.fireflow.node.impl.extraction.material;
 import de.blazemcworld.fireflow.node.ExtractionNode;
 import de.blazemcworld.fireflow.node.annotation.FlowValueInput;
 import de.blazemcworld.fireflow.node.annotation.FlowValueOutput;
+import de.blazemcworld.fireflow.util.TextCase;
 import de.blazemcworld.fireflow.value.MaterialValue;
 import de.blazemcworld.fireflow.value.TextValue;
 import net.minestom.server.item.Material;
-
-import static de.blazemcworld.fireflow.util.CamelCase.namespaceToName;
 
 public class MaterialName extends ExtractionNode {
 
@@ -19,7 +18,7 @@ public class MaterialName extends ExtractionNode {
 
     @FlowValueOutput("")
     private static String output() {
-        return namespaceToName(input().namespace());
+        return TextCase.namespaceToName(input().namespace());
     }
 
     @FlowValueInput("")
