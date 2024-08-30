@@ -72,7 +72,6 @@ public class VariablesCommand extends Command {
         TextColor c = NamedTextColor.YELLOW;
 
         for (Value v : AllValues.dataOnly) {
-            System.out.println(value.getClass());
             if (v.typeCheck(value)) {
                 s = v.formatInset(value);
                 c = v.getColor();

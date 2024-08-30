@@ -18,7 +18,7 @@ import org.objectweb.asm.tree.*;
 import java.util.List;
 import java.util.Objects;
 
-import static de.blazemcworld.fireflow.util.CamelCase.camelCase;
+import static de.blazemcworld.fireflow.util.CamelCase.namespaceToName;
 import static de.blazemcworld.fireflow.util.Levenshtein.calculateAndSmartSort;
 import static de.blazemcworld.fireflow.util.Levenshtein.smartSort;
 
@@ -96,7 +96,7 @@ public class EnchantmentValue implements Value {
     @Override
     public String formatInset(Object inset) {
         if (!(inset instanceof NamespaceID)) return String.valueOf(inset);
-        return camelCase(((NamespaceID) inset).asString().split(":")[1].replaceAll("_", " "));
+        return namespaceToName((NamespaceID) inset);
     }
 
     @Override
@@ -110,7 +110,7 @@ public class EnchantmentValue implements Value {
         List<String> list = REGISTRY.values().stream()
                 .map(REGISTRY::getKey)
                 .filter(Objects::nonNull)
-                .map(key -> camelCase(key.name().split(":")[1].replaceAll("_", " ")))
+                .map(key -> namespaceToName(key.namespace()))
                 .toList();
         if (list.size() > 30) list = smartSort(message, list.toArray(String[]::new)).subList(0, 30);
         list = calculateAndSmartSort(message, list.toArray(String[]::new));

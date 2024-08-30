@@ -11,7 +11,7 @@ import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
-import static de.blazemcworld.fireflow.util.CamelCase.camelCase;
+import static de.blazemcworld.fireflow.util.CamelCase.namespaceToName;
 
 public class ItemValue implements Value {
     public static final Value INSTANCE = new ItemValue();
@@ -75,7 +75,7 @@ public class ItemValue implements Value {
     @Override
     public String formatInset(Object inset) {
         if (!(inset instanceof ItemStack)) return String.valueOf(inset);
-        String name = camelCase(((ItemStack ) inset).material().name().split(":")[1].replaceAll("_", " "));
+        String name = namespaceToName(((ItemStack ) inset).material().namespace());
         return name + " x" + ((ItemStack) inset).amount();
     }
 

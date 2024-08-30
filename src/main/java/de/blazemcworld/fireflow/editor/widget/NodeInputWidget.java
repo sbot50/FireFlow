@@ -6,7 +6,6 @@ import de.blazemcworld.fireflow.editor.CodeEditor;
 import de.blazemcworld.fireflow.editor.Widget;
 import de.blazemcworld.fireflow.node.NodeInput;
 import de.blazemcworld.fireflow.util.Messages;
-import de.blazemcworld.fireflow.value.MessageValue;
 import de.blazemcworld.fireflow.value.SignalValue;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -98,9 +97,13 @@ public class NodeInputWidget extends ButtonWidget {
             new Thread(() -> {
                 List<String> suggestions = input.type.getSuggestions(finalStr);
                 if (!suggestions.isEmpty()) {
-                    Component msg = MessageValue.MM.deserialize("Did you mean: <br>- " + String.join("<br>- ", suggestions));
+                    Component msg = Component.text("Did you mean:").color(NamedTextColor.YELLOW);
+                    for (String s : suggestions) {
+                        msg = msg.appendNewline().append(Component.text("- " + s).color(NamedTextColor.YELLOW));
+                    }
+                    Component finalMsg = msg;
                     MinecraftServer.getSchedulerManager().scheduleNextTick(() ->
-                        event.getPlayer().sendMessage(msg.color(NamedTextColor.YELLOW))
+                        event.getPlayer().sendMessage(finalMsg)
                     );
                 }
             }).start();

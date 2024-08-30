@@ -25,8 +25,10 @@ public class RemoveItemLoreNode extends Node {
     @FlowValueOutput("Result")
     private static ItemStack result() {
         ItemStack item = item();
-        int position = (int) position();
         List<Component> lore = item.get(ItemComponent.LORE);
+        if (lore == null) lore = List.of();
+        int position = (int) position();
+        if (position < 0 || position > lore.size()) return item;
         lore.remove(position);
         return item.withLore(lore);
     }

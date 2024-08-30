@@ -28,7 +28,9 @@ public class InsertItemLoreNode extends Node {
     private static ItemStack result() {
         ItemStack item = item();
         List<Component> lore = item.get(ItemComponent.LORE);
+        if (lore == null) lore = List.of();
         int position = (int) position();
+        if (position < 0 || position > lore.size()) return item;
         Component lore1 = lore();
         lore.add(position, lore1);
         return item.withLore(lore);

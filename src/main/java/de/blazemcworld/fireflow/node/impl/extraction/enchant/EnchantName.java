@@ -8,7 +8,7 @@ import de.blazemcworld.fireflow.value.TextValue;
 import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.registry.DynamicRegistry;
 
-import static de.blazemcworld.fireflow.util.CamelCase.camelCase;
+import static de.blazemcworld.fireflow.util.CamelCase.namespaceToName;
 
 public class EnchantName extends ExtractionNode {
 
@@ -20,7 +20,7 @@ public class EnchantName extends ExtractionNode {
 
     @FlowValueOutput("")
     private static String output() {
-        return camelCase(input().name().split(":")[1].replaceAll("_", " "));
+        return namespaceToName(input().namespace());
     }
 
     @FlowValueInput("")

@@ -7,7 +7,7 @@ import de.blazemcworld.fireflow.value.MaterialValue;
 import de.blazemcworld.fireflow.value.TextValue;
 import net.minestom.server.item.Material;
 
-import static de.blazemcworld.fireflow.util.CamelCase.camelCase;
+import static de.blazemcworld.fireflow.util.CamelCase.namespaceToName;
 
 public class MaterialName extends ExtractionNode {
 
@@ -19,7 +19,7 @@ public class MaterialName extends ExtractionNode {
 
     @FlowValueOutput("")
     private static String output() {
-        return camelCase(input().name().split(":")[1].replaceAll("_", " "));
+        return namespaceToName(input().namespace());
     }
 
     @FlowValueInput("")
