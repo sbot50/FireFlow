@@ -46,14 +46,14 @@ public class EnchantmentValue implements Value {
 
     @Override
     public boolean typeCheck(Object value) {
-        return value instanceof NamespaceID;
+        return value instanceof DynamicRegistry.Key<?>;
     }
 
     @Override
     public InsnList compile(NodeCompiler ctx, Object inset) {
         InsnList out = new InsnList();
         String enchant = NamespaceID.from("minecraft", "protection").asString();
-        if (inset instanceof NamespaceID casted) enchant = casted.asString();
+        if (inset instanceof DynamicRegistry.Key<?> casted) enchant = casted.namespace().asString();
         out.add(new FieldInsnNode(Opcodes.GETSTATIC, "de/blazemcworld/fireflow/value/EnchantmentValue", "REGISTRY", "Lnet/minestom/server/registry/DynamicRegistry;"));
         out.add(new InsnNode(Opcodes.DUP));
         out.add(new LdcInsnNode(enchant));
@@ -95,14 +95,15 @@ public class EnchantmentValue implements Value {
 
     @Override
     public String formatInset(Object inset) {
-        if (!(inset instanceof NamespaceID)) return String.valueOf(inset);
-        return TextCase.namespaceToName((NamespaceID) inset);
+        if (!(inset instanceof DynamicRegistry.Key<?>)) return String.valueOf(inset);
+        return TextCase.namespaceToName(((DynamicRegistry.Key<?>) inset).namespace());
     }
 
     @Override
-    public NamespaceID prepareInset(String message) {
-        if (REGISTRY.get(NamespaceID.from("minecraft", message)) == null) return null;
-        return NamespaceID.from("minecraft", message);
+    public DynamicRegistry.Key<Enchantment> prepareInset(String message) {
+        Enchantment enchant = REGISTRY.get(NamespaceID.from("minecraft", message));
+        if (enchant == null) return null;
+        return REGISTRY.getKey(enchant);
     }
 
     @Override
@@ -126,12 +127,14 @@ public class EnchantmentValue implements Value {
     @Override
     public void writeInset(NetworkBuffer buffer, Object inset) {
         String enchant = NamespaceID.from("minecraft", "protection").asString();
-        if (inset instanceof NamespaceID casted) enchant = casted.asString();
+        if (inset instanceof DynamicRegistry.Key<?> casted) enchant = casted.namespace().asString();
         buffer.write(NetworkBuffer.STRING, enchant);
     }
 
     @Override
     public Object readInset(NetworkBuffer buffer) {
-        return NamespaceID.from(buffer.read(NetworkBuffer.STRING));
+        Enchantment enchant = REGISTRY.get(NamespaceID.from(buffer.read(NetworkBuffer.STRING)));
+        if (enchant == null) return Enchantment.PROTECTION;
+        return REGISTRY.getKey(enchant);
     }
 }

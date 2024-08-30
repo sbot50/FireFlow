@@ -30,9 +30,10 @@ public class InsertItemLoreNode extends Node {
         List<Component> lore = item.get(ItemComponent.LORE);
         if (lore == null) lore = List.of();
         int position = (int) position();
-        if (position < 0 || position > lore.size()) return item;
-        Component lore1 = lore();
-        lore.add(position, lore1);
+        if (position > 0 || position < lore.size()) {
+            Component lore1 = lore();
+            lore.add(position, lore1);
+        }
         return item.withLore(lore);
     }
 

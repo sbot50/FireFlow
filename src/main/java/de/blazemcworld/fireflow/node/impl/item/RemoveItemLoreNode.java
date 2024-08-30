@@ -28,8 +28,7 @@ public class RemoveItemLoreNode extends Node {
         List<Component> lore = item.get(ItemComponent.LORE);
         if (lore == null) lore = List.of();
         int position = (int) position();
-        if (position < 0 || position > lore.size()) return item;
-        lore.remove(position);
+        if (position > 0 || position < lore.size()) lore.remove(position);
         return item.withLore(lore);
     }
 
