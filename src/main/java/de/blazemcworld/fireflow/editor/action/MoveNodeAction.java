@@ -9,7 +9,7 @@ import net.minestom.server.entity.Player;
 
 public class MoveNodeAction implements EditorAction {
     private final Vec offset;
-    private final NodeWidget node;
+    private NodeWidget node;
     private final Player player;
     private final CodeEditor editor;
 
@@ -29,6 +29,16 @@ public class MoveNodeAction implements EditorAction {
     @Override
     public void rightClick(Vec cursor) {
         editor.setAction(player, null);
+    }
+
+    @Override
+    public void swapItem(Vec cursor) {
+        NodeWidget newNode = node.cloneWidget();
+        newNode.border.color(NamedTextColor.GREEN);
+        editor.widgets.add(newNode);
+        node.border.color(NamedTextColor.WHITE);
+        node.update(false);
+        node = newNode;
     }
 
     @Override

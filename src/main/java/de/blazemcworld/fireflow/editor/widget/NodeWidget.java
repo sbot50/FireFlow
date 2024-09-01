@@ -6,10 +6,7 @@ import de.blazemcworld.fireflow.editor.CodeEditor;
 import de.blazemcworld.fireflow.editor.Widget;
 import de.blazemcworld.fireflow.editor.action.CreateWireAction;
 import de.blazemcworld.fireflow.editor.action.MoveNodeAction;
-import de.blazemcworld.fireflow.node.ExtractionNode;
-import de.blazemcworld.fireflow.node.Node;
-import de.blazemcworld.fireflow.node.NodeInput;
-import de.blazemcworld.fireflow.node.NodeOutput;
+import de.blazemcworld.fireflow.node.*;
 import de.blazemcworld.fireflow.util.Messages;
 import de.blazemcworld.fireflow.util.TextWidth;
 import de.blazemcworld.fireflow.value.AllValues;
@@ -214,6 +211,14 @@ public class NodeWidget implements Widget {
         }
         title.remove();
         border.remove();
+    }
+
+    public NodeWidget cloneWidget() {
+        Node newNode = NodeList.nodes.get(node.getBaseName()).get();
+        newNode = newNode.fromGenerics(node.generics());
+        NodeWidget newNodeWidget = new NodeWidget(origin, inst, newNode);
+        newNodeWidget.update(false);
+        return newNodeWidget;
     }
 
     public Bounds getBounds() { return bounds; }
