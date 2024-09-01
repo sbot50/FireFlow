@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Objects;
 
 import static de.blazemcworld.fireflow.util.Levenshtein.calculateAndSmartSort;
-import static de.blazemcworld.fireflow.util.Levenshtein.smartSort;
 
 public class EnchantmentValue implements Value {
     public static final Value INSTANCE = new EnchantmentValue();
@@ -113,7 +112,6 @@ public class EnchantmentValue implements Value {
                 .filter(Objects::nonNull)
                 .map(key -> TextCase.namespaceToName(key.namespace()))
                 .toList();
-        if (list.size() > 30) list = smartSort(message, list.toArray(String[]::new)).subList(0, 30);
         list = calculateAndSmartSort(message, list.toArray(String[]::new));
         if (list.size() > 5) list = list.subList(0, 5);
         return list;

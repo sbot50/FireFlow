@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static de.blazemcworld.fireflow.util.Levenshtein.calculateAndSmartSort;
-import static de.blazemcworld.fireflow.util.Levenshtein.smartSort;
 
 public class MaterialValue implements Value {
     public static final Value INSTANCE = new MaterialValue();
@@ -96,10 +95,8 @@ public class MaterialValue implements Value {
     public List<String> getSuggestions(String message) {
         List<String> list = new ArrayList<>();
         for (Material mat : Material.values()) {
-            if (!mat.name().toLowerCase().contains(message.toLowerCase().replace(" ", "_"))) continue;
             list.add(TextCase.namespaceToName(mat.namespace()));
         }
-        if (list.size() > 30) list = smartSort(message, list.toArray(String[]::new)).subList(0, 30);
         list = calculateAndSmartSort(message, list.toArray(String[]::new));
         if (list.size() > 5) list = list.subList(0, 5);
         return list;

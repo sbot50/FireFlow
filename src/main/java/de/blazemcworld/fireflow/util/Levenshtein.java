@@ -1,6 +1,9 @@
 package de.blazemcworld.fireflow.util;
 
+import it.unimi.dsi.fastutil.Pair;
+
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 public class Levenshtein {
@@ -28,7 +31,11 @@ public class Levenshtein {
     }
 
     public static List<String> calculateAndSort(String x, String ...y) {
-        return Arrays.stream(y).sorted((a, b) -> calculate(x, b) - calculate(x, a)).toList();
+        return Arrays.stream(y)
+                .map(str -> Pair.of(str, calculate(x, str)))
+                .sorted(Comparator.comparing(Pair::right))
+                .map(Pair::key)
+                .toList();
     }
 
     public static int calculate(String x, String y) {
