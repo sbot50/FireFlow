@@ -23,6 +23,11 @@ public interface Value {
     }
     void writeInset(NetworkBuffer buffer, Object inset);
     Object readInset(NetworkBuffer buffer);
+    boolean typeCheck(Object value);
+
+    default List<String> getSuggestions(String message) {
+        return List.of();
+    }
 
     default String formatInset(Object inset) {
         return String.valueOf(inset);

@@ -23,6 +23,11 @@ public class SignalValue implements Value {
     }
 
     @Override
+    public boolean typeCheck(Object value) {
+        return false;
+    }
+
+    @Override
     public Type getType() {
         return Type.VOID_TYPE;
     }

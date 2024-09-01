@@ -12,12 +12,18 @@ import de.blazemcworld.fireflow.node.impl.dictionary.DictionaryKeysNode;
 import de.blazemcworld.fireflow.node.impl.dictionary.DictionarySetNode;
 import de.blazemcworld.fireflow.node.impl.dictionary.EmptyDictionaryNode;
 import de.blazemcworld.fireflow.node.impl.event.*;
+import de.blazemcworld.fireflow.node.impl.extraction.enchant.EnchantID;
+import de.blazemcworld.fireflow.node.impl.extraction.enchant.EnchantName;
+import de.blazemcworld.fireflow.node.impl.extraction.item.*;
+import de.blazemcworld.fireflow.node.impl.extraction.material.MaterialID;
+import de.blazemcworld.fireflow.node.impl.extraction.material.MaterialName;
 import de.blazemcworld.fireflow.node.impl.extraction.number.NumberToTextNode;
 import de.blazemcworld.fireflow.node.impl.extraction.player.*;
 import de.blazemcworld.fireflow.node.impl.extraction.position.*;
 import de.blazemcworld.fireflow.node.impl.extraction.text.FormatTextToMessageNode;
 import de.blazemcworld.fireflow.node.impl.extraction.text.TextToMessageNode;
 import de.blazemcworld.fireflow.node.impl.extraction.vector.*;
+import de.blazemcworld.fireflow.node.impl.item.*;
 import de.blazemcworld.fireflow.node.impl.list.*;
 import de.blazemcworld.fireflow.node.impl.number.*;
 import de.blazemcworld.fireflow.node.impl.number.comparison.GreaterEqualThanNode;
@@ -65,6 +71,21 @@ public class NodeCategory {
             () -> new SetVariableNode(LocalVariableScope.INSTANCE, NumberValue.INSTANCE),
             () -> new SetVariableNode(PersistentVariableScope.INSTANCE, NumberValue.INSTANCE),
             () -> new SetVariableNode(SpaceVariableScope.INSTANCE, NumberValue.INSTANCE)
+    ));
+
+    public static final NodeCategory ITEMS = new NodeCategory("Items", ROOT, List.of(
+            ItemBuilderNode::new,
+            GiveItemNode::new,
+            EnchantItemNode::new,
+            RemoveEnchantItemNode::new,
+            SetItemLoreNode::new,
+            SetItemEnchantsNode::new,
+            AddItemLoreNode::new,
+            RemoveItemLoreNode::new,
+            InsertItemLoreNode::new,
+            SetItemAmountNode::new,
+            SetItemNameNode::new,
+            SetItemMaterialNode::new
     ));
 
     public static final NodeCategory PLAYERS = new NodeCategory("Players", ROOT, List.of(
@@ -143,6 +164,24 @@ public class NodeCategory {
             PlayerNameNode::new,
             PlayerPositionNode::new,
             PlayerUUIDNode::new
+    ));
+
+    public static final NodeCategory ITEM_EXTRACTIONS = new NodeCategory("Item Extractions", ItemValue.INSTANCE, List.of(
+            ItemCount::new,
+            ItemEnchants::new,
+            ItemLore::new,
+            ItemMaterial::new,
+            ItemName::new
+    ));
+
+    public static final NodeCategory MATERIAL_EXTRACTIONS = new NodeCategory("Material Extractions", MaterialValue.INSTANCE, List.of(
+            MaterialID::new,
+            MaterialName::new
+    ));
+
+    public static final NodeCategory ENCHANT_EXTRACTIONS = new NodeCategory("Enchantment Extractions", EnchantmentValue.INSTANCE, List.of(
+            EnchantID::new,
+            EnchantName::new
     ));
 
     public static final NodeCategory TEXT_EXTRACTIONS = new NodeCategory("Text Extractions", TextValue.INSTANCE, List.of(

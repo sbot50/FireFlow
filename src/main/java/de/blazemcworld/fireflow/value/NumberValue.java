@@ -27,6 +27,11 @@ public class NumberValue implements Value {
     }
 
     @Override
+    public boolean typeCheck(Object value) {
+        return value instanceof Double;
+    }
+
+    @Override
     public Type getType() {
         return Type.DOUBLE_TYPE;
     }

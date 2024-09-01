@@ -9,6 +9,10 @@ public class Messages {
         return Component.text(message).color(NamedTextColor.RED);
     }
 
+    public static Component info(String message) {
+        return Component.text(message).color(NamedTextColor.YELLOW);
+    }
+
     public static Component success(String message) {
         return Component.text(message).color(NamedTextColor.GREEN);
     }

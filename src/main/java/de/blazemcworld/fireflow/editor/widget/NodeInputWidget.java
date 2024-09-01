@@ -9,6 +9,7 @@ import de.blazemcworld.fireflow.util.Messages;
 import de.blazemcworld.fireflow.value.SignalValue;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.player.PlayerChatEvent;
@@ -92,6 +93,20 @@ public class NodeInputWidget extends ButtonWidget {
             parent.update(false);
         } else {
             event.getPlayer().sendMessage(Messages.error("Failed to inset input value!"));
+            String finalStr = str;
+            new Thread(() -> {
+                List<String> suggestions = input.type.getSuggestions(finalStr);
+                if (!suggestions.isEmpty()) {
+                    Component msg = Component.text("Did you mean:").color(NamedTextColor.YELLOW);
+                    for (String s : suggestions) {
+                        msg = msg.appendNewline().append(Component.text("- " + s).color(NamedTextColor.YELLOW));
+                    }
+                    Component finalMsg = msg;
+                    MinecraftServer.getSchedulerManager().scheduleNextTick(() ->
+                        event.getPlayer().sendMessage(finalMsg)
+                    );
+                }
+            }).start();
         }
     }
 

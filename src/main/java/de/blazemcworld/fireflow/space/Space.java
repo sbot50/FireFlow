@@ -3,9 +3,11 @@ package de.blazemcworld.fireflow.space;
 import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.editor.CodeEditor;
 import de.blazemcworld.fireflow.evaluation.CodeEvaluator;
+import de.blazemcworld.fireflow.value.EnchantmentValue;
 import de.blazemcworld.fireflow.value.MessageValue;
 import de.blazemcworld.fireflow.value.PlayerValue;
 import it.unimi.dsi.fastutil.Pair;
+import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.BlockVec;
@@ -20,9 +22,14 @@ import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.item.ItemStack;
+import net.minestom.server.item.Material;
+import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.network.NetworkBuffer;
+import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.timer.Task;
 import net.minestom.server.timer.TaskSchedule;
+import net.minestom.server.utils.NamespaceID;
 
 import java.nio.ByteBuffer;
 import java.nio.file.Files;
@@ -147,6 +154,15 @@ public class Space {
                     buffer.write(NetworkBuffer.INT, objects.indexOf(entry.getKey()));
                     buffer.write(NetworkBuffer.INT, objects.indexOf(entry.getValue()));
                 }
+            } else if (obj instanceof ItemStack item) {
+                buffer.write(NetworkBuffer.BYTE, (byte) 9);
+                buffer.write(NetworkBuffer.NBT, item.toItemNBT());
+            } else if (obj instanceof Material mat) {
+                buffer.write(NetworkBuffer.BYTE, (byte) 10);
+                buffer.write(NetworkBuffer.STRING, mat.namespace().asString());
+            } else if (obj instanceof DynamicRegistry.Key<?> enchant) {
+                buffer.write(NetworkBuffer.BYTE, (byte) 11);
+                buffer.write(NetworkBuffer.STRING, enchant.namespace().asString());
             }
         }
 
@@ -248,6 +264,17 @@ public class Space {
                         }
                     });
                     objects.add(map);
+                }
+                case 9 -> {
+                    objects.add(ItemStack.fromItemNBT((CompoundBinaryTag) buffer.read(NetworkBuffer.NBT)));
+                }
+                case 10 -> {
+                    objects.add(Material.fromNamespaceId(buffer.read(NetworkBuffer.STRING)));
+                }
+                case 11 -> {
+                    Enchantment enchant = EnchantmentValue.REGISTRY.get(NamespaceID.from(buffer.read(NetworkBuffer.STRING)));
+                    if (enchant != null) objects.add(EnchantmentValue.REGISTRY.getKey(enchant));
+                    else objects.add(Enchantment.PROTECTION);
                 }
             }
         }

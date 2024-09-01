@@ -47,6 +47,11 @@ public class DictionaryValue implements Value {
     }
 
     @Override
+    public boolean typeCheck(Object value) {
+        return value instanceof Map<?,?>;
+    }
+
+    @Override
     public InsnList compile(NodeCompiler ctx, Object inset) {
         if (inset != null) throw new IllegalStateException("Dictionary values can not be inset!");
         InsnList out = new InsnList();
@@ -90,6 +95,12 @@ public class DictionaryValue implements Value {
     @Override
     public void writeInset(NetworkBuffer buffer, Object inset) {
         throw new IllegalStateException("Dictionary values can not be inset!");
+    }
+
+    @Override
+    public String formatInset(Object inset) {
+        if (!(inset instanceof Map<?, ?> m)) return String.valueOf(inset);
+        return "Dictionary (" + m.size() + " entries)";
     }
 
     @Override

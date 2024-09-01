@@ -4,47 +4,44 @@ import de.blazemcworld.fireflow.compiler.NodeCompiler;
 import de.blazemcworld.fireflow.compiler.instruction.Instruction;
 import de.blazemcworld.fireflow.compiler.instruction.MultiInstruction;
 import de.blazemcworld.fireflow.compiler.instruction.RawInstruction;
-import net.kyori.adventure.text.format.NamedTextColor;
+import de.blazemcworld.fireflow.util.TextCase;
 import net.kyori.adventure.text.format.TextColor;
-import net.minestom.server.coordinate.Vec;
+import net.minestom.server.item.ItemStack;
 import net.minestom.server.network.NetworkBuffer;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 
-import static de.blazemcworld.fireflow.util.NumTools.shorten;
+public class ItemValue implements Value {
+    public static final Value INSTANCE = new ItemValue();
 
-public class VectorValue implements Value {
-
-    public static final VectorValue INSTANCE = new VectorValue();
-
-    private VectorValue() {
+    private ItemValue() {
     }
 
     @Override
     public String getBaseName() {
-        return "Vector";
+        return "Item";
     }
 
     @Override
     public TextColor getColor() {
-        return NamedTextColor.WHITE;
+        return TextColor.color(0xF6FF5E);
     }
 
     @Override
     public Type getType() {
-        return Type.getType(Vec.class);
+        return Type.getType(ItemStack.class);
     }
 
     @Override
     public boolean typeCheck(Object value) {
-        return value instanceof Vec;
+        return value instanceof ItemStack;
     }
 
     @Override
     public InsnList compile(NodeCompiler ctx, Object inset) {
         InsnList out = new InsnList();
-        out.add(new FieldInsnNode(Opcodes.GETSTATIC, "net/minestom/server/coordinate/Vec", "ZERO", "Lnet/minestom/server/coordinate/Vec;"));
+        out.add(new FieldInsnNode(Opcodes.GETSTATIC, "net/minestom/server/item/ItemStack", "AIR", "Lnet/minestom/server/item/ItemStack;"));
         return out;
     }
 
@@ -53,17 +50,17 @@ public class VectorValue implements Value {
         LabelNode cast = new LabelNode();
         LabelNode end = new LabelNode();
 
-        return new MultiInstruction(Type.getType(Vec.class),
+        return new MultiInstruction(Type.getType(ItemStack.class),
                 value,
-                new RawInstruction(Type.getType(Vec.class),
+                new RawInstruction(Type.getType(ItemStack.class),
                         new InsnNode(Opcodes.DUP),
-                        new TypeInsnNode(Opcodes.INSTANCEOF, "net/minestom/server/coordinate/Vec"),
+                        new TypeInsnNode(Opcodes.INSTANCEOF, "net/minestom/server/item/ItemStack"),
                         new JumpInsnNode(Opcodes.IFGT, cast),
                         new InsnNode(Opcodes.POP),
-                        new FieldInsnNode(Opcodes.GETSTATIC, "net/minestom/server/coordinate/Vec", "ZERO", "Lnet/minestom/server/coordinate/Vec;"),
+                        new FieldInsnNode(Opcodes.GETSTATIC, "net/minestom/server/item/ItemStack", "AIR", "Lnet/minestom/server/item/ItemStack;"),
                         new JumpInsnNode(Opcodes.GOTO, end),
                         cast,
-                        new TypeInsnNode(Opcodes.CHECKCAST, "net/minestom/server/coordinate/Vec"),
+                        new TypeInsnNode(Opcodes.CHECKCAST, "net/minestom/server/item/ItemStack"),
                         end
                 )
         );
@@ -76,8 +73,9 @@ public class VectorValue implements Value {
 
     @Override
     public String formatInset(Object inset) {
-        if (!(inset instanceof Vec v)) return String.valueOf(inset);
-        return "Vector (" + shorten(v.x()) + ", " + shorten(v.y()) + ", " + shorten(v.z()) + ")";
+        if (!(inset instanceof ItemStack)) return String.valueOf(inset);
+        String name = TextCase.namespaceToName(((ItemStack ) inset).material().namespace());
+        return name + " x" + ((ItemStack) inset).amount();
     }
 
     @Override
@@ -87,12 +85,11 @@ public class VectorValue implements Value {
 
     @Override
     public void writeInset(NetworkBuffer buffer, Object inset) {
-        throw new IllegalStateException("Signal inputs can not be inset!");
+        throw new IllegalStateException("Item inputs can not be inset!");
     }
 
     @Override
     public Object readInset(NetworkBuffer buffer) {
-        throw new IllegalStateException("Signal inputs can not be inset!");
+        throw new IllegalStateException("Item inputs can not be inset!");
     }
-
 }

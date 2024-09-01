@@ -27,6 +27,11 @@ public class TextValue implements Value {
     }
 
     @Override
+    public boolean typeCheck(Object value) {
+        return value instanceof String;
+    }
+
+    @Override
     public Type getType() {
         return Type.getType(String.class);
     }
