@@ -217,6 +217,15 @@ public class NodeWidget implements Widget {
         Node newNode = NodeList.nodes.get(node.getBaseName()).get();
         newNode = newNode.fromGenerics(node.generics());
         NodeWidget newNodeWidget = new NodeWidget(origin, inst, newNode);
+
+        for (int i = 0; i < inputs.size(); i++) {
+            NodeInputWidget oldInput = inputs.get(i);
+            NodeInputWidget newInput = newNodeWidget.inputs.get(i);
+            if (oldInput.input.getInset() != null) {
+                newInput.input.inset(oldInput.input.getInset());
+            }
+        }
+
         newNodeWidget.update(false);
         return newNodeWidget;
     }

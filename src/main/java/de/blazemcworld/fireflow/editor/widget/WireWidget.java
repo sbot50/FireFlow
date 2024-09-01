@@ -40,6 +40,10 @@ public class WireWidget implements Widget {
     }
 
     public void update() {
+        for (int i = 0; i < relays.size(); i++) {
+            lines.get(i).to = relays.get(i);
+            lines.get(i + 1).from = relays.get(i);
+        }
         lines.getFirst().from = input.position.add(-0.1, 0.2, 0);
         lines.getLast().to = output.position.add(-output.bounds().size().x() + 0.05, 0.2, 0);
         for (LineWidget line : lines) {
