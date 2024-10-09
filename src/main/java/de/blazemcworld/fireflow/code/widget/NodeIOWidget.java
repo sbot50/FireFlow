@@ -1,6 +1,5 @@
 package de.blazemcworld.fireflow.code.widget;
 
-import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.action.WireAction;
 import de.blazemcworld.fireflow.code.node.Node;
@@ -66,8 +65,6 @@ public class NodeIOWidget implements Widget {
             i.editor().rootWidgets.add(wire);
             i.editor().setAction(i.player(), new WireAction(wire, getPos().sub(i.pos()), isInput));
             return true;
-        } else if (i.type() == Interaction.Type.SWAP_HANDS) {
-            FireFlow.LOGGER.info(this.connections);
         }
         return false;
     }
