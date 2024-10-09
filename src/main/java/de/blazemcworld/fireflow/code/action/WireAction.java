@@ -60,8 +60,9 @@ public class WireAction implements Action {
                     nodeIOWidget.connections.add(wire);
                     if (wire.type() == SignalType.INSTANCE) {
                         NodeIOWidget input = wire.getInputs().getFirst();
+                        NodeIOWidget output = wire.getOutputs().getFirst();
                         for (WireWidget wireWidget : new ArrayList<>(input.connections)) {
-                            if (!wireWidget.getOutputs().contains(nodeIOWidget)) {
+                            if (!wireWidget.getOutputs().contains(output)) {
                                 input.connections.remove(wireWidget);
                                 wireWidget.removeConnection(i.editor());
                             }

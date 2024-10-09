@@ -1,6 +1,5 @@
 package de.blazemcworld.fireflow.code.widget;
 
-import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.action.WireAction;
@@ -156,12 +155,6 @@ public class WireWidget implements Widget {
             w2.update(i.editor().space.code);
             i.editor().setAction(i.player(), new WireAction(wire, getPos().sub(i.pos()), this.type == SignalType.INSTANCE));
             return true;
-        } else if (i.type() == Interaction.Type.SWAP_HANDS) {
-            FireFlow.LOGGER.info("Inputs:");
-            FireFlow.LOGGER.info(getInputs());
-            FireFlow.LOGGER.info("Outputs:");
-            FireFlow.LOGGER.info(getOutputs());
-            return true;
         }
         return false;
     }
@@ -192,9 +185,7 @@ public class WireWidget implements Widget {
 
     private void removeNext(CodeEditor editor) {
         this.remove();
-        FireFlow.LOGGER.info(nextWires);
         for (WireWidget wire : nextWires) {
-            FireFlow.LOGGER.info("Wire");
             wire.removeNext(editor);
             editor.rootWidgets.remove(wire);
         }
@@ -238,7 +229,6 @@ public class WireWidget implements Widget {
 
         for (WireWidget wire : nextWires) {
             if (!(this.type instanceof SignalType)) {
-                FireFlow.LOGGER.info("A");
                 wire.removeNext(editor);
                 editor.rootWidgets.remove(wire);
             }
