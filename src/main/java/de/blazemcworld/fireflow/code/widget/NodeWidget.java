@@ -29,14 +29,14 @@ public class NodeWidget implements Widget {
         ioArea.widgets.add(new SpacingWidget(new Vec(1/8f, 0, 0)));
 
         for (Node.Input<?> input : node.inputs) {
-            inputArea.widgets.add(new TextWidget(Component.text("○ " + input.getName()).color(input.type.getColor())));
+            inputArea.widgets.add(new NodeIOWidget(input));
         }
 
         VerticalContainerWidget outputArea = new VerticalContainerWidget();
         ioArea.widgets.add(outputArea);
 
         for (Node.Output<?> output : node.outputs) {
-            outputArea.widgets.add(new TextWidget(Component.text(output.getName() + " ○").color(output.type.getColor())));
+            outputArea.widgets.add(new NodeIOWidget(output));
         }
 
         root = new BorderWidget(main);
@@ -85,5 +85,11 @@ public class NodeWidget implements Widget {
 
     public void borderColor(TextColor color) {
         root.color(color);
+    }
+
+    @Override
+    public Widget getWidget(Vec pos) {
+        if (!inBounds(pos)) return null;
+        return root.getWidget(pos);
     }
 }

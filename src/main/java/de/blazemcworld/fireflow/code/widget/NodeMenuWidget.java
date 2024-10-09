@@ -77,4 +77,10 @@ public class NodeMenuWidget implements Widget {
     public boolean interact(Interaction i) {
         return root.interact(i);
     }
+
+    @Override
+    public Widget getWidget(Vec pos) {
+        if (!inBounds(pos)) return null;
+        return root.getWidget(pos);
+    }
 }

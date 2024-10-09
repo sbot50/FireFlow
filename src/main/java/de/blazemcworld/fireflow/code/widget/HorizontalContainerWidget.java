@@ -61,4 +61,13 @@ public class HorizontalContainerWidget implements Widget {
             w.remove();
         }
     }
+
+    @Override
+    public Widget getWidget(Vec pos) {
+        if (!inBounds(pos)) return null;
+        for (Widget w : widgets) {
+            if (w.inBounds(pos)) return w.getWidget(pos);
+        }
+        return null;
+    }
 }
