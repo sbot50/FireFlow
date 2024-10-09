@@ -1,7 +1,6 @@
 package de.blazemcworld.fireflow.code;
 
 import de.blazemcworld.fireflow.code.action.Action;
-import de.blazemcworld.fireflow.code.action.WireAction;
 import de.blazemcworld.fireflow.code.node.NodeList;
 import de.blazemcworld.fireflow.code.widget.NodeMenuWidget;
 import de.blazemcworld.fireflow.code.widget.Widget;
@@ -97,10 +96,7 @@ public class CodeEditor {
         }
 
         for (Widget w : new HashSet<>(rootWidgets)) {
-            if (w.interact(i)) {
-                if (actions.get(player) instanceof WireAction) lockWidget(w, player);
-                return;
-            }
+            if (w.interact(i)) return;
         }
 
         if (type == Interaction.Type.RIGHT_CLICK) {
