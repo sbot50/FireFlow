@@ -44,4 +44,8 @@ public class LineElement {
     public void color(TextColor color) {
         meta.setText(Component.text("-").color(color));
     }
+
+    public TextColor color() {
+        return meta.getText().color();
+    }
 }

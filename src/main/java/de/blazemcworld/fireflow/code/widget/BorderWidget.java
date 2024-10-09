@@ -59,4 +59,11 @@ public class BorderWidget implements Widget {
     public void color(TextColor color) {
         rect.color(color);
     }
+
+    @Override
+    public Widget getWidget(Vec pos) {
+        if (!inBounds(pos)) return null;
+        if (inner.getWidget(pos) == null) return this;
+        return inner.getWidget(pos);
+    }
 }

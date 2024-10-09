@@ -40,4 +40,9 @@ public class SpacingWidget implements Widget {
     public boolean interact(Interaction i) {
         return false;
     }
+
+    @Override
+    public Widget getWidget(Vec pos) {
+        return null;
+    }
 }

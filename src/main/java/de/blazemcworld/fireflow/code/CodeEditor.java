@@ -1,6 +1,7 @@
 package de.blazemcworld.fireflow.code;
 
 import de.blazemcworld.fireflow.code.action.Action;
+import de.blazemcworld.fireflow.code.action.WireAction;
 import de.blazemcworld.fireflow.code.node.NodeList;
 import de.blazemcworld.fireflow.code.widget.NodeMenuWidget;
 import de.blazemcworld.fireflow.code.widget.Widget;
@@ -59,6 +60,8 @@ public class CodeEditor {
                 if (passenger.getEntityType() == EntityType.INTERACTION) passenger.remove();
             }
 
+            if (actions.containsKey(event.getPlayer())) actions.get(event.getPlayer()).stop(this, event.getPlayer());
+            actions.remove(event.getPlayer());
             lockedWidgets.remove(event.getPlayer());
         });
 
@@ -94,7 +97,10 @@ public class CodeEditor {
         }
 
         for (Widget w : new HashSet<>(rootWidgets)) {
-            if (w.interact(i)) return;
+            if (w.interact(i)) {
+                if (actions.get(player) instanceof WireAction) lockWidget(w, player);
+                return;
+            }
         }
 
         if (type == Interaction.Type.RIGHT_CLICK) {
@@ -122,6 +128,10 @@ public class CodeEditor {
 
     public void unlockWidget(Widget widget, Player player) {
         lockedWidgets.computeIfAbsent(player, p -> new HashSet<>()).remove(widget);
+    }
+
+    public void unlockWidgets(Player player) {
+        lockedWidgets.remove(player);
     }
 
     public boolean lockWidget(Widget widget, Player player) {
