@@ -64,10 +64,12 @@ public class WireAction implements Action {
                         for (WireWidget wireWidget : new ArrayList<>(input.connections)) {
                             if (!wireWidget.getOutputs().contains(output)) {
                                 input.connections.remove(wireWidget);
+                                input.removed(wireWidget);
                                 wireWidget.removeConnection(i.editor());
                             }
                         }
                     }
+                    nodeIOWidget.connect(wire);
                     wire = null;
                     i.editor().stopAction(i.player());
                     return;
@@ -122,6 +124,7 @@ public class WireAction implements Action {
                         for (WireWidget WW : new ArrayList<>(input.connections)) {
                             if (!WW.getOutputs().isEmpty()) {
                                 input.connections.remove(WW);
+                                input.removed(WW);
                                 WW.removeConnection(i.editor());
                             }
                         }
@@ -129,6 +132,12 @@ public class WireAction implements Action {
                     if (!needOutput) wire.addNextWire(w2);
                     else wire.addPreviousWire(w1);
                     wire.update(i.editor().space.code);
+                    for (NodeIOWidget nodeIO : wire.getInputs()) {
+                        nodeIO.connect(wire);
+                    }
+                    for (NodeIOWidget nodeIO : wire.getOutputs()) {
+                        nodeIO.connect(wire);
+                    }
                     wire = null;
                     i.editor().stopAction(i.player());
                     return;
