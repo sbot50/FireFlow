@@ -85,8 +85,14 @@ public class WireWidget implements Widget {
     public void remove() {
         line.remove();
 
-        if (nextInput != null) nextInput.connections.remove(this);
-        if (previousOutput != null) previousOutput.connections.remove(this);
+        if (nextInput != null) {
+            nextInput.connections.remove(this);
+            nextInput.removed(this);
+        }
+        if (previousOutput != null) {
+            previousOutput.connections.remove(this);
+            previousOutput.removed(this);
+        }
 
         for (WireWidget wire : previousWires) {
             wire.nextWires.remove(this);
