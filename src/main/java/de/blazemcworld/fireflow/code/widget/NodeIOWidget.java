@@ -18,17 +18,23 @@ public class NodeIOWidget implements Widget {
     public final List<WireWidget> connections = new ArrayList<>();
     private final boolean isInput;
     private final WireType<?> type;
+    private final Node.Output<?> output;
+    private final Node.Input<?> input;
 
     public NodeIOWidget(Node.Output<?> output) {
         text = new TextWidget(Component.text(output.getName() + " ○").color(output.type.getColor()));
         type = output.type;
         isInput = false;
+        this.output = output;
+        this.input = null;
     }
 
     public NodeIOWidget(Node.Input<?> input) {
         text = new TextWidget(Component.text("○ " + input.getName()).color(input.type.getColor()));
         type = input.type;
         isInput = true;
+        this.output = null;
+        this.input = input;
     }
 
     @Override
@@ -79,5 +85,13 @@ public class NodeIOWidget implements Widget {
 
     public WireType<?> type() {
         return type;
+    }
+
+    public void connect(WireWidget wire) {
+
+    }
+
+    public void removed(WireWidget wire) {
+
     }
 }
