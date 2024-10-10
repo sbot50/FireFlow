@@ -69,7 +69,12 @@ public class WireAction implements Action {
                             }
                         }
                     }
-                    nodeIOWidget.connect(wire);
+                    for (NodeIOWidget nodeIO : wire.getInputs()) {
+                        nodeIO.connect(wire);
+                    }
+                    for (NodeIOWidget nodeIO : wire.getOutputs()) {
+                        nodeIO.connect(wire);
+                    }
                     wire = null;
                     i.editor().stopAction(i.player());
                     return;
