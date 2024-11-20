@@ -1,7 +1,7 @@
 package de.blazemcworld.fireflow.space;
 
+import de.blazemcworld.fireflow.inventory.MySpacesInventory;
 import de.blazemcworld.fireflow.util.Statistics;
-import de.blazemcworld.fireflow.util.Transfer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -79,8 +79,7 @@ public class Lobby {
 
     private static void rightClick(Player player) {
         if (player.getItemInMainHand().isSimilar(MY_SPACES)) {
-            // TODO: Implement space selection
-            Transfer.move(player, SpaceManager.getOrLoadSpace(0).play);
+            MySpacesInventory.open(player);
         }
     }
 }

@@ -1,6 +1,7 @@
 package de.blazemcworld.fireflow.space;
 
 import de.blazemcworld.fireflow.code.CodeEditor;
+import de.blazemcworld.fireflow.code.CodeEvaluator;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.instance.IChunkLoader;
@@ -11,11 +12,15 @@ import net.minestom.server.instance.block.Block;
 
 public class Space {
 
+    public final int id;
     public final InstanceContainer play = MinecraftServer.getInstanceManager().createInstanceContainer();
     public final InstanceContainer code = MinecraftServer.getInstanceManager().createInstanceContainer();
-    private final CodeEditor editor;
+    public final CodeEditor editor;
+    private CodeEvaluator evaluator;
 
     public Space(int id) {
+        this.id = id;
+
         play.setTimeRate(0);
         play.setChunkSupplier(LightingChunk::new);
         play.setChunkLoader(new AnvilLoader("spaces/" + id + "/world"));
@@ -40,6 +45,11 @@ public class Space {
         });
 
         editor = new CodeEditor(this);
+        evaluator = new CodeEvaluator(this);
     }
 
+    public void reload() {
+        evaluator.stop();
+        evaluator = new CodeEvaluator(this);
+    }
 }

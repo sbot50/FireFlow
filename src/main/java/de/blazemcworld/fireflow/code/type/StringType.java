@@ -19,4 +19,9 @@ public class StringType extends WireType<String> {
     public TextColor getColor() {
         return NamedTextColor.YELLOW;
     }
+
+    @Override
+    public String parseInset(String str) {
+        return str;
+    }
 }

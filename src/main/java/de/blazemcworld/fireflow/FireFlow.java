@@ -3,6 +3,7 @@ package de.blazemcworld.fireflow;
 import de.blazemcworld.fireflow.command.CodeCommand;
 import de.blazemcworld.fireflow.command.PlayCommand;
 import de.blazemcworld.fireflow.command.LobbyCommand;
+import de.blazemcworld.fireflow.command.ReloadCommand;
 import de.blazemcworld.fireflow.space.Lobby;
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
 import net.kyori.adventure.text.Component;
@@ -37,6 +38,7 @@ public class FireFlow {
         MinecraftServer.getCommandManager().register(
                 new CodeCommand(),
                 new PlayCommand(),
+                new ReloadCommand(),
                 new LobbyCommand()
         );
 

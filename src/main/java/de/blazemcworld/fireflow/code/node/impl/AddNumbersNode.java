@@ -12,7 +12,7 @@ public class AddNumbersNode extends Node {
         Input<Double> right = new Input<>("right", NumberType.INSTANCE);
         Output<Double> result = new Output<>("result", NumberType.INSTANCE);
 
-        result.valueFrom(() -> left.getValue() + right.getValue());
+        result.valueFrom((ctx) -> left.getValue(ctx) + right.getValue(ctx));
     }
 
     @Override

@@ -19,4 +19,13 @@ public class NumberType extends WireType<Double> {
     public TextColor getColor() {
         return NamedTextColor.GREEN;
     }
+
+    @Override
+    public Double parseInset(String str) {
+        try {
+            return Double.parseDouble(str);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 }

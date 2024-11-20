@@ -10,7 +10,7 @@ import net.minestom.server.instance.InstanceContainer;
 
 public class NodeWidget implements Widget {
 
-    private final Node node;
+    public final Node node;
     private final BorderWidget root;
 
     public NodeWidget(Node node) {
@@ -29,14 +29,15 @@ public class NodeWidget implements Widget {
         ioArea.widgets.add(new SpacingWidget(new Vec(1/8f, 0, 0)));
 
         for (Node.Input<?> input : node.inputs) {
-            inputArea.widgets.add(new NodeIOWidget(input));
+            inputArea.widgets.add(new NodeIOWidget(this, input));
         }
 
         VerticalContainerWidget outputArea = new VerticalContainerWidget();
         ioArea.widgets.add(outputArea);
+        outputArea.align = VerticalContainerWidget.Align.RIGHT;
 
         for (Node.Output<?> output : node.outputs) {
-            outputArea.widgets.add(new NodeIOWidget(output));
+            outputArea.widgets.add(new NodeIOWidget(this, output));
         }
 
         root = new BorderWidget(main);
@@ -70,12 +71,12 @@ public class NodeWidget implements Widget {
     @Override
     public boolean interact(Interaction i) {
         if (!inBounds(i.pos())) return false;
+        if (root.interact(i)) return true;
         if (i.type() == Interaction.Type.LEFT_CLICK) {
             remove();
             i.editor().rootWidgets.remove(this);
             return true;
         }
-        if (root.interact(i)) return true;
         if (i.type() == Interaction.Type.RIGHT_CLICK && i.editor().lockWidget(this, i.player())) {
             i.editor().setAction(i.player(), new DragNodeAction(this, getPos().sub(i.pos())));
             return true;

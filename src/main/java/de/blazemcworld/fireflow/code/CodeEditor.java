@@ -2,10 +2,13 @@ package de.blazemcworld.fireflow.code;
 
 import de.blazemcworld.fireflow.code.action.Action;
 import de.blazemcworld.fireflow.code.node.NodeList;
+import de.blazemcworld.fireflow.code.widget.NodeIOWidget;
 import de.blazemcworld.fireflow.code.widget.NodeMenuWidget;
 import de.blazemcworld.fireflow.code.widget.Widget;
 import de.blazemcworld.fireflow.space.Space;
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
+import de.blazemcworld.fireflow.util.Translations;
+import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
@@ -14,10 +17,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.InteractionMeta;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
-import net.minestom.server.event.player.PlayerEntityInteractEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
-import net.minestom.server.event.player.PlayerSwapItemEvent;
-import net.minestom.server.event.player.PlayerTickEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 
 import java.util.HashMap;
@@ -83,6 +83,25 @@ public class CodeEditor {
             cursor = cursor.withX(Math.round(cursor.x() * 8) / 8f)
                     .withY(Math.round(cursor.y() * 8) / 8f);
             a.tick(cursor, this, event.getPlayer());
+        });
+
+        events.addListener(PlayerChatEvent.class, event -> {
+            Vec pos = getCursor(event.getPlayer()).mul(8).apply(Vec.Operator.CEIL).div(8).withZ(15.999);
+            for (Widget w : rootWidgets) {
+                if (w.getWidget(pos) instanceof NodeIOWidget input) {
+                    if (!input.isInput()) return;
+                    event.setCancelled(true);
+                    if (input.type().parseInset(event.getMessage()) == null) {
+                        event.getPlayer().sendMessage(Component.text(Translations.get("error.invalid.inset")));
+                        return;
+                    }
+
+                    input.insetValue(event.getMessage());
+                    input.update(space.code);
+                    w.update(space.code);
+                    return;
+                }
+            }
         });
     }
 

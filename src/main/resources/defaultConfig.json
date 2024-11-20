@@ -1,0 +1,9 @@
+{
+  "motd": "A new FireFlow Server",
+  "port": 25565,
+  "limits": {
+    "cpuPerTick": 10000000,
+    "spacesPerPlayer": 5,
+    "totalSpaces": 100
+  }
+}
