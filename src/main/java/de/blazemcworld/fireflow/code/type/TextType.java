@@ -29,6 +29,11 @@ public class TextType extends WireType<Component> {
     }
 
     @Override
+    public String id() {
+        return "text";
+    }
+
+    @Override
     public Component defaultValue() {
         return Component.empty();
     }

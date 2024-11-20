@@ -12,6 +12,11 @@ public class PlayerType extends WireType<Player> {
     }
 
     @Override
+    public String id() {
+        return "player";
+    }
+
+    @Override
     public Player defaultValue() {
         return null;
     }

@@ -19,9 +19,9 @@ public class NodeIOWidget implements Widget {
     public final List<WireWidget> connections = new ArrayList<>();
     private final boolean isInput;
     private final WireType<?> type;
-    private final Node.Output<?> output;
-    private final Node.Input<?> input;
-    private final NodeWidget parent;
+    public final Node.Output<?> output;
+    public final Node.Input<?> input;
+    public final NodeWidget parent;
 
     public NodeIOWidget(NodeWidget parent, Node.Output<?> output) {
         type = output.type;
@@ -30,6 +30,7 @@ public class NodeIOWidget implements Widget {
         this.input = null;
         this.parent = parent;
         text = new TextWidget(displayText());
+        text.shiftLeft = true;
     }
 
     public NodeIOWidget(NodeWidget parent, Node.Input<?> input) {

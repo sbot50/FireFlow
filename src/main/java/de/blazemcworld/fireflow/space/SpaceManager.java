@@ -1,14 +1,8 @@
 package de.blazemcworld.fireflow.space;
 
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.entity.Player;
-import net.minestom.server.item.Material;
-import net.minestom.server.timer.TaskSchedule;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -21,11 +15,15 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import de.blazemcworld.fireflow.FireFlow;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
+import net.minestom.server.item.Material;
+import net.minestom.server.timer.TaskSchedule;
 
 public class SpaceManager {
 
     private static final HashMap<Integer, Space> spaces = new HashMap<>();
-    public static final List<SpaceInfo> info = new ArrayList<>();
+    public static final HashMap<Integer, SpaceInfo> info = new HashMap<>();
     public static int lastId = 0;
 
     static {
@@ -39,7 +37,7 @@ public class SpaceManager {
         try {
             JsonObject data = new JsonObject();
             JsonObject spaces = new JsonObject();
-            for (SpaceInfo spaceInfo : info) {
+            for (SpaceInfo spaceInfo : info.values()) {
                 JsonObject space = new JsonObject();
                 space.addProperty("name", spaceInfo.name);
                 space.addProperty("icon", spaceInfo.icon.namespace().asString());
@@ -57,6 +55,14 @@ public class SpaceManager {
             Files.writeString(Path.of("spaces.json"), data.toString());
         } catch (IOException e) {
             FireFlow.LOGGER.error("Failed to save spaces.json!", e);
+        }
+
+        for (Space space : List.copyOf(spaces.values())) {
+            space.save();
+            if (space.isInactive()) {
+                spaces.remove(space.info.id);
+                space.unload();
+            }
         }
     }
 
@@ -79,22 +85,18 @@ public class SpaceManager {
                 for (JsonElement contributor : space.getAsJsonArray("contributors")) {
                     spaceInfo.contributors.add(UUID.fromString(contributor.getAsString()));
                 }
-                info.add(spaceInfo);
+                info.put(spaceInfo.id, spaceInfo);
             }
         } catch (IOException e) {
             FireFlow.LOGGER.error("Failed to load spaces.json!", e);
         }
     }
 
-    public static Space getOrNullSpace(int id) {
-        return spaces.get(id);
-    }
-
-    public static Space getOrLoadSpace(int id) {
-        Space space = spaces.get(id);
+    public static Space getOrLoadSpace(SpaceInfo info) {
+        Space space = spaces.get(info.id);
         if (space == null) {
-            space = new Space(id);
-            spaces.put(id, space);
+            space = new Space(info);
+            spaces.put(info.id, space);
         }
         return space;
     }

@@ -11,6 +11,11 @@ public class StringType extends WireType<String> {
     }
 
     @Override
+    public String id() {
+        return "string";
+    }
+
+    @Override
     public String defaultValue() {
         return "";
     }

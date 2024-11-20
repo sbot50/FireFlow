@@ -1,12 +1,16 @@
 package de.blazemcworld.fireflow.code;
 
+import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.widget.NodeWidget;
 import de.blazemcworld.fireflow.code.widget.Widget;
 import de.blazemcworld.fireflow.space.Space;
+import de.blazemcworld.fireflow.util.Config;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.timer.TaskSchedule;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -17,6 +21,7 @@ public class CodeEvaluator {
     public final Space space;
     public final EventNode<InstanceEvent> events;
     private boolean stopped = false;
+    private long cpuUsed = 0;
 
     public CodeEvaluator(Space space) {
         this.space = space;
@@ -28,7 +33,7 @@ public class CodeEvaluator {
             }
         }
 
-        events = EventNode.type("space-" + space.id, EventFilter.INSTANCE);
+        events = EventNode.type("space-" + space.info.id, EventFilter.INSTANCE);
         space.play.eventNode().addChild(events);
 
         nodes = copyNodes(nodes);
@@ -36,6 +41,17 @@ public class CodeEvaluator {
         for (Node node : nodes) {
             node.init(this);
         }
+
+        MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+            if (isStopped()) return TaskSchedule.stop();
+            if (cpuUsed > Config.store.limits().cpuPerTick()) {
+                FireFlow.LOGGER.info("Space " + space.info.id + " used too much CPU: " + (cpuUsed * 100 / Config.store.limits().cpuPerTick()) + "%");
+                space.reload();
+                return TaskSchedule.stop();
+            }
+            cpuUsed = 0;
+            return TaskSchedule.tick(1);
+        }, TaskSchedule.tick(1));
     }
 
     public void stop() {
@@ -84,5 +100,10 @@ public class CodeEvaluator {
 
     public CodeThread newCodeThread() {
         return new CodeThread(this);
+    }
+
+    public boolean timelimitHit(long elapsed) {
+        cpuUsed += elapsed;
+        return cpuUsed > Config.store.limits().cpuPerTick();
     }
 }

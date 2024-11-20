@@ -12,7 +12,7 @@ import java.util.function.Function;
 
 public abstract class Node {
 
-    private final String id;
+    public final String id;
     public List<Input<?>> inputs = new ArrayList<>();
     public List<Output<?>> outputs = new ArrayList<>();
 
@@ -30,7 +30,7 @@ public abstract class Node {
     }
 
     public class Input<T> {
-        private final String id;
+        public final String id;
         public final WireType<T> type;
         public String inset;
         public Output<T> connected;
@@ -53,6 +53,7 @@ public abstract class Node {
         }
 
         private void computeNow(CodeThread ctx) {
+            if (ctx.timelimitHit()) return;
             if (logic == null) return;
             logic.accept(ctx);
         }
@@ -72,7 +73,7 @@ public abstract class Node {
     }
 
     public class Output<T> {
-        private final String id;
+        public final String id;
         public final WireType<T> type;
         public Input<T> connected;
         private Function<CodeThread, T> logic;

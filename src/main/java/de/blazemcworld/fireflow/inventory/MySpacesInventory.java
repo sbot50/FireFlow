@@ -1,5 +1,9 @@
 package de.blazemcworld.fireflow.inventory;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 import de.blazemcworld.fireflow.code.type.TextType;
 import de.blazemcworld.fireflow.space.SpaceInfo;
 import de.blazemcworld.fireflow.space.SpaceManager;
@@ -14,10 +18,6 @@ import net.minestom.server.inventory.InventoryType;
 import net.minestom.server.item.ItemStack;
 import net.minestom.server.item.Material;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-
 public class MySpacesInventory {
 
     private static final ItemStack CREATE_SPACE = ItemStack.builder(Material.GREEN_STAINED_GLASS)
@@ -30,7 +30,7 @@ public class MySpacesInventory {
 
         List<SpaceInfo> spaces = new ArrayList<>();
 
-        for (SpaceInfo space : SpaceManager.info) {
+        for (SpaceInfo space : SpaceManager.info.values()) {
             if (space.owner.equals(player.getUuid())) {
                 spaces.add(space);
             }
@@ -52,7 +52,7 @@ public class MySpacesInventory {
             if (p != player) return;
 
             if (slot < spaces.size()) {
-                Transfer.move(player, SpaceManager.getOrLoadSpace(spaces.get(slot).id).play);
+                Transfer.move(player, SpaceManager.getOrLoadSpace(spaces.get(slot)).play);
                 return;
             }
 
@@ -62,7 +62,7 @@ public class MySpacesInventory {
                 info.icon = Material.PAPER;
                 info.owner = p.getUuid();
                 info.contributors = new HashSet<>();
-                SpaceManager.info.add(info);
+                SpaceManager.info.put(info.id, info);
                 MySpacesInventory.open(player);
                 return;
             }

@@ -11,6 +11,11 @@ public class ConditionType extends WireType<Boolean> {
     }
 
     @Override
+    public String id() {
+        return "condition";
+    }
+
+    @Override
     public Boolean defaultValue() {
         return false;
     }

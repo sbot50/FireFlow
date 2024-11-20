@@ -59,6 +59,13 @@ public class WireWidget implements Widget {
         this.type = type;
     }
 
+    public WireWidget(WireType<?> type, Vec from, Vec to) {
+        line.from = from;
+        line.to = to;
+        line.color(type.getColor());
+        this.type = type;
+    }
+
     @Override
     public void setPos(Vec pos) {
         if (Math.abs(pos.x() - line.from.x()) >= Math.abs(pos.y() - line.from.y())) pos = new Vec(pos.x(), line.from.y(), 0);

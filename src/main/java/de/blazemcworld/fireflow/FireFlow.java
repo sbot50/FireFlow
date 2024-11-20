@@ -1,8 +1,18 @@
 package de.blazemcworld.fireflow;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import de.blazemcworld.fireflow.command.CodeCommand;
-import de.blazemcworld.fireflow.command.PlayCommand;
+import de.blazemcworld.fireflow.command.ContributorCommand;
+import de.blazemcworld.fireflow.command.JoinCommand;
 import de.blazemcworld.fireflow.command.LobbyCommand;
+import de.blazemcworld.fireflow.command.PlayCommand;
 import de.blazemcworld.fireflow.command.ReloadCommand;
 import de.blazemcworld.fireflow.space.Lobby;
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
@@ -16,13 +26,6 @@ import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.ping.ResponseData;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Base64;
 
 public class FireFlow {
 
@@ -37,6 +40,8 @@ public class FireFlow {
 
         MinecraftServer.getCommandManager().register(
                 new CodeCommand(),
+                new ContributorCommand(),
+                new JoinCommand(),
                 new PlayCommand(),
                 new ReloadCommand(),
                 new LobbyCommand()

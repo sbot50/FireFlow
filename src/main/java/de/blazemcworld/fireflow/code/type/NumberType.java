@@ -11,6 +11,11 @@ public class NumberType extends WireType<Double> {
     }
 
     @Override
+    public String id() {
+        return "number";
+    }
+
+    @Override
     public Double defaultValue() {
         return 0.0;
     }

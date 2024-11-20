@@ -11,6 +11,11 @@ public class SignalType extends WireType<Void> {
     }
 
     @Override
+    public String id() {
+        return "signal";
+    }
+
+    @Override
     public Void defaultValue() {
         return null;
     }

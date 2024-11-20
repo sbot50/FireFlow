@@ -11,6 +11,7 @@ public class CodeThread {
     public final CodeEvaluator evaluator;
     private final HashMap<Node.Output<?>, Object> threadValues = new HashMap<>();
     private final List<Runnable> todo = new ArrayList<>();
+    private long lastSync = System.nanoTime();
 
     public CodeThread(CodeEvaluator evaluator) {
         this.evaluator = evaluator;
@@ -33,5 +34,12 @@ public class CodeThread {
         while (!todo.isEmpty()) {
             todo.removeFirst().run();
         }
+    }
+
+    public boolean timelimitHit() {
+        long now = System.nanoTime();
+        long elapsed = now - lastSync;
+        lastSync = now;
+        return evaluator.timelimitHit(elapsed);
     }
 }

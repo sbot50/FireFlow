@@ -22,7 +22,8 @@ public class NodeWidget implements Widget {
 
         VerticalContainerWidget main = new VerticalContainerWidget();
         main.align = VerticalContainerWidget.Align.CENTER;
-        main.widgets.add(new TextWidget(Component.text(node.getTitle())));
+        TextWidget title = new TextWidget(Component.text(node.getTitle()));
+        main.widgets.add(title);
 
         HorizontalContainerWidget ioArea = new HorizontalContainerWidget();
         main.widgets.add(ioArea);
@@ -30,7 +31,8 @@ public class NodeWidget implements Widget {
         VerticalContainerWidget inputArea = new VerticalContainerWidget();
         ioArea.widgets.add(inputArea);
 
-        ioArea.widgets.add(new SpacingWidget(new Vec(1/8f, 0, 0)));
+        SpacingWidget spacing = new SpacingWidget(new Vec(1/8f, 0, 0));
+        ioArea.widgets.add(spacing);
 
         for (Node.Input<?> input : node.inputs) {
             inputArea.widgets.add(new NodeIOWidget(this, input));
@@ -43,7 +45,9 @@ public class NodeWidget implements Widget {
         for (Node.Output<?> output : node.outputs) {
             outputArea.widgets.add(new NodeIOWidget(this, output));
         }
-
+        
+        double needed = Math.max(0, title.getSize().x() - ioArea.getSize().x());
+        spacing.size = spacing.size.withX(spacing.size.x() + Math.ceil(needed * 8) / 8);
         root = new BorderWidget(main);
     }
 

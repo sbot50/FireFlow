@@ -16,6 +16,7 @@ public class TextWidget implements Widget {
     private final Entity display = new Entity(EntityType.TEXT_DISPLAY);
     private final TextDisplayMeta meta = (TextDisplayMeta) display.getEntityMeta();
     private Vec pos = Vec.ZERO;
+    public boolean shiftLeft = false;
 
     public TextWidget(Component text) {
         meta.setText(text);
@@ -37,7 +38,9 @@ public class TextWidget implements Widget {
     }
 
     public void update(InstanceContainer inst) {
-        Vec adjusted = Vec.fromPoint(pos).add(-TextWidth.calculate(meta.getText()) / 80, -1 / 32.0 - 0.25, 0);
+        double width = TextWidth.calculate(meta.getText()) / 40;
+        Vec adjusted = Vec.fromPoint(pos).add(-width / 2, -1 / 32.0 - 0.25, 0);
+        if (shiftLeft) adjusted = adjusted.add(width - Math.ceil(width * 8) / 8, 0, 0);
         display.setInstance(inst, adjusted.asPosition().withView(180, 0));
     }
 
