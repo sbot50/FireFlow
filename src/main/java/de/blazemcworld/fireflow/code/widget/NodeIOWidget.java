@@ -145,4 +145,9 @@ public class NodeIOWidget implements Widget {
 
         return Component.text(str).color(type.getColor());
     }
+
+    @Override
+    public List<Widget> getChildren() {
+        return null;
+    }
 }
