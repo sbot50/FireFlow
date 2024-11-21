@@ -140,9 +140,8 @@ public class NodeIOWidget implements Widget {
     }
 
     private Component displayText() {
-        String str = isInput ?
-        ((connections.isEmpty() ? "○ " : "⏺ ") + input.getName()) :
-        (output.getName() + (connections.isEmpty() ? " ○" : " ⏺"));
+        String str = isInput ? ((connections.isEmpty() ? "○ " : "⏺ ") + input.getName()) :
+            (output.getName() + (connections.isEmpty() ? " ○" : " ⏺"));
         
         if (isInput && input.inset != null) {
             str = "⏹ " + input.inset;
