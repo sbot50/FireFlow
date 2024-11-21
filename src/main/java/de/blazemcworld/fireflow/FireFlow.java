@@ -19,11 +19,12 @@ import de.blazemcworld.fireflow.command.PlayCommand;
 import de.blazemcworld.fireflow.command.ReloadCommand;
 import de.blazemcworld.fireflow.space.Lobby;
 import de.blazemcworld.fireflow.space.SpaceManager;
+import de.blazemcworld.fireflow.util.Config;
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
 import de.blazemcworld.fireflow.util.TextWidth;
 import de.blazemcworld.fireflow.util.Translations;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.GlobalEventHandler;
@@ -36,7 +37,8 @@ import net.minestom.server.ping.ResponseData;
 public class FireFlow {
 
     public static final Logger LOGGER = LogManager.getLogger("FireFlow");
-
+    private static final Component motd = MiniMessage.miniMessage().deserialize(Config.store.motd());
+    
     public static void main(String[] args) {
         LOGGER.info("Starting...");
         MinecraftServer server = MinecraftServer.init();
@@ -74,7 +76,7 @@ public class FireFlow {
 
         events.addListener(ServerListPingEvent.class, event -> {
             ResponseData res = new ResponseData();
-            res.setDescription(Component.text("FireFlow!").color(NamedTextColor.YELLOW));
+            res.setDescription(motd);
 
             try {
                 Path favicon = Path.of("favicon.png");
@@ -87,7 +89,7 @@ public class FireFlow {
             event.setResponseData(res);
         });
 
-        server.start("0.0.0.0", 25565);
+        server.start("0.0.0.0", Config.store.port());
         LOGGER.info("Ready!");
     }
 
