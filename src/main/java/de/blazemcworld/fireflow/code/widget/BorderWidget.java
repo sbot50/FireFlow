@@ -1,21 +1,22 @@
 package de.blazemcworld.fireflow.code.widget;
 
+import java.util.List;
+
 import de.blazemcworld.fireflow.code.Interaction;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.InstanceContainer;
 
-import java.util.List;
+public class BorderWidget<T extends Widget> implements Widget {
 
-public class BorderWidget implements Widget {
-
+    public final T inner;
     private Vec pos = Vec.ZERO;
-    private final Widget inner;
     private final RectElement rect = new RectElement();
     public double padding = 1/8f;
     public double margin = 0f;
+    private FilledRectElement background = null;
 
-    public BorderWidget(Widget inner) {
+    public BorderWidget(T inner) {
         this.inner = inner;
     }
 
@@ -45,12 +46,21 @@ public class BorderWidget implements Widget {
         current = current.add(-padding, -padding, 0);
         inner.setPos(current);
         inner.update(inst);
+
+        if (background != null) {
+            background.pos = rect.pos;
+            background.size = rect.size;
+            background.update(inst);
+        }
     }
 
     @Override
     public void remove() {
         rect.remove();
         inner.remove();
+        if (background != null) {
+            background.remove();
+        }
     }
 
     @Override
@@ -72,5 +82,22 @@ public class BorderWidget implements Widget {
     @Override
     public List<Widget> getChildren() {
         return List.of(inner);
+    }
+
+    public void backgroundColor(int argb) {
+        if (argb == 0) {
+            if (background != null) {
+                background.remove();
+                background = null;
+            }
+            return;
+        }
+        if (background == null) {
+            background = new FilledRectElement(argb);
+            background.pos = getPos();
+            background.size = getSize();
+        } else {
+            background.color(argb);
+        }
     }
 }

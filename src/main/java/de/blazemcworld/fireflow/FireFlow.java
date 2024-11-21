@@ -8,14 +8,20 @@ import java.util.Base64;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import de.blazemcworld.fireflow.code.node.NodeList;
+import de.blazemcworld.fireflow.code.type.AllTypes;
 import de.blazemcworld.fireflow.command.CodeCommand;
 import de.blazemcworld.fireflow.command.ContributorCommand;
+import de.blazemcworld.fireflow.command.FunctionCommand;
 import de.blazemcworld.fireflow.command.JoinCommand;
 import de.blazemcworld.fireflow.command.LobbyCommand;
 import de.blazemcworld.fireflow.command.PlayCommand;
 import de.blazemcworld.fireflow.command.ReloadCommand;
 import de.blazemcworld.fireflow.space.Lobby;
+import de.blazemcworld.fireflow.space.SpaceManager;
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
+import de.blazemcworld.fireflow.util.TextWidth;
+import de.blazemcworld.fireflow.util.Translations;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
@@ -38,13 +44,21 @@ public class FireFlow {
         MinecraftServer.setBrandName("FireFlow");
         MojangAuth.init();
 
+        Translations.init();
+        NodeList.init();
+        AllTypes.init();
+        Lobby.init();
+        SpaceManager.init();
+        TextWidth.init();
+
         MinecraftServer.getCommandManager().register(
                 new CodeCommand(),
                 new ContributorCommand(),
                 new JoinCommand(),
                 new PlayCommand(),
                 new ReloadCommand(),
-                new LobbyCommand()
+                new LobbyCommand(),
+                new FunctionCommand()
         );
 
         GlobalEventHandler events = MinecraftServer.getGlobalEventHandler();

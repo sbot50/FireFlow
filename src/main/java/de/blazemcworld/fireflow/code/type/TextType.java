@@ -1,5 +1,8 @@
 package de.blazemcworld.fireflow.code.type;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonPrimitive;
+
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
@@ -46,5 +49,21 @@ public class TextType extends WireType<Component> {
     @Override
     public Component parseInset(String str) {
         return MM.deserialize(str);
+    }
+
+    @Override
+    public Component convert(Object obj) {
+        if (obj instanceof Component comp) return comp;
+        return null;
+    }
+
+    @Override
+    public JsonElement toJson(Component obj) {
+        return new JsonPrimitive(MM.serialize(obj));
+    }
+
+    @Override
+    public Component fromJson(JsonElement json) {
+        return MM.deserialize(json.getAsString());
     }
 }

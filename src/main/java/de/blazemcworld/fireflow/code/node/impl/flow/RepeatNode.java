@@ -1,4 +1,4 @@
-package de.blazemcworld.fireflow.code.node.impl;
+package de.blazemcworld.fireflow.code.node.impl.flow;
 
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.NumberType;
@@ -20,8 +20,8 @@ public class RepeatNode extends Node {
             double total = times.getValue(ctx);
             for (int i = 0; i < total; i++) {
                 if (ctx.timelimitHit()) return;
-                ctx.sendSignal(repeat);
-                ctx.setThreadValue(index, (double) i);
+                ctx.setThreadValue(index, i + 1.0);
+                repeat.sendSignalImmediately(ctx);
             }
             ctx.sendSignal(next);
         });

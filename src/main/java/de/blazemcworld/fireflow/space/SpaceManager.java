@@ -26,7 +26,7 @@ public class SpaceManager {
     public static final HashMap<Integer, SpaceInfo> info = new HashMap<>();
     public static int lastId = 0;
 
-    static {
+    public static void init() {
         load();
 
         MinecraftServer.getSchedulerManager().scheduleTask(SpaceManager::save, TaskSchedule.minutes(1), TaskSchedule.minutes(1));

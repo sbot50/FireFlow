@@ -1,31 +1,5 @@
 package de.blazemcworld.fireflow.code;
 
-import de.blazemcworld.fireflow.FireFlow;
-import de.blazemcworld.fireflow.code.action.Action;
-import de.blazemcworld.fireflow.code.node.Node;
-import de.blazemcworld.fireflow.code.node.NodeList;
-import de.blazemcworld.fireflow.code.type.AllTypes;
-import de.blazemcworld.fireflow.code.type.WireType;
-import de.blazemcworld.fireflow.code.widget.NodeIOWidget;
-import de.blazemcworld.fireflow.code.widget.NodeMenuWidget;
-import de.blazemcworld.fireflow.code.widget.NodeWidget;
-import de.blazemcworld.fireflow.code.widget.Widget;
-import de.blazemcworld.fireflow.code.widget.WireWidget;
-import de.blazemcworld.fireflow.space.Space;
-import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
-import de.blazemcworld.fireflow.util.Translations;
-import net.kyori.adventure.text.Component;
-import net.minestom.server.coordinate.Pos;
-import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.Entity;
-import net.minestom.server.entity.EntityType;
-import net.minestom.server.entity.Player;
-import net.minestom.server.entity.metadata.other.InteractionMeta;
-import net.minestom.server.event.EventNode;
-import net.minestom.server.event.entity.EntityAttackEvent;
-import net.minestom.server.event.player.*;
-import net.minestom.server.event.trait.InstanceEvent;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -41,6 +15,42 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
+import de.blazemcworld.fireflow.FireFlow;
+import de.blazemcworld.fireflow.code.action.Action;
+import de.blazemcworld.fireflow.code.node.Node;
+import de.blazemcworld.fireflow.code.node.NodeList;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionCallNode;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionDefinition;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionInputsNode;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionOutputsNode;
+import de.blazemcworld.fireflow.code.type.AllTypes;
+import de.blazemcworld.fireflow.code.type.WireType;
+import de.blazemcworld.fireflow.code.widget.NodeIOWidget;
+import de.blazemcworld.fireflow.code.widget.NodeMenuWidget;
+import de.blazemcworld.fireflow.code.widget.NodeWidget;
+import de.blazemcworld.fireflow.code.widget.TypeSelectorWidget;
+import de.blazemcworld.fireflow.code.widget.Widget;
+import de.blazemcworld.fireflow.code.widget.WireWidget;
+import de.blazemcworld.fireflow.space.Space;
+import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
+import de.blazemcworld.fireflow.util.Translations;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.coordinate.Pos;
+import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.Player;
+import net.minestom.server.entity.metadata.other.InteractionMeta;
+import net.minestom.server.event.EventNode;
+import net.minestom.server.event.entity.EntityAttackEvent;
+import net.minestom.server.event.player.PlayerChatEvent;
+import net.minestom.server.event.player.PlayerEntityInteractEvent;
+import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.event.player.PlayerSwapItemEvent;
+import net.minestom.server.event.player.PlayerTickEvent;
+import net.minestom.server.event.trait.InstanceEvent;
+
 public class CodeEditor {
 
     public final Space space;
@@ -48,6 +58,7 @@ public class CodeEditor {
     public final HashMap<Player, Set<Widget>> lockedWidgets = new HashMap<>();
     private final HashMap<Player, Action> actions = new HashMap<>();
     private final Path codePath;
+    public final HashMap<String, FunctionDefinition> functions = new HashMap<>();
 
     public CodeEditor(Space space) {
         this.space = space;
@@ -139,7 +150,7 @@ public class CodeEditor {
         }
 
         if (type == Interaction.Type.RIGHT_CLICK) {
-            NodeMenuWidget n = new NodeMenuWidget(NodeList.nodes);
+            NodeMenuWidget n = new NodeMenuWidget(NodeList.root, this);
             Vec s = n.getSize();
             n.setPos(pos.add(Math.round(s.x() * 4) / 8f, Math.round(s.y() * 4) / 8f, 0));
             n.update(space.code);
@@ -191,6 +202,177 @@ public class CodeEditor {
         actions.remove(player);
     }
 
+    public void createFunction(Player player, String name) {
+        if (functions.containsKey(name)) {
+            player.sendMessage(Component.text(Translations.get("error.function.exists")).color(NamedTextColor.RED));
+            return;
+        }
+
+        FunctionDefinition function = new FunctionDefinition(name);
+        functions.put(name, function);
+
+        Vec pos = getCursor(player).mul(8).apply(Vec.Operator.CEIL).div(8).withZ(15.999);
+
+        NodeWidget inputs = new NodeWidget(function.inputsNode);
+        NodeWidget outputs = new NodeWidget(function.outputsNode);
+
+        inputs.setPos(pos.add(inputs.getSize().x(), 0, 0));
+        inputs.update(space.code);
+        rootWidgets.add(inputs);
+        
+        outputs.setPos(pos.sub(outputs.getSize().x(), 0, 0));
+        outputs.update(space.code);
+        rootWidgets.add(outputs);
+    }
+
+    private FunctionDefinition tryGetFunction(Player player) {
+        Vec pos = getCursor(player);
+        FunctionDefinition function = null;
+        for (Widget w : new HashSet<>(rootWidgets)) {
+            if (w instanceof NodeWidget nodeWidget && nodeWidget.inBounds(pos)) {
+                if (nodeWidget.node instanceof FunctionInputsNode inputsNode) {
+                    function = inputsNode.function;
+                } else if (nodeWidget.node instanceof FunctionOutputsNode outputsNode) {
+                    function = outputsNode.function;
+                }
+            }
+        }
+
+        if (function == null) {
+            player.sendMessage(Component.text(Translations.get("error.needs.function")).color(NamedTextColor.RED));
+            return null;
+        }
+
+        if (!function.callNodes.isEmpty()) {
+            player.sendMessage(Component.text(Translations.get("error.function.in_use")).color(NamedTextColor.RED));
+            return null;
+        }
+
+        return function;
+    }
+
+    private void refreshFunctionWidgets(FunctionDefinition oldFunction, FunctionDefinition newFunction) {
+        for (Widget w : new HashSet<>(rootWidgets)) {
+            if (w instanceof NodeWidget old) {
+                if (old.node instanceof FunctionInputsNode inputsNode && inputsNode.function == oldFunction) {
+                    old.remove();
+                    rootWidgets.remove(old);
+
+                    NodeWidget updated = new NodeWidget(newFunction.inputsNode);
+                    updated.setPos(old.getPos());
+                    updated.update(space.code);
+                    rootWidgets.add(updated);
+                } else if (old.node instanceof FunctionOutputsNode outputsNode && outputsNode.function == oldFunction) {
+                    old.remove();
+                    rootWidgets.remove(old);
+
+                    NodeWidget updated = new NodeWidget(newFunction.outputsNode);
+                    updated.setPos(old.getPos());
+                    updated.update(space.code);
+                    rootWidgets.add(updated);
+                }
+            }
+        }
+    }
+
+    public void deleteFunction(Player player) {
+        FunctionDefinition function = tryGetFunction(player);
+        if (function == null) return;
+
+        functions.remove(function.name);
+        for (Widget w : new HashSet<>(rootWidgets)) {
+            if (w instanceof NodeWidget nodeWidget) {
+                if (nodeWidget.node instanceof FunctionInputsNode inputsNode && inputsNode.function == function) {
+                    nodeWidget.remove(this);
+                    rootWidgets.remove(nodeWidget);
+                } else if (nodeWidget.node instanceof FunctionOutputsNode outputsNode && outputsNode.function == function) {
+                    nodeWidget.remove(this);
+                    rootWidgets.remove(nodeWidget);
+                }
+            }
+        }
+    }
+
+    public void addFunctionInput(Player player, String name) {
+        FunctionDefinition function = tryGetFunction(player);
+        if (function == null) return;
+
+        if (function.getInput(name) != null) {
+            player.sendMessage(Component.text(Translations.get("error.input.exists")).color(NamedTextColor.RED));
+            return;
+        }
+
+        TypeSelectorWidget typeSelectorWidget = new TypeSelectorWidget(List.copyOf(AllTypes.all), type -> {
+            if (function.getInput(name) != null) return;
+
+            function.addInput(name, type);
+            refreshFunctionWidgets(function, function);
+        });
+        typeSelectorWidget.setPos(getCursor(player));
+        typeSelectorWidget.update(space.code);
+        rootWidgets.add(typeSelectorWidget);
+    }
+
+    public void addFunctionOutput(Player player, String name) {
+        FunctionDefinition function = tryGetFunction(player);
+        if (function == null) return;
+
+        if (function.getOutput(name) != null) {
+            player.sendMessage(Component.text(Translations.get("error.output.exists")).color(NamedTextColor.RED));
+            return;
+        }
+
+        TypeSelectorWidget typeSelectorWidget = new TypeSelectorWidget(List.copyOf(AllTypes.all), type -> {
+            if (function.getOutput(name) != null) return;
+
+            function.addOutput(name, type);
+            refreshFunctionWidgets(function, function);
+        });
+        typeSelectorWidget.setPos(getCursor(player));
+        typeSelectorWidget.update(space.code);
+        rootWidgets.add(typeSelectorWidget);
+    }
+
+    public void removeFunctionInput(Player player, String name) {
+        FunctionDefinition function = tryGetFunction(player);
+        if (function == null) return;
+
+        if (function.getInput(name) == null) {
+            player.sendMessage(Component.text(Translations.get("error.input.not_found")).color(NamedTextColor.RED));
+            return;
+        }
+
+        FunctionDefinition adjusted = new FunctionDefinition(function.name);
+        for (Node.Output<?> input : function.inputsNode.outputs) {
+            if (input.id.equals(name)) continue;
+            adjusted.addInput(input.id, input.type);
+        }
+        for (Node.Input<?> output : function.outputsNode.inputs) {
+            adjusted.addOutput(output.id, output.type);
+        }
+        refreshFunctionWidgets(function, adjusted);
+    }
+
+    public void removeFunctionOutput(Player player, String name) {
+        FunctionDefinition function = tryGetFunction(player);
+        if (function == null) return;
+
+        if (function.getOutput(name) == null) {
+            player.sendMessage(Component.text(Translations.get("error.output.not_found")).color(NamedTextColor.RED));
+            return;
+        }
+
+        FunctionDefinition adjusted = new FunctionDefinition(function.name);
+        for (Node.Output<?> input : function.inputsNode.outputs) {
+            adjusted.addInput(input.id, input.type);
+        }
+        for (Node.Input<?> output : function.outputsNode.inputs) {
+            if (output.id.equals(name)) continue;
+            adjusted.addOutput(output.id, output.type);
+        }
+        refreshFunctionWidgets(function, adjusted);
+    }
+
     public void save() {
         JsonObject data = new JsonObject();
         JsonArray nodes = new JsonArray();
@@ -208,6 +390,14 @@ public class CodeEditor {
             entry.addProperty("x", nodeWidget.getPos().x());
             entry.addProperty("y", nodeWidget.getPos().y());
             
+            if (nodeWidget.node.getTypeCount() > 0) {
+                JsonArray types = new JsonArray();
+                for (WireType<?> type : nodeWidget.node.getTypes()) {
+                    types.add(AllTypes.toJson(type));
+                }
+                entry.add("types", types);
+            }
+
             JsonObject insets = new JsonObject();
             for (NodeIOWidget io : nodeWidget.getIOWidgets()) {
                 if (io.isInput() && io.input.inset != null) {
@@ -252,6 +442,14 @@ public class CodeEditor {
                 entry.add("outputs", outputs);
             }
 
+            if (nodeWidget.node instanceof FunctionInputsNode inputsNode) {
+                entry.addProperty("function", inputsNode.function.name);
+            } else if (nodeWidget.node instanceof FunctionOutputsNode outputsNode) {
+                entry.addProperty("function", outputsNode.function.name);
+            } else if (nodeWidget.node instanceof FunctionCallNode callNode) {
+                entry.addProperty("function", callNode.function.name);
+            }
+
             nodes.add(entry);
         }
         
@@ -264,7 +462,7 @@ public class CodeEditor {
 
         for (WireWidget wireWidget : wireWidgets) {
             JsonObject wireObj = new JsonObject();
-            wireObj.addProperty("type", wireWidget.type().id());
+            wireObj.add("type", AllTypes.toJson(wireWidget.type()));
             wireObj.addProperty("fromX", wireWidget.line.from.x());
             wireObj.addProperty("fromY", wireWidget.line.from.y());
             wireObj.addProperty("toX", wireWidget.line.to.x());
@@ -302,6 +500,30 @@ public class CodeEditor {
         data.add("nodes", nodes);
         data.add("wires", wires);
 
+        JsonArray functions = new JsonArray();
+        for (FunctionDefinition function : this.functions.values()) {
+            JsonObject obj = new JsonObject();
+            obj.addProperty("name", function.name);
+            JsonArray inputs = new JsonArray();
+            for (Node.Output<?> input : function.inputsNode.outputs) {
+                JsonObject inputObj = new JsonObject();
+                inputObj.addProperty("name", input.id);
+                inputObj.add("type", AllTypes.toJson(input.type));
+                inputs.add(inputObj);
+            }
+            obj.add("inputs", inputs);
+            JsonArray outputs = new JsonArray();
+            for (Node.Input<?> output : function.outputsNode.inputs) {
+                JsonObject outputObj = new JsonObject();
+                outputObj.addProperty("name", output.id);
+                outputObj.add("type", AllTypes.toJson(output.type));
+                outputs.add(outputObj);
+            }
+            obj.add("outputs", outputs);
+            functions.add(obj);
+        }
+        data.add("functions", functions);
+
         try {
             if (!Files.exists(codePath.getParent())) Files.createDirectories(codePath.getParent());
             Files.writeString(codePath, data.toString());
@@ -316,6 +538,24 @@ public class CodeEditor {
             if (!Files.exists(codePath)) return;
             JsonObject data = JsonParser.parseString(Files.readString(codePath)).getAsJsonObject();
             
+            JsonArray functions = data.getAsJsonArray("functions");
+            for (JsonElement function : functions) {
+                JsonObject obj = function.getAsJsonObject();
+                String name = obj.get("name").getAsString();
+                FunctionDefinition functionDefinition = new FunctionDefinition(name);
+                for (JsonElement input : obj.getAsJsonArray("inputs")) {
+                    JsonObject inputObj = input.getAsJsonObject();
+                    String inputName = inputObj.get("name").getAsString();
+                    functionDefinition.addInput(inputName, AllTypes.fromJson(inputObj.get("type")));
+                }
+                for (JsonElement output : obj.getAsJsonArray("outputs")) {
+                    JsonObject outputObj = output.getAsJsonObject();
+                    String outputName = outputObj.get("name").getAsString();
+                    functionDefinition.addOutput(outputName, AllTypes.fromJson(outputObj.get("type")));
+                }
+                this.functions.put(name, functionDefinition);
+            }
+
             JsonArray nodes = data.getAsJsonArray("nodes");
             List<NodeWidget> nodeWidgets = new ArrayList<>();
             
@@ -326,11 +566,36 @@ public class CodeEditor {
                 String type = nodeObj.get("type").getAsString();
                 double x = nodeObj.get("x").getAsDouble();
                 double y = nodeObj.get("y").getAsDouble();
+
+                List<WireType<?>> nodeTypes = new ArrayList<>();
+                if (nodeObj.has("types")) {
+                    JsonArray types = nodeObj.getAsJsonArray("types");
+                    for (JsonElement str : types) {
+                        nodeTypes.add(AllTypes.fromJson(str));
+                    }
+                }
+
                 Node node = null;
-                for (Node n : NodeList.nodes) {
+                for (Node n : NodeList.root.collectNodes()) {
                     if (n.id.equals(type)) {
-                        node = n.copy();
+                        if (nodeTypes.isEmpty()) {
+                            node = n.copy();
+                        } else {
+                            node = n.copyWithTypes(nodeTypes);
+                        }
                         break;
+                    }
+                }
+
+                if (node == null && nodeObj.has("function")) {
+                    FunctionDefinition function = this.functions.get(nodeObj.get("function").getAsString());
+                    if (function != null) {
+                        node = switch (type) {
+                            case "function_inputs" -> function.inputsNode;
+                            case "function_outputs" -> function.outputsNode;
+                            case "function_call" -> new FunctionCallNode(function);
+                            default -> null;
+                        };
                     }
                 }
 
@@ -396,19 +661,13 @@ public class CodeEditor {
             
             for (JsonElement wireElem : wires) {
                 JsonObject wireObj = wireElem.getAsJsonObject();
-                String type = wireObj.get("type").getAsString();
+                JsonElement type = wireObj.get("type");
                 double fromX = wireObj.get("fromX").getAsDouble();
                 double fromY = wireObj.get("fromY").getAsDouble();
                 double toX = wireObj.get("toX").getAsDouble();
                 double toY = wireObj.get("toY").getAsDouble();
                 
-                WireType<?> typeInst = null;
-                for (WireType<?> t : AllTypes.list) {
-                    if (t.id().equals(type)) {
-                        typeInst = t;
-                        break;
-                    }
-                }
+                WireType<?> typeInst = AllTypes.fromJson(type);
                 WireWidget wire = new WireWidget(typeInst, new Vec(fromX, fromY, 15.999), new Vec(toX, toY, 15.999));
                 if (wireObj.has("previousOutputNode") && wireObj.has("previousOutputId")) {
                     int nodeIndex = wireObj.get("previousOutputNode").getAsInt();

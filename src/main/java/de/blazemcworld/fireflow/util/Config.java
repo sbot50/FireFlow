@@ -1,12 +1,13 @@
 package de.blazemcworld.fireflow.util;
 
-import com.google.gson.Gson;
-import de.blazemcworld.fireflow.FireFlow;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+
+import com.google.gson.Gson;
+
+import de.blazemcworld.fireflow.FireFlow;
 
 public class Config {
 
@@ -32,7 +33,7 @@ public class Config {
         }
     }
 
-    public record Store(String motd, int port, LimitsConfig limits) {
+    public record Store(String motd, int port, LimitsConfig limits, String translations) {
     }
 
     public record LimitsConfig(long cpuPerTick, int spacesPerPlayer, int totalSpaces) {

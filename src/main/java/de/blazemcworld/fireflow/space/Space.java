@@ -4,7 +4,11 @@ import java.util.List;
 
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.CodeEvaluator;
+import de.blazemcworld.fireflow.code.VariableStore;
 import de.blazemcworld.fireflow.util.Transfer;
+import de.blazemcworld.fireflow.util.Translations;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.entity.Player;
@@ -24,6 +28,7 @@ public class Space {
     public final CodeEditor editor;
     private CodeEvaluator evaluator;
     private long emptySince = -1;
+    public final VariableStore savedVariables = new VariableStore();
 
     public Space(SpaceInfo info) {
         this.info = info;
@@ -67,9 +72,10 @@ public class Space {
         return emptySince != -1 && System.currentTimeMillis() - emptySince > 10000;
     }
 
-    public void reload() {
+    public void reload(String reason) {
         evaluator.stop();
         for (Player player : play.getPlayers()) {
+            player.sendMessage(Component.text(Translations.get("reload." + reason)).color(reason == "cpu" ? NamedTextColor.RED : NamedTextColor.YELLOW));
             if (info.owner.equals(player.getUuid()) || info.contributors.contains(player.getUuid())) {
                 Transfer.move(player, code);
             } else {

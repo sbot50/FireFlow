@@ -1,10 +1,12 @@
 package de.blazemcworld.fireflow.code;
 
-import de.blazemcworld.fireflow.code.node.Node;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Stack;
+
+import de.blazemcworld.fireflow.code.node.Node;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionCallNode;
 
 public class CodeThread {
 
@@ -12,6 +14,8 @@ public class CodeThread {
     private final HashMap<Node.Output<?>, Object> threadValues = new HashMap<>();
     private final List<Runnable> todo = new ArrayList<>();
     private long lastSync = System.nanoTime();
+    public final VariableStore threadVariables = new VariableStore();
+    public final Stack<FunctionCallNode> functionStack = new Stack<>();
 
     public CodeThread(CodeEvaluator evaluator) {
         this.evaluator = evaluator;
@@ -32,6 +36,7 @@ public class CodeThread {
 
     public void clearQueue() {
         while (!todo.isEmpty()) {
+            if (timelimitHit()) return;
             todo.removeFirst().run();
         }
     }
@@ -41,5 +46,11 @@ public class CodeThread {
         long elapsed = now - lastSync;
         lastSync = now;
         return evaluator.timelimitHit(elapsed);
+    }
+
+    public CodeThread subThread() {
+        CodeThread thread = new CodeThread(evaluator);
+        thread.threadValues.putAll(threadValues);
+        return thread;
     }
 }

@@ -1,24 +1,25 @@
 package de.blazemcworld.fireflow.util;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TextComponent;
-import net.kyori.adventure.text.format.TextDecoration;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.format.TextDecoration;
+
 public class TextWidth {
 
     private static final HashMap<String, Info> known = new HashMap<>();
-    private static final Info missing;
+    private static Info missing;
 
-    static {
+    public static void init() {
         try (InputStream stream = TextWidth.class.getClassLoader().getResourceAsStream("fontwidth.json")) {
             String raw = new String(stream.readAllBytes());
 

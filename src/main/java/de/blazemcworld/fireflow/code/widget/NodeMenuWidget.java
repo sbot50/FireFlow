@@ -1,20 +1,51 @@
 package de.blazemcworld.fireflow.code.widget;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.node.Node;
+import de.blazemcworld.fireflow.code.node.NodeList;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionCallNode;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionDefinition;
+import de.blazemcworld.fireflow.code.type.AllTypes;
+import de.blazemcworld.fireflow.code.type.WireType;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.InstanceContainer;
-
-import java.util.List;
-import java.util.Set;
 
 public class NodeMenuWidget implements Widget {
 
     private final Widget root;
 
-    public NodeMenuWidget(Set<Node> nodes) {
+    public NodeMenuWidget(NodeList.Category category, CodeEditor editor) {
         VerticalContainerWidget list = new VerticalContainerWidget();
+
+        for (NodeList.Category subCategory : category.categories) {
+            ButtonWidget button = new ButtonWidget(Component.text(subCategory.name));
+
+            button.handler = interaction -> {
+                if (interaction.type() != Interaction.Type.RIGHT_CLICK) return false;
+                remove();
+                interaction.editor().rootWidgets.remove(this);
+
+                NodeMenuWidget n = new NodeMenuWidget(subCategory, interaction.editor());
+                n.setPos(interaction.pos());
+                n.update(interaction.editor().space.code);
+                interaction.editor().rootWidgets.add(n);
+                return true;
+            };
+
+            list.widgets.add(button);
+        }
+
+        List<Node> nodes = category.nodes;
+        if (category.isFunctions) {
+            for (FunctionDefinition fn : editor.functions.values()) {
+                nodes.add(new FunctionCallNode(fn));
+            }
+        }
 
         for (Node node : nodes) {
             ButtonWidget button = new ButtonWidget(Component.text(node.getTitle()));
@@ -24,18 +55,16 @@ public class NodeMenuWidget implements Widget {
                 remove();
                 interaction.editor().rootWidgets.remove(this);
 
-                NodeWidget n = new NodeWidget(node.copy());
-                Vec s = n.getSize();
-                n.setPos(interaction.pos().add(Math.round(s.x() * 4) / 8f, Math.round(s.y() * 4) / 8f, 0));
-                n.update(interaction.editor().space.code);
-                interaction.editor().rootWidgets.add(n);
+                createNode(interaction.editor(), interaction.pos(), node, new ArrayList<>());
                 return true;
             };
 
             list.widgets.add(button);
         }
 
-        ButtonWidget button = new ButtonWidget(new BorderWidget(list));
+        BorderWidget<VerticalContainerWidget> border = new BorderWidget<>(list);
+        border.backgroundColor(0x99000011);
+        ButtonWidget button = new ButtonWidget(border);
 
         button.handler = interaction -> {
             if (interaction.type() == Interaction.Type.LEFT_CLICK) {
@@ -47,6 +76,38 @@ public class NodeMenuWidget implements Widget {
         };
 
         root = button;
+    }
+
+    private void createNode(CodeEditor e, Vec pos, Node node, List<WireType<?>> types) {
+        if (node.getTypeCount() > types.size()) {
+            List<WireType<?>> filtered = new ArrayList<>();
+            for (WireType<?> type : AllTypes.all) {
+                if (node.acceptsType(type, types.size())) {
+                    filtered.add(type);
+                }
+            }
+
+            TypeSelectorWidget selector = new TypeSelectorWidget(filtered, type -> {
+                types.add(type);
+                createNode(e, pos, node.copyWithTypes(types), types);
+            });
+            selector.setPos(pos);
+            selector.update(e.space.code);
+            e.rootWidgets.add(selector);
+            return;
+        }
+
+        NodeWidget n;
+        if (types.isEmpty()) {
+            n = new NodeWidget(node.copy());
+        } else {
+            n = new NodeWidget(node.copyWithTypes(types));
+        }
+
+        Vec s = n.getSize();
+        n.setPos(pos.add(Math.round(s.x() * 4) / 8f, Math.round(s.y() * 4) / 8f, 0));
+        n.update(e.space.code);
+        e.rootWidgets.add(n);
     }
 
     @Override

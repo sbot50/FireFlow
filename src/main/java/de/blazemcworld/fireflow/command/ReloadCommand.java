@@ -21,7 +21,7 @@ public class ReloadCommand extends Command {
                     return;
                 }
 
-                space.reload();
+                space.reload("regular");
                 sender.sendMessage(Component.text(Translations.get("success.reload")).color(NamedTextColor.GREEN));
             } else {
                 sender.sendMessage(Component.text(Translations.get("error.needs.player")).color(NamedTextColor.RED));

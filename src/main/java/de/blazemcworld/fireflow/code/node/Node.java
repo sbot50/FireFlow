@@ -1,14 +1,17 @@
 package de.blazemcworld.fireflow.code.node;
 
-import de.blazemcworld.fireflow.code.CodeEvaluator;
-import de.blazemcworld.fireflow.code.CodeThread;
-import de.blazemcworld.fireflow.code.type.WireType;
-import de.blazemcworld.fireflow.util.Translations;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+
+import de.blazemcworld.fireflow.code.CodeEvaluator;
+import de.blazemcworld.fireflow.code.CodeThread;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionCallNode;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionInputsNode;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionOutputsNode;
+import de.blazemcworld.fireflow.code.type.WireType;
+import de.blazemcworld.fireflow.util.Translations;
 
 public abstract class Node {
 
@@ -27,6 +30,22 @@ public abstract class Node {
     public abstract Node copy();
 
     public void init(CodeEvaluator evaluator) {
+    }
+
+    public List<WireType<?>> getTypes() {
+        return null;
+    }
+
+    public int getTypeCount() {
+        return 0;
+    }
+
+    public boolean acceptsType(WireType<?> type, int index) {
+        return false;
+    }
+
+    public Node copyWithTypes(List<WireType<?>> types) {
+        return copy();
     }
 
     public class Input<T> {
@@ -59,6 +78,7 @@ public abstract class Node {
         }
 
         public String getName() {
+            if (Node.this instanceof FunctionCallNode || Node.this instanceof FunctionOutputsNode || Node.this instanceof FunctionInputsNode) return id;
             return Translations.get("node." + Node.this.id + ".input." + id);
         }
 
@@ -94,10 +114,12 @@ public abstract class Node {
         }
 
         private T computeNow(CodeThread ctx) {
+            if (ctx.timelimitHit()) return type.defaultValue();
             return logic.apply(ctx);
         }
 
         public String getName() {
+            if (Node.this instanceof FunctionCallNode || Node.this instanceof FunctionOutputsNode || Node.this instanceof FunctionInputsNode) return id;
             return Translations.get("node." + Node.this.id + ".output." + id);
         }
 
@@ -109,5 +131,4 @@ public abstract class Node {
             logic = (ctx) -> ctx.getThreadValue(this);
         }
     }
-
 }

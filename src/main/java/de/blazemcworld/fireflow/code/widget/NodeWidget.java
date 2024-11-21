@@ -1,21 +1,26 @@
 package de.blazemcworld.fireflow.code.widget;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.action.DragNodeAction;
 import de.blazemcworld.fireflow.code.node.Node;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionCallNode;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionInputsNode;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionOutputsNode;
+import de.blazemcworld.fireflow.util.Translations;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.InstanceContainer;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class NodeWidget implements Widget {
 
     public final Node node;
-    private final BorderWidget root;
+    private final BorderWidget<VerticalContainerWidget> root;
 
     public NodeWidget(Node node) {
         this.node = node;
@@ -48,7 +53,8 @@ public class NodeWidget implements Widget {
         
         double needed = Math.max(0, title.getSize().x() - ioArea.getSize().x());
         spacing.size = spacing.size.withX(spacing.size.x() + Math.ceil(needed * 8) / 8);
-        root = new BorderWidget(main);
+        root = new BorderWidget<>(main);
+        root.backgroundColor(0x99001100);
     }
 
     @Override
@@ -82,7 +88,10 @@ public class NodeWidget implements Widget {
                 wire.removeConnection(editor);
             }
         }
-        root.remove();
+        remove();
+        if (node instanceof FunctionCallNode call) {
+            call.function.callNodes.remove(call);
+        }
     }
 
     @Override
@@ -90,6 +99,10 @@ public class NodeWidget implements Widget {
         if (!inBounds(i.pos())) return false;
         if (root.interact(i)) return true;
         if (i.type() == Interaction.Type.LEFT_CLICK) {
+            if (node instanceof FunctionInputsNode || node instanceof FunctionOutputsNode) {
+                i.player().sendMessage(Component.text(Translations.get("error.function.delete_command")).color(NamedTextColor.RED));
+                return true;
+            }
             remove(i.editor());
             i.editor().rootWidgets.remove(this);
             return true;

@@ -1,4 +1,4 @@
-package de.blazemcworld.fireflow.code.node.impl;
+package de.blazemcworld.fireflow.code.node.impl.number;
 
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.NumberType;

@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import de.blazemcworld.fireflow.space.Space;
 import de.blazemcworld.fireflow.space.SpaceManager;
+import de.blazemcworld.fireflow.util.Transfer;
 import de.blazemcworld.fireflow.util.Translations;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -107,6 +108,9 @@ public class ContributorCommand extends Command {
                         return;
                     }
                     space.info.contributors.remove(contributor);
+                    if (space.code.getPlayerByUuid(contributor) != null) {
+                        Transfer.move(space.code.getPlayerByUuid(contributor), space.play);
+                    }
                     sender.sendMessage(Component.text(Translations.get("success.contributors.removed")).color(NamedTextColor.GREEN));
                     return;
                 }

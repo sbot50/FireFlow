@@ -1,4 +1,6 @@
-package de.blazemcworld.fireflow.code.node.impl;
+package de.blazemcworld.fireflow.code.node.impl.flow;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import de.blazemcworld.fireflow.code.CodeThread;
 import de.blazemcworld.fireflow.code.node.Node;
@@ -6,8 +8,6 @@ import de.blazemcworld.fireflow.code.type.NumberType;
 import de.blazemcworld.fireflow.code.type.SignalType;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.timer.TaskSchedule;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class ScheduleNode extends Node {
 
@@ -25,7 +25,7 @@ public class ScheduleNode extends Node {
 
             MinecraftServer.getSchedulerManager().submitTask(() -> {
                 if (ctx.evaluator.isStopped()) return TaskSchedule.stop();
-                CodeThread spawned = ctx.evaluator.newCodeThread();
+                CodeThread spawned = ctx.subThread();
                 if (remaining.get() <= 0) {
                     spawned.sendSignal(task);
                     spawned.clearQueue();
