@@ -1,5 +1,8 @@
 package de.blazemcworld.fireflow.code.widget;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.action.WireAction;
 import de.blazemcworld.fireflow.code.node.Node;
@@ -9,9 +12,6 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.InstanceContainer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class NodeIOWidget implements Widget {
 
@@ -112,6 +112,7 @@ public class NodeIOWidget implements Widget {
                 input.input.inset = null;
             }
         }
+        text.text(displayText());
     }
 
     @SuppressWarnings("unchecked")
@@ -126,6 +127,7 @@ public class NodeIOWidget implements Widget {
                 input.input.inset = null;
             }
         }
+        text.text(displayText());
     }
 
     public void insetValue(String value) {
@@ -138,8 +140,10 @@ public class NodeIOWidget implements Widget {
     }
 
     private Component displayText() {
-        String str = isInput ? ("○ " + input.getName()) : (output.getName() + " ○");
-
+        String str = isInput ?
+        ((connections.isEmpty() ? "○ " : "⏺ ") + input.getName()) :
+        (output.getName() + (connections.isEmpty() ? " ○" : " ⏺"));
+        
         if (isInput && input.inset != null) {
             str = "⏹ " + input.inset;
         }
