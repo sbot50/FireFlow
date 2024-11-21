@@ -27,6 +27,11 @@ public class CodeCommand extends Command {
                     return;
                 }
 
+                if (!space.info.owner.equals(player.getUuid()) && !space.info.contributors.contains(player.getUuid())) {
+                    sender.sendMessage(Component.text(Translations.get("error.needs.permission")).color(NamedTextColor.RED));
+                    return;
+                }
+
                 Transfer.move(player, space.code);
             } else {
                 sender.sendMessage(Component.text(Translations.get("error.needs.player")).color(NamedTextColor.RED));
