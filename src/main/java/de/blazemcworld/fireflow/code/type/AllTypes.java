@@ -30,7 +30,7 @@ public class AllTypes {
     public static WireType<?> fromJson(JsonElement json) {
         if (json.isJsonPrimitive()) {
             for (WireType<?> t : all) {
-                if (t.id().equals(json.getAsString())) {
+                if (t.id.equals(json.getAsString())) {
                     return t;
                 }
             }
@@ -40,7 +40,7 @@ public class AllTypes {
         JsonArray array = json.getAsJsonArray();
         WireType<?> main = null;
         for (WireType<?> t : all) {
-            if (t.id().equals(array.get(0).getAsString())) {
+            if (t.id.equals(array.get(0).getAsString())) {
                 main = t;
                 break;
             }
@@ -57,12 +57,12 @@ public class AllTypes {
 
     public static JsonElement toJson(WireType<?> type) {
         if (type.getTypeCount() == 0) {
-            return new JsonPrimitive(type.id());
+            return new JsonPrimitive(type.id);
         }
         
         JsonArray json = new JsonArray();
 
-        json.add(new JsonPrimitive(type.id()));
+        json.add(new JsonPrimitive(type.id));
         for (WireType<?> t : type.getTypes()) {
             json.add(AllTypes.toJson(t));
         }

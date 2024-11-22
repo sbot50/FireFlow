@@ -1,12 +1,12 @@
 package de.blazemcworld.fireflow.code.widget;
 
+import java.util.List;
+import java.util.function.Function;
+
 import de.blazemcworld.fireflow.code.Interaction;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.InstanceContainer;
-
-import java.util.List;
-import java.util.function.Function;
 
 public class ButtonWidget implements Widget {
 
@@ -19,6 +19,10 @@ public class ButtonWidget implements Widget {
 
     public ButtonWidget(Component text) {
         this(new TextWidget(text));
+    }
+
+    public ButtonWidget(Widget... widgets) {
+        this(new HorizontalContainerWidget(widgets));
     }
 
     @Override

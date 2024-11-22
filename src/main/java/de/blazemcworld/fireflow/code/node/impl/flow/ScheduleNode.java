@@ -7,12 +7,13 @@ import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.NumberType;
 import de.blazemcworld.fireflow.code.type.SignalType;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.item.Material;
 import net.minestom.server.timer.TaskSchedule;
 
 public class ScheduleNode extends Node {
 
     public ScheduleNode() {
-        super("schedule");
+        super("schedule", Material.CLOCK);
 
         Input<Void> signal = new Input<>("signal", SignalType.INSTANCE);
         Input<Double> delay = new Input<>("delay", NumberType.INSTANCE);

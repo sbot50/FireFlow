@@ -16,45 +16,52 @@ import de.blazemcworld.fireflow.code.node.impl.flow.ScheduleNode;
 import de.blazemcworld.fireflow.code.node.impl.list.EmptyListNode;
 import de.blazemcworld.fireflow.code.node.impl.list.ListAppendNode;
 import de.blazemcworld.fireflow.code.node.impl.number.AddNumbersNode;
+import de.blazemcworld.fireflow.code.node.impl.number.DivideNumbersNode;
+import de.blazemcworld.fireflow.code.node.impl.number.MultiplyNumbersNode;
 import de.blazemcworld.fireflow.code.node.impl.number.NumberToTextNode;
+import de.blazemcworld.fireflow.code.node.impl.number.SubtractNumbersNode;
 import de.blazemcworld.fireflow.code.node.impl.text.FormatToTextNode;
 import de.blazemcworld.fireflow.code.node.impl.text.StringToTextNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.GetVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.SetVariableNode;
 import de.blazemcworld.fireflow.util.Translations;
+import net.minestom.server.item.Material;
 
 public class NodeList {
 
     public static Category root;
     
     public static void init() {
-        root = new Category("root")
-            .add(new Category("action")
+        root = new Category("root", null)
+            .add(new Category("action", Material.REDSTONE)
                     .add(new SendMessageNode())
             )
-            .add(new Category("event")
+            .add(new Category("event", Material.OBSERVER)
                     .add(new OnPlayerChatNode())
                     .add(new OnPlayerJoinNode())
             )
-            .add(new Category("flow")
+            .add(new Category("flow", Material.COMPARATOR)
                     .add(new IfNode())
                     .add(new ListForEachNode<>(null))
                     .add(new RepeatNode())
                     .add(new ScheduleNode())
             )
-            .add(new Category("list")
+            .add(new Category("list", Material.BOOKSHELF)
                     .add(new EmptyListNode<>(null))
                     .add(new ListAppendNode<>(null))
             )
-            .add(new Category("number")
+            .add(new Category("number", Material.CLOCK)
                     .add(new AddNumbersNode())
+                    .add(new DivideNumbersNode())
                     .add(new NumberToTextNode())
+                    .add(new MultiplyNumbersNode())
+                    .add(new SubtractNumbersNode())
             )
-            .add(new Category("text")
+            .add(new Category("text", Material.WRITABLE_BOOK)
                     .add(new FormatToTextNode())
                     .add(new StringToTextNode())
             )
-            .add(new Category("variable")
+            .add(new Category("variable", Material.ENDER_CHEST)
                     .add(new GetVariableNode<>(null, VariableStore.Scope.SAVED))
                     .add(new GetVariableNode<>(null, VariableStore.Scope.SESSION))
                     .add(new GetVariableNode<>(null, VariableStore.Scope.THREAD))
@@ -62,7 +69,7 @@ public class NodeList {
                     .add(new SetVariableNode<>(null, VariableStore.Scope.SESSION))
                     .add(new SetVariableNode<>(null, VariableStore.Scope.THREAD))
             )
-            .add(new Category("function").markFunctions())
+            .add(new Category("function", Material.COMMAND_BLOCK).markFunctions())
             .finish();
         
         FireFlow.LOGGER.info("Loaded " + root.collectNodes().size() + " node types");
@@ -70,12 +77,15 @@ public class NodeList {
 
     public static class Category {
         public final String name;
+        public final Material icon;
+        
         public final List<Category> categories = new ArrayList<>();
         public final List<Node> nodes = new ArrayList<>();
         public boolean isFunctions = false;
 
-        public Category(String id) {
+        public Category(String id, Material icon) {
             name = Translations.get("category." + id);
+            this.icon = icon;
         }
 
         public Category add(Node node) {

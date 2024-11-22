@@ -9,7 +9,7 @@ public class FunctionOutputsNode extends Node {
     public FunctionDefinition function;
 
     public FunctionOutputsNode(FunctionDefinition function) {
-        super("function_outputs");
+        super("function_outputs", function.icon);
         this.function = function;
     }
 

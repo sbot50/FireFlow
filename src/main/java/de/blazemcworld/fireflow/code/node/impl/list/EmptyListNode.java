@@ -8,13 +8,14 @@ import de.blazemcworld.fireflow.code.type.ListType;
 import de.blazemcworld.fireflow.code.type.WireType;
 import de.blazemcworld.fireflow.code.value.ListValue;
 import de.blazemcworld.fireflow.util.Translations;
+import net.minestom.server.item.Material;
 
 public class EmptyListNode<T> extends Node {
 
     private final WireType<T> type;
 
     public EmptyListNode(WireType<T> type) {
-        super("empty_list");
+        super("empty_list", Material.MINECART);
         this.type = type;
 
         Output<ListValue<T>> output = new Output<>("list", ListType.of(type));

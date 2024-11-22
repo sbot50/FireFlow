@@ -75,7 +75,7 @@ public class CodeEvaluator {
         HashMap<String, FunctionDefinition> functions = new HashMap<>();
 
         for (FunctionDefinition old : space.editor.functions.values()) {
-            FunctionDefinition copy = new FunctionDefinition(old.name);
+            FunctionDefinition copy = new FunctionDefinition(old.name, old.icon);
             for (Node.Output<?> input : old.inputsNode.outputs) {
                 copy.addInput(input.id, input.type);
             }

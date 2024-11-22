@@ -6,11 +6,12 @@ import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.type.TextType;
 import de.blazemcworld.fireflow.code.value.PlayerValue;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.item.Material;
 
 public class SendMessageNode extends Node {
 
     public SendMessageNode() {
-        super("send_message");
+        super("send_message", Material.PAPER);
 
         Input<Void> signal = new Input<>("signal", SignalType.INSTANCE);
         Input<PlayerValue> player = new Input<>("player", PlayerType.INSTANCE);

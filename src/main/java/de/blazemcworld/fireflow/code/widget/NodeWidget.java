@@ -27,7 +27,7 @@ public class NodeWidget implements Widget {
 
         VerticalContainerWidget main = new VerticalContainerWidget();
         main.align = VerticalContainerWidget.Align.CENTER;
-        TextWidget title = new TextWidget(Component.text(node.getTitle()));
+        HorizontalContainerWidget title = new HorizontalContainerWidget(new ItemWidget(node.icon), new TextWidget(Component.text(node.getTitle())));
         main.widgets.add(title);
 
         HorizontalContainerWidget ioArea = new HorizontalContainerWidget();

@@ -4,20 +4,20 @@ import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.NumberType;
 import net.minestom.server.item.Material;
 
-public class AddNumbersNode extends Node {
+public class SubtractNumbersNode extends Node {
 
-    public AddNumbersNode() {
-        super("add_numbers", Material.ANVIL);
+    public SubtractNumbersNode() {
+        super("subtract_numbers", Material.SHEARS);
 
         Input<Double> left = new Input<>("left", NumberType.INSTANCE);
         Input<Double> right = new Input<>("right", NumberType.INSTANCE);
         Output<Double> result = new Output<>("result", NumberType.INSTANCE);
 
-        result.valueFrom((ctx) -> left.getValue(ctx) + right.getValue(ctx));
+        result.valueFrom((ctx) -> left.getValue(ctx) - right.getValue(ctx));
     }
 
     @Override
     public Node copy() {
-        return new AddNumbersNode();
+        return new SubtractNumbersNode();
     }
 }

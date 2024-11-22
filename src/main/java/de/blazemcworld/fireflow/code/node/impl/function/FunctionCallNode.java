@@ -9,7 +9,7 @@ public class FunctionCallNode extends Node {
 
     @SuppressWarnings("unchecked")
     public FunctionCallNode(FunctionDefinition function) {
-        super("function_call");
+        super("function_call", function.icon);
         this.function = function;
 
         for (Node.Output<?> matching : function.inputsNode.outputs) {

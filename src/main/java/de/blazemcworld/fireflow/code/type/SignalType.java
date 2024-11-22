@@ -4,28 +4,19 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.item.Material;
 
 public class SignalType extends WireType<Void> {
 
     public static final SignalType INSTANCE = new SignalType();
 
     private SignalType() {
-    }
-
-    @Override
-    public String id() {
-        return "signal";
+        super("signal", NamedTextColor.AQUA, Material.REDSTONE);
     }
 
     @Override
     public Void defaultValue() {
         return null;
-    }
-
-    @Override
-    public TextColor getColor() {
-        return NamedTextColor.AQUA;
     }
 
     @Override

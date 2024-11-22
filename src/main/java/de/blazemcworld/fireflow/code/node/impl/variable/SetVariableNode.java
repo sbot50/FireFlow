@@ -9,6 +9,7 @@ import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.type.StringType;
 import de.blazemcworld.fireflow.code.type.WireType;
 import de.blazemcworld.fireflow.util.Translations;
+import net.minestom.server.item.Material;
 
 public class SetVariableNode<T> extends Node {
 
@@ -16,7 +17,7 @@ public class SetVariableNode<T> extends Node {
     private final VariableStore.Scope scope;
 
     public SetVariableNode(WireType<T> type, VariableStore.Scope scope) {
-        super("set_variable");
+        super("set_variable", Material.IRON_BLOCK);
         this.type = type;
         this.scope = scope;
 

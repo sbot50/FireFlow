@@ -50,6 +50,7 @@ import net.minestom.server.event.player.PlayerSpawnEvent;
 import net.minestom.server.event.player.PlayerSwapItemEvent;
 import net.minestom.server.event.player.PlayerTickEvent;
 import net.minestom.server.event.trait.InstanceEvent;
+import net.minestom.server.item.Material;
 
 public class CodeEditor {
 
@@ -150,7 +151,7 @@ public class CodeEditor {
         }
 
         if (type == Interaction.Type.RIGHT_CLICK) {
-            NodeMenuWidget n = new NodeMenuWidget(NodeList.root, this);
+            NodeMenuWidget n = new NodeMenuWidget(NodeList.root, this, null);
             Vec s = n.getSize();
             n.setPos(pos.add(Math.round(s.x() * 4) / 8f, Math.round(s.y() * 4) / 8f, 0));
             n.update(space.code);
@@ -208,7 +209,7 @@ public class CodeEditor {
             return;
         }
 
-        FunctionDefinition function = new FunctionDefinition(name);
+        FunctionDefinition function = new FunctionDefinition(name, Material.COMMAND_BLOCK);
         functions.put(name, function);
 
         Vec pos = getCursor(player).mul(8).apply(Vec.Operator.CEIL).div(8).withZ(15.999);
@@ -342,7 +343,7 @@ public class CodeEditor {
             return;
         }
 
-        FunctionDefinition adjusted = new FunctionDefinition(function.name);
+        FunctionDefinition adjusted = new FunctionDefinition(function.name, function.icon);
         for (Node.Output<?> input : function.inputsNode.outputs) {
             if (input.id.equals(name)) continue;
             adjusted.addInput(input.id, input.type);
@@ -350,6 +351,7 @@ public class CodeEditor {
         for (Node.Input<?> output : function.outputsNode.inputs) {
             adjusted.addOutput(output.id, output.type);
         }
+        functions.put(function.name, adjusted);
         refreshFunctionWidgets(function, adjusted);
     }
 
@@ -362,7 +364,7 @@ public class CodeEditor {
             return;
         }
 
-        FunctionDefinition adjusted = new FunctionDefinition(function.name);
+        FunctionDefinition adjusted = new FunctionDefinition(function.name, function.icon);
         for (Node.Output<?> input : function.inputsNode.outputs) {
             adjusted.addInput(input.id, input.type);
         }
@@ -370,6 +372,29 @@ public class CodeEditor {
             if (output.id.equals(name)) continue;
             adjusted.addOutput(output.id, output.type);
         }
+        functions.put(function.name, adjusted);
+        refreshFunctionWidgets(function, adjusted);
+    }
+
+    public void setFunctionIcon(Player player, String icon) {
+        FunctionDefinition function = tryGetFunction(player);
+        if (function == null) return;
+
+        Material m = Material.fromNamespaceId(icon);
+        
+        if (m == null) {
+            player.sendMessage(Component.text(Translations.get("error.unknown.item")).color(NamedTextColor.RED));
+            return;
+        }
+        
+        FunctionDefinition adjusted = new FunctionDefinition(function.name, m);
+        for (Node.Output<?> input : function.inputsNode.outputs) {
+            adjusted.addInput(input.id, input.type);
+        }
+        for (Node.Input<?> output : function.outputsNode.inputs) {
+            adjusted.addOutput(output.id, output.type);
+        }
+        functions.put(function.name, adjusted);
         refreshFunctionWidgets(function, adjusted);
     }
 
@@ -504,6 +529,7 @@ public class CodeEditor {
         for (FunctionDefinition function : this.functions.values()) {
             JsonObject obj = new JsonObject();
             obj.addProperty("name", function.name);
+            obj.addProperty("icon", function.icon.namespace().asString());
             JsonArray inputs = new JsonArray();
             for (Node.Output<?> input : function.inputsNode.outputs) {
                 JsonObject inputObj = new JsonObject();
@@ -542,7 +568,10 @@ public class CodeEditor {
             for (JsonElement function : functions) {
                 JsonObject obj = function.getAsJsonObject();
                 String name = obj.get("name").getAsString();
-                FunctionDefinition functionDefinition = new FunctionDefinition(name);
+                Material icon = Material.fromNamespaceId(obj.get("icon").getAsString());
+                if (icon == null) icon = Material.COMMAND_BLOCK;
+                FunctionDefinition functionDefinition = new FunctionDefinition(name, icon);
+
                 for (JsonElement input : obj.getAsJsonArray("inputs")) {
                     JsonObject inputObj = input.getAsJsonObject();
                     String inputName = inputObj.get("name").getAsString();

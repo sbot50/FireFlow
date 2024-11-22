@@ -7,28 +7,19 @@ import com.google.gson.JsonPrimitive;
 
 import de.blazemcworld.fireflow.code.value.PlayerValue;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.item.Material;
 
 public class PlayerType extends WireType<PlayerValue> {
 
     public static final PlayerType INSTANCE = new PlayerType();
 
     private PlayerType() {
-    }
-
-    @Override
-    public String id() {
-        return "player";
+        super("player", NamedTextColor.GOLD, Material.PLAYER_HEAD);
     }
 
     @Override
     public PlayerValue defaultValue() {
         return new PlayerValue(UUID.fromString("00000000-0000-0000-0000-000000000000"));
-    }
-
-    @Override
-    public TextColor getColor() {
-        return NamedTextColor.GOLD;
     }
 
     @Override

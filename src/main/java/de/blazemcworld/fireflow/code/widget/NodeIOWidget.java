@@ -147,7 +147,7 @@ public class NodeIOWidget implements Widget {
             str = "⏹ " + input.inset;
         }
 
-        return Component.text(str).color(type.getColor());
+        return Component.text(str).color(type.color);
     }
 
     @Override

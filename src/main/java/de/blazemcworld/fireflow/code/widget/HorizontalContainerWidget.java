@@ -1,16 +1,24 @@
 package de.blazemcworld.fireflow.code.widget;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.blazemcworld.fireflow.code.Interaction;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.InstanceContainer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class HorizontalContainerWidget implements Widget {
 
     private Vec pos = Vec.ZERO;
     public final List<Widget> widgets = new ArrayList<>();
+
+    public HorizontalContainerWidget() {}
+
+    public HorizontalContainerWidget(Widget... widgets) {
+        for (Widget widget : widgets) {
+            this.widgets.add(widget);
+        }
+    }
 
     @Override
     public void setPos(Vec pos) {

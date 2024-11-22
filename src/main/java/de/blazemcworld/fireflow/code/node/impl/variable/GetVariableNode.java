@@ -8,6 +8,7 @@ import de.blazemcworld.fireflow.code.type.AllTypes;
 import de.blazemcworld.fireflow.code.type.StringType;
 import de.blazemcworld.fireflow.code.type.WireType;
 import de.blazemcworld.fireflow.util.Translations;
+import net.minestom.server.item.Material;
 
 public class GetVariableNode<T> extends Node {
     
@@ -15,7 +16,7 @@ public class GetVariableNode<T> extends Node {
     private final VariableStore.Scope scope;
 
     public GetVariableNode(WireType<T> type, VariableStore.Scope scope) {
-        super("get_variable");
+        super("get_variable", Material.IRON_INGOT);
         this.type = type;
         this.scope = scope;
 

@@ -7,6 +7,7 @@ import de.blazemcworld.fireflow.code.type.PlayerType;
 import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.value.PlayerValue;
 import net.minestom.server.event.player.PlayerSpawnEvent;
+import net.minestom.server.item.Material;
 
 public class OnPlayerJoinNode extends Node {
 
@@ -14,7 +15,7 @@ public class OnPlayerJoinNode extends Node {
     private final Output<PlayerValue> player;
 
     public OnPlayerJoinNode() {
-        super("on_player_join");
+        super("on_player_join", Material.OAK_DOOR);
 
         signal = new Output<>("signal", SignalType.INSTANCE);
         player = new Output<>("player", PlayerType.INSTANCE);

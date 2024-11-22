@@ -9,7 +9,9 @@ import com.google.gson.JsonElement;
 
 import de.blazemcworld.fireflow.code.value.ListValue;
 import de.blazemcworld.fireflow.util.Translations;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.item.Material;
 
 public class ListType<T> extends WireType<ListValue<T>> {
 
@@ -18,6 +20,7 @@ public class ListType<T> extends WireType<ListValue<T>> {
     private static final WeakHashMap<WireType<?>, ListType<?>> instances = new WeakHashMap<>();
 
     private ListType(WireType<T> type) {
+        super("list", computeColor(type), Material.BOOKSHELF);
         this.type = type;
     }
 
@@ -27,18 +30,13 @@ public class ListType<T> extends WireType<ListValue<T>> {
     }
 
     @Override
-    public String id() {
-        return "list";
-    }
-
-    @Override
     public ListValue<T> defaultValue() {
         return new ListValue<>(type);
     }
 
-    @Override
-    public TextColor getColor() {
-        TextColor elementColor = type.getColor();
+    private static TextColor computeColor(WireType<?> type) {
+        if (type == null) return NamedTextColor.WHITE;
+        TextColor elementColor = type.color;
         int r = elementColor.red() / 2;
         int g = elementColor.green() / 2 + 127;
         int b = elementColor.blue() / 2;

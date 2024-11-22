@@ -1,5 +1,8 @@
 package de.blazemcworld.fireflow.code.widget;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.action.WireAction;
@@ -7,9 +10,6 @@ import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.type.WireType;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.InstanceContainer;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class WireWidget implements Widget {
 
@@ -62,7 +62,7 @@ public class WireWidget implements Widget {
     public WireWidget(WireType<?> type, Vec from, Vec to) {
         line.from = from;
         line.to = to;
-        line.color(type.getColor());
+        line.color(type.color);
         this.type = type;
     }
 

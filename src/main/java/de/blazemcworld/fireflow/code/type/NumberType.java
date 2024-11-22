@@ -4,28 +4,19 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.item.Material;
 
 public class NumberType extends WireType<Double> {
 
     public static final NumberType INSTANCE = new NumberType();
 
     private NumberType() {
-    }
-
-    @Override
-    public String id() {
-        return "number";
+        super("number", NamedTextColor.GREEN, Material.CLOCK);
     }
 
     @Override
     public Double defaultValue() {
         return 0.0;
-    }
-
-    @Override
-    public TextColor getColor() {
-        return NamedTextColor.GREEN;
     }
 
     @Override

@@ -12,15 +12,18 @@ import de.blazemcworld.fireflow.code.node.impl.function.FunctionInputsNode;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionOutputsNode;
 import de.blazemcworld.fireflow.code.type.WireType;
 import de.blazemcworld.fireflow.util.Translations;
+import net.minestom.server.item.Material;
 
 public abstract class Node {
 
     public final String id;
+    public final Material icon;
     public List<Input<?>> inputs = new ArrayList<>();
     public List<Output<?>> outputs = new ArrayList<>();
 
-    protected Node(String id) {
+    protected Node(String id, Material icon) {
         this.id = id;
+        this.icon = icon;
     }
 
     public String getTitle() {

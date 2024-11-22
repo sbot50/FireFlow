@@ -4,11 +4,12 @@ import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.NumberType;
 import de.blazemcworld.fireflow.code.type.TextType;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.item.Material;
 
 public class NumberToTextNode extends Node {
 
     public NumberToTextNode() {
-        super("number_to_text");
+        super("number_to_text", Material.BIRCH_SIGN);
 
         Input<Double> number = new Input<>("number", NumberType.INSTANCE);
         Output<Component> text = new Output<>("text", TextType.INSTANCE);

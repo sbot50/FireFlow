@@ -8,13 +8,14 @@ import de.blazemcworld.fireflow.code.type.ListType;
 import de.blazemcworld.fireflow.code.type.WireType;
 import de.blazemcworld.fireflow.code.value.ListValue;
 import de.blazemcworld.fireflow.util.Translations;
+import net.minestom.server.item.Material;
 
 public class ListAppendNode<T> extends Node {
     
     private final WireType<T> type;
 
     public ListAppendNode(WireType<T> type) {
-        super("list_append");
+        super("list_append", Material.DISPENSER);
         this.type = type;
 
         Input<ListValue<T>> list = new Input<>("list", ListType.of(type));

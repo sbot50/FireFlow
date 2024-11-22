@@ -4,11 +4,12 @@ import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.StringType;
 import de.blazemcworld.fireflow.code.type.TextType;
 import net.kyori.adventure.text.Component;
+import net.minestom.server.item.Material;
 
 public class FormatToTextNode extends Node {
     
     public FormatToTextNode() {
-        super("format_to_text");
+        super("format_to_text", Material.DARK_OAK_SIGN);
 
         Input<String> input = new Input<>("string", StringType.INSTANCE);
         Output<Component> output = new Output<>("text", TextType.INSTANCE);

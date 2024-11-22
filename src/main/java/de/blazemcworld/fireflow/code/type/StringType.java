@@ -4,28 +4,19 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextColor;
+import net.minestom.server.item.Material;
 
 public class StringType extends WireType<String> {
 
     public static final StringType INSTANCE = new StringType();
 
     private StringType() {
-    }
-
-    @Override
-    public String id() {
-        return "string";
+        super("string", NamedTextColor.YELLOW, Material.STRING);
     }
 
     @Override
     public String defaultValue() {
         return "";
-    }
-
-    @Override
-    public TextColor getColor() {
-        return NamedTextColor.YELLOW;
     }
 
     @Override

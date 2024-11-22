@@ -9,7 +9,9 @@ import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.ArgumentLiteral;
 import net.minestom.server.command.builder.arguments.ArgumentString;
+import net.minestom.server.command.builder.arguments.minecraft.ArgumentItemStack;
 import net.minestom.server.entity.Player;
+import net.minestom.server.item.ItemStack;
 
 public class FunctionCommand extends Command {
     
@@ -39,9 +41,13 @@ public class FunctionCommand extends Command {
         addSyntax((sender, ctx) -> {
             run(sender, "remove_output", ctx.get("name"));
         }, new ArgumentLiteral("remove"), new ArgumentLiteral("output"), new ArgumentString("name"));
+
+        addSyntax((sender, ctx) -> {
+            run(sender, "icon", ctx.<ItemStack>get("item").material().namespace().asString());
+        }, new ArgumentLiteral("icon"), new ArgumentItemStack("item"));
     }
 
-    private void run(CommandSender sender, String action, String name) {
+    private void run(CommandSender sender, String action, String input) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage(Component.text(Translations.get("error.needs.player")).color(NamedTextColor.RED));
             return;
@@ -58,17 +64,19 @@ public class FunctionCommand extends Command {
         }
 
         if (action.equals("create")) {
-            space.editor.createFunction(player, name);
+            space.editor.createFunction(player, input);
         } else if (action.equals("delete")) {
             space.editor.deleteFunction(player);
         } else if (action.equals("add_input")) {
-            space.editor.addFunctionInput(player, name);
+            space.editor.addFunctionInput(player, input);
         } else if (action.equals("add_output")) {
-            space.editor.addFunctionOutput(player, name);
+            space.editor.addFunctionOutput(player, input);
         } else if (action.equals("remove_input")) {
-            space.editor.removeFunctionInput(player, name);
+            space.editor.removeFunctionInput(player, input);
         } else if (action.equals("remove_output")) {
-            space.editor.removeFunctionOutput(player, name);
+            space.editor.removeFunctionOutput(player, input);
+        } else if (action.equals("icon")) {
+            space.editor.setFunctionIcon(player, input);
         }
     }
 

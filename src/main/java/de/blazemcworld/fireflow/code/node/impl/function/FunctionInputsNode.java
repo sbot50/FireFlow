@@ -9,7 +9,7 @@ public class FunctionInputsNode extends Node {
     public final FunctionDefinition function;
 
     public FunctionInputsNode(FunctionDefinition function) {
-        super("function_inputs");
+        super("function_inputs", function.icon);
         this.function = function;
     }
 

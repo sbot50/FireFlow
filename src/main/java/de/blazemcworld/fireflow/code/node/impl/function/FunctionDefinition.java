@@ -5,16 +5,19 @@ import java.util.Set;
 
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.WireType;
+import net.minestom.server.item.Material;
 
 public class FunctionDefinition {
     
+    public final Material icon;
     public final String name;
     public final Set<FunctionCallNode> callNodes = new HashSet<>();
     public final FunctionInputsNode inputsNode;
     public final FunctionOutputsNode outputsNode;
 
-    public FunctionDefinition(String name) {
+    public FunctionDefinition(String name, Material icon) {
         this.name = name;
+        this.icon = icon;
         inputsNode = new FunctionInputsNode(this);
         outputsNode = new FunctionOutputsNode(this);
     }

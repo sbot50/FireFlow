@@ -19,7 +19,10 @@ public class TypeSelectorWidget implements Widget {
     public TypeSelectorWidget(List<WireType<?>> options, Consumer<WireType<?>> callback) {
         container.backgroundColor(0x99000011);
         for (WireType<?> type : options) {
-            ButtonWidget button = new ButtonWidget(Component.text(type.getName()));
+            ButtonWidget button = new ButtonWidget(
+                new ItemWidget(type.icon),
+                new TextWidget(Component.text(type.getName()))
+            );
             button.handler = interaction -> {
                 if (interaction.type() != Interaction.Type.RIGHT_CLICK) return false;
                 if (type.getTypeCount() == 0) {

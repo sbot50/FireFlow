@@ -9,13 +9,14 @@ import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.type.WireType;
 import de.blazemcworld.fireflow.code.value.ListValue;
 import de.blazemcworld.fireflow.util.Translations;
+import net.minestom.server.item.Material;
 
 public class ListForEachNode<T> extends Node {
     
     private final WireType<T> type;
 
     public ListForEachNode(WireType<T> type) {
-        super("list_for_each");
+        super("list_for_each", Material.HOPPER);
         this.type = type;
 
         Input<Void> signal = new Input<>("signal", SignalType.INSTANCE);

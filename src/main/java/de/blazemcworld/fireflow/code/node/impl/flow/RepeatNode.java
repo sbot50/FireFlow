@@ -3,11 +3,12 @@ package de.blazemcworld.fireflow.code.node.impl.flow;
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.NumberType;
 import de.blazemcworld.fireflow.code.type.SignalType;
+import net.minestom.server.item.Material;
 
 public class RepeatNode extends Node {
     
     public RepeatNode() {
-        super("repeat");
+        super("repeat", Material.REPEATER);
 
         Input<Void> signal = new Input<>("signal", SignalType.INSTANCE);
         Input<Double> times = new Input<>("times", NumberType.INSTANCE);
