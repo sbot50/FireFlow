@@ -26,13 +26,12 @@ public class ScheduleNode extends Node {
 
             MinecraftServer.getSchedulerManager().submitTask(() -> {
                 if (ctx.evaluator.isStopped()) return TaskSchedule.stop();
-                CodeThread spawned = ctx.subThread();
-                if (remaining.get() <= 0) {
+                if (remaining.getAndDecrement() <= 0) {
+                    CodeThread spawned = ctx.subThread();
                     spawned.sendSignal(task);
                     spawned.clearQueue();
                     return TaskSchedule.stop();
                 }
-                remaining.getAndDecrement();
                 return TaskSchedule.tick(1);
             });
 

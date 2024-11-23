@@ -27,7 +27,7 @@ public class CodeCommand extends Command {
                     return;
                 }
 
-                if (!space.info.owner.equals(player.getUuid()) && !space.info.contributors.contains(player.getUuid())) {
+                if (!space.isOwnerOrContributor(player)) {
                     sender.sendMessage(Component.text(Translations.get("error.needs.permission")).color(NamedTextColor.RED));
                     return;
                 }

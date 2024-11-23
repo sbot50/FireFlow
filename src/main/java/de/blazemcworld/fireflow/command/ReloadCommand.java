@@ -21,6 +21,11 @@ public class ReloadCommand extends Command {
                     return;
                 }
 
+                if (!space.isOwnerOrContributor(player)) {
+                    sender.sendMessage(Component.text(Translations.get("error.needs.permission")).color(NamedTextColor.RED));
+                    return;
+                }
+
                 space.reload("regular");
                 sender.sendMessage(Component.text(Translations.get("success.reload")).color(NamedTextColor.GREEN));
             } else {

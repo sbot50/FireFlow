@@ -19,6 +19,7 @@ import de.blazemcworld.fireflow.code.node.impl.number.AddNumbersNode;
 import de.blazemcworld.fireflow.code.node.impl.number.DivideNumbersNode;
 import de.blazemcworld.fireflow.code.node.impl.number.MultiplyNumbersNode;
 import de.blazemcworld.fireflow.code.node.impl.number.NumberToTextNode;
+import de.blazemcworld.fireflow.code.node.impl.number.ParseNumberNode;
 import de.blazemcworld.fireflow.code.node.impl.number.SubtractNumbersNode;
 import de.blazemcworld.fireflow.code.node.impl.text.FormatToTextNode;
 import de.blazemcworld.fireflow.code.node.impl.text.StringToTextNode;
@@ -55,6 +56,7 @@ public class NodeList {
                     .add(new DivideNumbersNode())
                     .add(new NumberToTextNode())
                     .add(new MultiplyNumbersNode())
+                    .add(new ParseNumberNode())
                     .add(new SubtractNumbersNode())
             )
             .add(new Category("text", Material.WRITABLE_BOOK)

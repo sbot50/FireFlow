@@ -122,7 +122,7 @@ public class CodeEditor {
                     if (!input.isInput()) return;
                     event.setCancelled(true);
                     if (input.type().parseInset(event.getMessage()) == null) {
-                        event.getPlayer().sendMessage(Component.text(Translations.get("error.invalid.inset")));
+                        event.getPlayer().sendMessage(Component.text(Translations.get("error.invalid.inset")).color(NamedTextColor.RED));
                         return;
                     }
 

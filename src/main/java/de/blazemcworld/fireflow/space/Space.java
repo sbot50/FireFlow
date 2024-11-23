@@ -26,7 +26,7 @@ public class Space {
     public final InstanceContainer play = MinecraftServer.getInstanceManager().createInstanceContainer();
     public final InstanceContainer code = MinecraftServer.getInstanceManager().createInstanceContainer();
     public final CodeEditor editor;
-    private CodeEvaluator evaluator;
+    public CodeEvaluator evaluator;
     private long emptySince = -1;
     public final VariableStore savedVariables = new VariableStore();
 
@@ -76,7 +76,7 @@ public class Space {
         evaluator.stop();
         for (Player player : play.getPlayers()) {
             player.sendMessage(Component.text(Translations.get("reload." + reason)).color(reason == "cpu" ? NamedTextColor.RED : NamedTextColor.YELLOW));
-            if (info.owner.equals(player.getUuid()) || info.contributors.contains(player.getUuid())) {
+            if (isOwnerOrContributor(player)) {
                 Transfer.move(player, code);
             } else {
                 Transfer.move(player, Lobby.instance);
@@ -107,5 +107,9 @@ public class Space {
         evaluator.stop();
         MinecraftServer.getInstanceManager().unregisterInstance(play);
         MinecraftServer.getInstanceManager().unregisterInstance(code);
+    }
+
+    public boolean isOwnerOrContributor(Player player) {
+        return info.owner.equals(player.getUuid()) || info.contributors.contains(player.getUuid());
     }
 }

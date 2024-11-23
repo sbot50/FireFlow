@@ -26,6 +26,7 @@ public class CodeEvaluator {
     public final EventNode<InstanceEvent> events;
     private boolean stopped = false;
     private long cpuUsed = 0;
+    public int cpuPercentage = 0;
     public final VariableStore sessionVariables = new VariableStore();
 
     public CodeEvaluator(Space space) {
@@ -49,8 +50,9 @@ public class CodeEvaluator {
 
         MinecraftServer.getSchedulerManager().scheduleTask(() -> {
             if (isStopped()) return TaskSchedule.stop();
+            cpuPercentage = (int) (cpuUsed * 100 / Config.store.limits().cpuPerTick());
             if (cpuUsed > Config.store.limits().cpuPerTick()) {
-                FireFlow.LOGGER.info("Space " + space.info.id + " used too much CPU: " + (cpuUsed * 100 / Config.store.limits().cpuPerTick()) + "%");
+                FireFlow.LOGGER.info("Space " + space.info.id + " used too much CPU: " + cpuPercentage + "%");
                 space.reload("cpu");
                 return TaskSchedule.stop();
             }

@@ -15,6 +15,7 @@ import de.blazemcworld.fireflow.command.ContributorCommand;
 import de.blazemcworld.fireflow.command.FunctionCommand;
 import de.blazemcworld.fireflow.command.JoinCommand;
 import de.blazemcworld.fireflow.command.LobbyCommand;
+import de.blazemcworld.fireflow.command.MonitorCommand;
 import de.blazemcworld.fireflow.command.PlayCommand;
 import de.blazemcworld.fireflow.command.ReloadCommand;
 import de.blazemcworld.fireflow.space.Lobby;
@@ -60,7 +61,8 @@ public class FireFlow {
                 new PlayCommand(),
                 new ReloadCommand(),
                 new LobbyCommand(),
-                new FunctionCommand()
+                new FunctionCommand(),
+                new MonitorCommand()
         );
 
         GlobalEventHandler events = MinecraftServer.getGlobalEventHandler();

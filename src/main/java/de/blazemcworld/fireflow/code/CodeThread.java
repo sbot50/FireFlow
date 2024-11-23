@@ -1,7 +1,7 @@
 package de.blazemcworld.fireflow.code;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 
@@ -12,7 +12,7 @@ public class CodeThread {
 
     public final CodeEvaluator evaluator;
     private final HashMap<Node.Output<?>, Object> threadValues = new HashMap<>();
-    private final List<Runnable> todo = new ArrayList<>();
+    private final List<Runnable> todo = new LinkedList<>();
     private long lastSync = System.nanoTime();
     public final VariableStore threadVariables = new VariableStore();
     public final Stack<FunctionCallNode> functionStack = new Stack<>();
