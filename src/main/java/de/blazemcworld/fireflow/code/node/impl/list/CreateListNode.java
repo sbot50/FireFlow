@@ -10,27 +10,30 @@ import de.blazemcworld.fireflow.code.value.ListValue;
 import de.blazemcworld.fireflow.util.Translations;
 import net.minestom.server.item.Material;
 
-public class EmptyListNode<T> extends Node {
+public class CreateListNode<T> extends Node {
 
     private final WireType<T> type;
 
-    public EmptyListNode(WireType<T> type) {
-        super("empty_list", Material.MINECART);
+    public CreateListNode(WireType<T> type) {
+        super("create_list", Material.MINECART);
         this.type = type;
 
+        Varargs<T> content = new Varargs<>("content", type);
         Output<ListValue<T>> output = new Output<>("list", ListType.of(type));
-        output.valueFrom((ctx) -> ListType.of(type).defaultValue());
+        output.valueFrom((ctx) -> {
+            return new ListValue<>(type, content.getVarargs(ctx));
+        });
     }
 
     @Override
     public String getTitle() {
-        if (type == null) return Translations.get("node.empty_list.base_title");
-        return Translations.get("node.empty_list.title", type.getName());
+        if (type == null) return Translations.get("node.create_list.base_title");
+        return Translations.get("node.create_list.title", type.getName());
     }
 
     @Override
     public Node copy() {
-        return new EmptyListNode<>(type);
+        return new CreateListNode<>(type);
     }
     
     @Override
@@ -40,7 +43,7 @@ public class EmptyListNode<T> extends Node {
 
     @Override
     public Node copyWithTypes(List<WireType<?>> types) {
-        return new EmptyListNode<>(types.get(0));
+        return new CreateListNode<>(types.get(0));
     }
 
     @Override

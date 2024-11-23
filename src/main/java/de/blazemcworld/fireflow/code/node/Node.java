@@ -2,6 +2,7 @@ package de.blazemcworld.fireflow.code.node;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -19,6 +20,7 @@ public abstract class Node {
     public final String id;
     public final Material icon;
     public List<Input<?>> inputs = new ArrayList<>();
+    public List<Varargs<?>> varargs = new ArrayList<>();
     public List<Output<?>> outputs = new ArrayList<>();
 
     protected Node(String id, Material icon) {
@@ -56,6 +58,7 @@ public abstract class Node {
         public final WireType<T> type;
         public String inset;
         public Output<T> connected;
+        public Varargs<T> varargsParent;
         private Consumer<CodeThread> logic;
 
         public Input(String id, WireType<T> type) {
@@ -82,6 +85,7 @@ public abstract class Node {
 
         public String getName() {
             if (Node.this instanceof FunctionCallNode || Node.this instanceof FunctionOutputsNode || Node.this instanceof FunctionInputsNode) return id;
+            if (varargsParent != null) return Translations.get("node." + Node.this.id + ".input." + varargsParent.id);
             return Translations.get("node." + Node.this.id + ".input." + id);
         }
 
@@ -92,6 +96,13 @@ public abstract class Node {
         public void setInset(String value) {
             inset = value;
             connected = null;
+            if (varargsParent != null) varargsParent.update();
+        }
+
+        public void connect(Output<T> output) {
+            connected = output;
+            inset = null;
+            if (varargsParent != null) varargsParent.update();
         }
     }
 
@@ -132,6 +143,69 @@ public abstract class Node {
 
         public void valueFromThread() {
             logic = (ctx) -> ctx.getThreadValue(this);
+        }
+    }
+
+    public class Varargs<T> {
+        public final String id;
+        public final WireType<T> type;
+        public List<Input<T>> children = new ArrayList<>();
+        public boolean ignoreUpdates = false;
+
+        public Varargs(String id, WireType<T> type) {
+            this.id = id;
+            this.type = type;
+            varargs.add(this);
+            addInput(UUID.randomUUID().toString());
+        }
+
+        public List<T> getVarargs(CodeThread ctx) {
+            List<T> list = new ArrayList<>();
+            for (Input<T> input : children) {
+                if (input.inset == null && input.connected == null) continue;
+                list.add(input.getValue(ctx));
+            }
+            return list;
+        }
+
+        public void update() {
+            if (ignoreUpdates) return;
+            List<Input<T>> used = new ArrayList<>();
+            for (Input<T> input : children) {
+                if (input.inset != null || input.connected != null) {
+                    used.add(input);
+                }
+            }
+
+            if (used.size() == children.size()) {
+                addInput(UUID.randomUUID().toString());
+                return;
+            }
+
+            for (Input<T> input : new ArrayList<>(children)) {
+                if (used.contains(input)) continue;
+                if (input != children.getLast()) {
+                    inputs.remove(input);
+                    children.remove(input);
+                }
+            }
+
+            if (!used.contains(children.getLast())) return;
+            addInput(UUID.randomUUID().toString());
+        }
+
+        public void addInput(String uuid) {
+            Input<T> input = new Input<>(uuid, type);
+            input.varargsParent = this;
+            children.add(input);
+            inputs.remove(input);
+            for (int i = inputs.size() - 1; i >= 0; i--) {
+                if (inputs.get(i).varargsParent == this) {
+                    inputs.add(i + 1, input);
+                    return;
+                }
+            }
+            inputs.add(input);
         }
     }
 }

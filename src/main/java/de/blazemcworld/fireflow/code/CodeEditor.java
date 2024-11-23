@@ -18,6 +18,8 @@ import com.google.gson.JsonParser;
 import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.action.Action;
 import de.blazemcworld.fireflow.code.node.Node;
+import de.blazemcworld.fireflow.code.node.Node.Input;
+import de.blazemcworld.fireflow.code.node.Node.Varargs;
 import de.blazemcworld.fireflow.code.node.NodeList;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionCallNode;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionDefinition;
@@ -467,6 +469,19 @@ public class CodeEditor {
                 entry.add("outputs", outputs);
             }
 
+            if (!nodeWidget.node.varargs.isEmpty()) {
+                JsonObject varargsObj = new JsonObject();
+                for (Varargs<?> varargs : nodeWidget.node.varargs) {
+                    JsonArray varargsEntry = new JsonArray();
+                    for (Input<?> input : varargs.children) {
+                        if (input.inset == null && input.connected == null) continue;
+                        varargsEntry.add(input.id);
+                    }
+                    varargsObj.add(varargs.id, varargsEntry);
+                }
+                entry.add("varargs", varargsObj);
+            }
+
             if (nodeWidget.node instanceof FunctionInputsNode inputsNode) {
                 entry.addProperty("function", inputsNode.function.name);
             } else if (nodeWidget.node instanceof FunctionOutputsNode outputsNode) {
@@ -628,6 +643,23 @@ public class CodeEditor {
                     }
                 }
 
+                if (nodeObj.has("varargs")) {
+                    JsonObject varargsObj = nodeObj.getAsJsonObject("varargs");
+                    for (Map.Entry<String, JsonElement> entry : varargsObj.entrySet()) {
+                        String varargsId = entry.getKey();
+                        JsonArray children = entry.getValue().getAsJsonArray();
+                        for (Varargs<?> varargs : node.varargs) {
+                            varargs.ignoreUpdates = true;
+                            if (varargs.id.equals(varargsId)) {
+                                for (JsonElement child : children) {
+                                    varargs.addInput(child.getAsString());
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 NodeWidget nodeWidget = new NodeWidget(node);
                 nodeWidget.setPos(new Vec(x, y, 15.999));
                 nodeWidgets.add(nodeWidget);
@@ -659,7 +691,7 @@ public class CodeEditor {
                             NodeWidget other = nodeWidgets.get(nodeIndex);
                             for (Node.Input<?> input : nodeWidget.node.inputs) {
                                 if (input.id.equals(inputId)) {
-                                    ((Node.Input<Object>) input).connected = (Node.Output<Object>) other.node.outputs.get(outputId);
+                                    ((Node.Input<Object>) input).connect((Node.Output<Object>) other.node.outputs.get(outputId));
                                     break;
                                 }
                             }
@@ -680,6 +712,10 @@ public class CodeEditor {
                                 }
                             }
                         }
+                    }
+
+                    for (Varargs<?> varargs : nodeWidget.node.varargs) {
+                        varargs.ignoreUpdates = false;
                     }
                     nodeWidget.update(space.code);
                 });

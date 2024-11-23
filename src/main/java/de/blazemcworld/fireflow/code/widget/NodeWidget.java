@@ -21,6 +21,9 @@ public class NodeWidget implements Widget {
 
     public final Node node;
     private final BorderWidget<VerticalContainerWidget> root;
+    private final VerticalContainerWidget inputArea;
+    private InstanceContainer inst;
+    private boolean refreshingInputs = false;
 
     public NodeWidget(Node node) {
         this.node = node;
@@ -33,7 +36,7 @@ public class NodeWidget implements Widget {
         HorizontalContainerWidget ioArea = new HorizontalContainerWidget();
         main.widgets.add(ioArea);
 
-        VerticalContainerWidget inputArea = new VerticalContainerWidget();
+        inputArea = new VerticalContainerWidget();
         ioArea.widgets.add(inputArea);
 
         SpacingWidget spacing = new SpacingWidget(new Vec(1/8f, 0, 0));
@@ -74,12 +77,40 @@ public class NodeWidget implements Widget {
 
     @Override
     public void update(InstanceContainer inst) {
+        this.inst = inst;
+        refreshInputs();
         root.update(inst);
+    }
+
+    public void refreshInputs() {
+        if (refreshingInputs) return;
+        
+        inputArea.widgets.removeIf(w -> {
+            if (w instanceof NodeIOWidget io && !node.inputs.contains(io.input)) {
+                io.remove();
+                return true;
+            }
+            return false;
+        });
+        for (int i = 0; i < node.inputs.size(); i++) {
+            Node.Input<?> input = node.inputs.get(i);
+            if (i < inputArea.widgets.size() && inputArea.widgets.get(i) instanceof NodeIOWidget io && io.input == input) {
+                continue;
+            }
+            NodeIOWidget io = new NodeIOWidget(this, input);
+            inputArea.widgets.add(i, io);
+        }
+        if (inst != null) {
+            refreshingInputs = true;
+            update(inst);
+            refreshingInputs = false;
+        }
     }
 
     @Override
     public void remove() {
         root.remove();
+        inst = null;
     }
 
     public void remove(CodeEditor editor) {

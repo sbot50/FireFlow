@@ -19,10 +19,16 @@ public class ListAppendNode<T> extends Node {
         this.type = type;
 
         Input<ListValue<T>> list = new Input<>("list", ListType.of(type));
-        Input<T> value = new Input<>("value", type);
+        Varargs<T> value = new Varargs<>("value", type);
 
         Output<ListValue<T>> output = new Output<>("list", ListType.of(type));
-        output.valueFrom((ctx) -> list.getValue(ctx).add(value.getValue(ctx)));
+        output.valueFrom((ctx) -> {
+            ListValue<T> listValue = list.getValue(ctx);
+            for (T t : value.getVarargs(ctx)) {
+                listValue = listValue.add(t);
+            }
+            return listValue;
+        });
     }
 
     @Override

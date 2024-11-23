@@ -13,7 +13,7 @@ import de.blazemcworld.fireflow.code.node.impl.flow.IfNode;
 import de.blazemcworld.fireflow.code.node.impl.flow.ListForEachNode;
 import de.blazemcworld.fireflow.code.node.impl.flow.RepeatNode;
 import de.blazemcworld.fireflow.code.node.impl.flow.ScheduleNode;
-import de.blazemcworld.fireflow.code.node.impl.list.EmptyListNode;
+import de.blazemcworld.fireflow.code.node.impl.list.CreateListNode;
 import de.blazemcworld.fireflow.code.node.impl.list.ListAppendNode;
 import de.blazemcworld.fireflow.code.node.impl.number.AddNumbersNode;
 import de.blazemcworld.fireflow.code.node.impl.number.DivideNumbersNode;
@@ -48,7 +48,7 @@ public class NodeList {
                     .add(new ScheduleNode())
             )
             .add(new Category("list", Material.BOOKSHELF)
-                    .add(new EmptyListNode<>(null))
+                    .add(new CreateListNode<>(null))
                     .add(new ListAppendNode<>(null))
             )
             .add(new Category("number", Material.CLOCK)

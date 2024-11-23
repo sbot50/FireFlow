@@ -6,6 +6,7 @@ import java.util.Set;
 
 import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.node.Node;
+import de.blazemcworld.fireflow.code.node.Node.Varargs;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionCallNode;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionDefinition;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionInputsNode;
@@ -103,6 +104,19 @@ public class CodeEvaluator {
             }
 
             if (copy == null) copy = node.copy();
+            
+            for (Varargs<?> base : node.varargs) {
+                for (Varargs<?> next : copy.varargs) {
+                    if (!base.id.equals(next.id)) continue;
+                    next.ignoreUpdates = true;
+                    copy.inputs.removeAll(next.children);
+                    next.children.removeAll(next.children);
+
+                    for (Node.Input<?> input : base.children) {
+                        next.addInput(input.id);
+                    }
+                }
+            }
 
             old2new.put(node, copy);
         }
@@ -114,7 +128,8 @@ public class CodeEvaluator {
                 Node.Output<?> oldTarget = old.inputs.get(i).connected;
                 if (oldTarget == null) continue;
                 Node.Output<?> newTarget = old2new.get(oldTarget.getNode()).outputs.get(oldTarget.getNode().outputs.indexOf(oldTarget));
-                ((Node.Input<Object>) newInput).connected = (Node.Output<Object>) newTarget;
+                if (newTarget == null) continue;
+                ((Node.Input<Object>) newInput).connect((Node.Output<Object>) newTarget);
             }
 
             for (int i = 0; i < copy.outputs.size(); i++) {
@@ -128,7 +143,8 @@ public class CodeEvaluator {
             for (int i = 0; i < copy.inputs.size(); i++) {
                 Node.Input<?> newInput = copy.inputs.get(i);
                 Node.Input<?> oldInput = old.inputs.get(i);
-                newInput.inset = oldInput.inset;
+                if (oldInput.inset == null) continue;
+                newInput.setInset(oldInput.inset);
             }
         }
 

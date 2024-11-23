@@ -108,11 +108,11 @@ public class NodeIOWidget implements Widget {
         } else {
             NodeIOWidget output = wire.getInputs().getFirst();
             for (NodeIOWidget input : wire.getOutputs()) {
-                ((Node.Input<Object>) input.input).connected = (Node.Output<Object>) output.output;
-                input.input.inset = null;
+                ((Node.Input<Object>) input.input).connect((Node.Output<Object>) output.output);
             }
         }
         text.text(displayText());
+        parent.refreshInputs();
     }
 
     @SuppressWarnings("unchecked")
@@ -123,11 +123,11 @@ public class NodeIOWidget implements Widget {
             }
         } else {
             for (NodeIOWidget input : wire.getOutputs()) {
-                ((Node.Input<Object>) input.input).connected = null;
-                input.input.inset = null;
+                input.input.setInset(null);
             }
         }
         text.text(displayText());
+        parent.refreshInputs();
     }
 
     public void insetValue(String value) {
@@ -137,6 +137,7 @@ public class NodeIOWidget implements Widget {
 
         input.setInset(value);
         text.text(displayText());
+        parent.refreshInputs();
     }
 
     private Component displayText() {
