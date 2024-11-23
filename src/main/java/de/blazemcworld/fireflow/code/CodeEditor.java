@@ -568,7 +568,7 @@ public class CodeEditor {
             for (JsonElement function : functions) {
                 JsonObject obj = function.getAsJsonObject();
                 String name = obj.get("name").getAsString();
-                Material icon = Material.fromNamespaceId(obj.get("icon").getAsString());
+                Material icon = obj.has("icon") ? Material.fromNamespaceId(obj.get("icon").getAsString()) : null;
                 if (icon == null) icon = Material.COMMAND_BLOCK;
                 FunctionDefinition functionDefinition = new FunctionDefinition(name, icon);
 

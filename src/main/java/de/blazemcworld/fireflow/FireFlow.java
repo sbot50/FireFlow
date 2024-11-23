@@ -11,13 +11,12 @@ import org.apache.logging.log4j.Logger;
 import de.blazemcworld.fireflow.code.node.NodeList;
 import de.blazemcworld.fireflow.code.type.AllTypes;
 import de.blazemcworld.fireflow.command.CodeCommand;
-import de.blazemcworld.fireflow.command.ContributorCommand;
 import de.blazemcworld.fireflow.command.FunctionCommand;
 import de.blazemcworld.fireflow.command.JoinCommand;
 import de.blazemcworld.fireflow.command.LobbyCommand;
-import de.blazemcworld.fireflow.command.MonitorCommand;
 import de.blazemcworld.fireflow.command.PlayCommand;
 import de.blazemcworld.fireflow.command.ReloadCommand;
+import de.blazemcworld.fireflow.command.SpaceCommand;
 import de.blazemcworld.fireflow.space.Lobby;
 import de.blazemcworld.fireflow.space.SpaceManager;
 import de.blazemcworld.fireflow.util.Config;
@@ -56,13 +55,12 @@ public class FireFlow {
 
         MinecraftServer.getCommandManager().register(
                 new CodeCommand(),
-                new ContributorCommand(),
                 new JoinCommand(),
                 new PlayCommand(),
                 new ReloadCommand(),
                 new LobbyCommand(),
                 new FunctionCommand(),
-                new MonitorCommand()
+                new SpaceCommand()
         );
 
         GlobalEventHandler events = MinecraftServer.getGlobalEventHandler();
