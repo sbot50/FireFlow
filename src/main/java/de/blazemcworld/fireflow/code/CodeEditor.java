@@ -60,6 +60,7 @@ public class CodeEditor {
     private final HashMap<Player, Action> actions = new HashMap<>();
     private final Path codePath;
     public final HashMap<String, FunctionDefinition> functions = new HashMap<>();
+    public final Pathfinder pathfinder = new Pathfinder(this);
 
     public CodeEditor(Space space) {
         this.space = space;
