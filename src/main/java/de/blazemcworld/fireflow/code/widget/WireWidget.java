@@ -1,8 +1,5 @@
 package de.blazemcworld.fireflow.code.widget;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.action.WireAction;
@@ -10,6 +7,9 @@ import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.type.WireType;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.InstanceContainer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class WireWidget implements Widget {
 
@@ -197,16 +197,18 @@ public class WireWidget implements Widget {
     }
 
     private void removeNext(CodeEditor editor) {
+        List<WireWidget> nextWiresClone = new ArrayList<>(nextWires);
         this.remove();
-        for (WireWidget wire : nextWires) {
+        for (WireWidget wire : nextWiresClone) {
             wire.removeNext(editor);
             editor.rootWidgets.remove(wire);
         }
     }
 
     private void removePrevious(CodeEditor editor) {
+        List<WireWidget> previousWiresClone = new ArrayList<>(previousWires);
         this.remove();
-        for (WireWidget wire : previousWires) {
+        for (WireWidget wire : previousWiresClone) {
             wire.removePrevious(editor);
             editor.rootWidgets.remove(wire);
         }
@@ -231,8 +233,10 @@ public class WireWidget implements Widget {
     }
 
     public void removeConnection(CodeEditor editor) {
+        List<WireWidget> nextWiresClone = new ArrayList<>(nextWires);
+        List<WireWidget> previousWiresClone = new ArrayList<>(previousWires);
         this.remove();
-        for (WireWidget wire : previousWires) {
+        for (WireWidget wire : previousWiresClone) {
             if (this.type instanceof SignalType) {
                 wire.removePrevious(editor);
                 editor.rootWidgets.remove(wire);
@@ -240,7 +244,7 @@ public class WireWidget implements Widget {
             else if (wire.removeWithoutOutputs(editor)) editor.rootWidgets.remove(wire);
         }
 
-        for (WireWidget wire : nextWires) {
+        for (WireWidget wire : nextWiresClone) {
             if (!(this.type instanceof SignalType)) {
                 wire.removeNext(editor);
                 editor.rootWidgets.remove(wire);
