@@ -48,8 +48,8 @@ public class WireAction implements Action {
                             wireWidget.removeConnection(i.editor());
                         }
                     }
-                    if (nodeIOWidget.isInput()) wire.setPos(nodeIOWidget.getPos().sub(1/8f-1/32f, 1/8f, 0));
-                    else wire.setPos(nodeIOWidget.getPos().sub(nodeIOWidget.getSize().sub(1/8f, 1/8f, 0)));
+                    if (nodeIOWidget.isInput()) wire.setPos(nodeIOWidget.getPos().sub(1 / 8f - 1 / 32f, 1 / 8f, 0));
+                    else wire.setPos(nodeIOWidget.getPos().sub(nodeIOWidget.getSize().sub(1 / 8f, 1 / 8f, 0)));
                     if (!needOutput) wire.setNextInput(nodeIOWidget);
                     else {
                         Vec temp = wire.line.to;
@@ -81,10 +81,10 @@ public class WireAction implements Action {
                     return;
                 } else if
                 (
-                    widget instanceof WireWidget wireWidget
-                    && wireWidget != wire
-                    && wire.type() == wireWidget.type()
-                    && wireWidget.inBounds(wire.line.to)
+                        widget instanceof WireWidget wireWidget
+                                && wireWidget != wire
+                                && wire.type() == wireWidget.type()
+                                && wireWidget.inBounds(wire.line.to)
                 ) {
                     if (wire.type() == SignalType.INSTANCE) {
                         if (needOutput) return;
@@ -118,6 +118,87 @@ public class WireAction implements Action {
                     wire = null;
                     i.editor().stopAction(i.player());
                     return;
+                } else if (widget.getWidget(i.pos()) instanceof NodeIOWidget nodeIOWidget) {
+                    if (nodeIOWidget.type() != wire.type()) return;
+                    Vec shiftedPos = nodeIOWidget.getPos().add(1 / 4f, -1 / 8f, 0);
+                    Vec from = wire.line.from;
+                    WireWidget previousWire;
+                    boolean remove = true;
+                    boolean hasIO = true;
+                    WireWidget connect = null;
+                    if (!nodeIOWidget.isInput()) {
+                        WireWidget newWire = new WireWidget(nodeIOWidget, wire.type(), nodeIOWidget.getPos().sub(1 / 8f - 1 / 32f, 1 / 8f, 0));
+                        nodeIOWidget.connections.add(newWire);
+                        if (wire.nextInput != null) {
+                            nodeIOWidget = wire.nextInput;
+                            shiftedPos = nodeIOWidget.getPos().sub(1 / 8f - 1 / 32f, 1 / 8f, 0);
+                        } else {
+                            hasIO = false;
+                            connect = wire;
+                            shiftedPos = wire.line.to;
+                            Vec temp = wire.line.to;
+                            wire.line.to = wire.line.from;
+                            wire.line.from = temp;
+                        }
+                        from = newWire.line.from;
+                        i.editor().rootWidgets.remove(wire);
+                        wire.remove();
+                        wire = newWire;
+                        i.editor().rootWidgets.add(wire);
+                        wire.update(i.editor().space.code);
+                    }
+                    if (wire.previousWires.isEmpty()) {
+                        Vec shiftedBeginPos = from.sub(1 / 2f, 1 / 8f, 0);
+                        wire.setPos(shiftedBeginPos);
+                        wire.update(i.editor().space.code);
+                        previousWire = wire;
+                        from = wire.line.to;
+                        remove = false;
+                    } else {
+                        previousWire = wire.previousWires.getFirst();
+                    }
+                    List<Vec> path = i.editor().pathfinder.findPath(from, shiftedPos, 5, 1000);
+                    for (Vec pos : path) {
+                        WireWidget newWire = new WireWidget(previousWire, previousWire.type(), pos, false);
+                        previousWire.addNextWire(newWire);
+                        previousWire = newWire;
+                        i.editor().rootWidgets.add(newWire);
+                        newWire.update(i.editor().space.code);
+                    }
+
+                    if (hasIO) {
+                        if (previousWire.line.from.x() != previousWire.line.to.x()) {
+                            previousWire.setPos(nodeIOWidget.getPos().sub(1 / 8f, 1 / 8f, 0));
+                            previousWire.update(i.editor().space.code);
+                        } else {
+                            WireWidget newWire = new WireWidget(previousWire, previousWire.type(), nodeIOWidget.getPos().sub(1 / 8f - 1 / 32f, 1 / 8f, 0), false);
+                            previousWire.addNextWire(newWire);
+                            previousWire = newWire;
+                            i.editor().rootWidgets.add(newWire);
+                            newWire.update(i.editor().space.code);
+                        }
+                        previousWire.setNextInput(nodeIOWidget);
+                        nodeIOWidget.connections.add(previousWire);
+                    } else {
+                        previousWire.line.to = connect.line.from;
+                        previousWire.addNextWire(connect);
+                        connect.addPreviousWire(previousWire);
+                        previousWire.update(i.editor().space.code);
+                    }
+
+                    for (NodeIOWidget nodeIO : wire.getInputs()) {
+                        nodeIO.connect(wire);
+                    }
+                    for (NodeIOWidget nodeIO : wire.getOutputs()) {
+                        nodeIO.connect(wire);
+                    }
+                    if (remove) {
+                        i.editor().rootWidgets.remove(wire);
+                        wire.remove();
+                    }
+                    wire = null;
+                    i.editor().stopAction(i.player());
+                    return;
                 }
             }
 
@@ -140,22 +221,22 @@ public class WireAction implements Action {
                 i.editor().stopAction(i.player());
             } else {
                 if (
-                    !needOutput &&
-                    (!wire.previousWires.getLast().nextWires.isEmpty() ||
-                    wire.previousWires.getLast().nextInput != null ||
-                    !wire.previousWires.getLast().previousWires.isEmpty() ||
-                    wire.previousWires.getLast().previousOutput != null) &&
-                    !(wire.previousWires.getLast().nextWires.size() == 1 && wire.previousWires.getLast().nextWires.contains(wire))
+                        !needOutput &&
+                                (!wire.previousWires.getLast().nextWires.isEmpty() ||
+                                        wire.previousWires.getLast().nextInput != null ||
+                                        !wire.previousWires.getLast().previousWires.isEmpty() ||
+                                        wire.previousWires.getLast().previousOutput != null) &&
+                                !(wire.previousWires.getLast().nextWires.size() == 1 && wire.previousWires.getLast().nextWires.contains(wire))
                 ) {
                     i.editor().stopAction(i.player());
                     return;
                 } else if (
-                    needOutput &&
-                    (!wire.nextWires.getLast().previousWires.isEmpty() ||
-                    wire.nextWires.getLast().previousOutput != null ||
-                    !wire.nextWires.getLast().nextWires.isEmpty() ||
-                    wire.nextWires.getLast().nextInput != null) &&
-                    !(wire.nextWires.getLast().previousWires.size() == 1 && wire.nextWires.getLast().previousWires.contains(wire))
+                        needOutput &&
+                                (!wire.nextWires.getLast().previousWires.isEmpty() ||
+                                        wire.nextWires.getLast().previousOutput != null ||
+                                        !wire.nextWires.getLast().nextWires.isEmpty() ||
+                                        wire.nextWires.getLast().nextInput != null) &&
+                                !(wire.nextWires.getLast().previousWires.size() == 1 && wire.nextWires.getLast().previousWires.contains(wire))
                 ) {
                     i.editor().stopAction(i.player());
                     return;
