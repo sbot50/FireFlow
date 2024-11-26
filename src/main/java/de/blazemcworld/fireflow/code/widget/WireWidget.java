@@ -364,4 +364,8 @@ public class WireWidget implements Widget {
         w2.update(editor.space.code);
         return List.of(w1, w2);
     }
+
+    public boolean isValid() {
+        return !getInputs().isEmpty() && !getOutputs().isEmpty();
+    }
 }

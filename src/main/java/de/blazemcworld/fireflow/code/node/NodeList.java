@@ -1,12 +1,8 @@
 package de.blazemcworld.fireflow.code.node;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
 import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.VariableStore;
-import de.blazemcworld.fireflow.code.node.impl.action.player.SendMessageNode;
+import de.blazemcworld.fireflow.code.node.impl.action.player.*;
 import de.blazemcworld.fireflow.code.node.impl.event.player.OnPlayerChatNode;
 import de.blazemcworld.fireflow.code.node.impl.event.player.OnPlayerJoinNode;
 import de.blazemcworld.fireflow.code.node.impl.flow.IfNode;
@@ -15,18 +11,17 @@ import de.blazemcworld.fireflow.code.node.impl.flow.RepeatNode;
 import de.blazemcworld.fireflow.code.node.impl.flow.ScheduleNode;
 import de.blazemcworld.fireflow.code.node.impl.list.EmptyListNode;
 import de.blazemcworld.fireflow.code.node.impl.list.ListAppendNode;
-import de.blazemcworld.fireflow.code.node.impl.number.AddNumbersNode;
-import de.blazemcworld.fireflow.code.node.impl.number.DivideNumbersNode;
-import de.blazemcworld.fireflow.code.node.impl.number.MultiplyNumbersNode;
-import de.blazemcworld.fireflow.code.node.impl.number.NumberToTextNode;
-import de.blazemcworld.fireflow.code.node.impl.number.ParseNumberNode;
-import de.blazemcworld.fireflow.code.node.impl.number.SubtractNumbersNode;
+import de.blazemcworld.fireflow.code.node.impl.number.*;
 import de.blazemcworld.fireflow.code.node.impl.text.FormatToTextNode;
 import de.blazemcworld.fireflow.code.node.impl.text.StringToTextNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.GetVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.SetVariableNode;
 import de.blazemcworld.fireflow.util.Translations;
 import net.minestom.server.item.Material;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class NodeList {
 
@@ -35,7 +30,11 @@ public class NodeList {
     public static void init() {
         root = new Category("root", null)
             .add(new Category("action", Material.REDSTONE)
+                    .add(new AdventureModeNode())
+                    .add(new CreativeModeNode())
                     .add(new SendMessageNode())
+                    .add(new SpectatorModeNode())
+                    .add(new SurvivalModeNode())
             )
             .add(new Category("event", Material.OBSERVER)
                     .add(new OnPlayerChatNode())
@@ -110,8 +109,7 @@ public class NodeList {
         }
 
         public List<Node> collectNodes() {
-            List<Node> list = new ArrayList<>();
-            list.addAll(nodes);
+            List<Node> list = new ArrayList<>(nodes);
             for (Category category : categories) {
                 list.addAll(category.collectNodes());
             }

@@ -18,12 +18,6 @@ public class WireAction implements Action {
     private final Vec offset;
     private final boolean needOutput;
 
-    public WireAction(WireWidget wire, Vec offset) {
-        this.wire = wire;
-        this.offset = offset;
-        this.needOutput = false;
-    }
-
     public WireAction(WireWidget wire, Vec offset, boolean needOutput) {
         this.wire = wire;
         this.offset = offset;
@@ -120,6 +114,7 @@ public class WireAction implements Action {
                     return;
                 } else if (widget.getWidget(i.pos()) instanceof NodeIOWidget nodeIOWidget) {
                     if (nodeIOWidget.type() != wire.type()) return;
+                    if (nodeIOWidget.isInput() == needOutput) return;
                     Vec shiftedPos = nodeIOWidget.getPos().add(1 / 4f, -1 / 8f, 0);
                     Vec from = wire.line.from;
                     WireWidget previousWire;
@@ -131,14 +126,12 @@ public class WireAction implements Action {
                         nodeIOWidget.connections.add(newWire);
                         if (wire.nextInput != null) {
                             nodeIOWidget = wire.nextInput;
-                            shiftedPos = nodeIOWidget.getPos().sub(1 / 8f - 1 / 32f, 1 / 8f, 0);
+                            shiftedPos = nodeIOWidget.getPos().add(1 / 4f, -1 / 8f, 0);
                         } else {
                             hasIO = false;
-                            connect = wire;
-                            shiftedPos = wire.line.to;
-                            Vec temp = wire.line.to;
-                            wire.line.to = wire.line.from;
-                            wire.line.from = temp;
+                            WireWidget nextWire = wire.nextWires.getFirst();
+                            connect = nextWire;
+                            shiftedPos = nextWire.line.from;
                         }
                         from = newWire.line.from;
                         i.editor().rootWidgets.remove(wire);
@@ -157,7 +150,7 @@ public class WireAction implements Action {
                     } else {
                         previousWire = wire.previousWires.getFirst();
                     }
-                    List<Vec> path = i.editor().pathfinder.findPath(from, shiftedPos, 5, 1000);
+                    List<Vec> path = i.editor().pathfinder.findPath(from, shiftedPos, 7, 1000);
                     for (Vec pos : path) {
                         WireWidget newWire = new WireWidget(previousWire, previousWire.type(), pos, false);
                         previousWire.addNextWire(newWire);
