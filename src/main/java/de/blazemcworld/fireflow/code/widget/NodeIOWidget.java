@@ -1,8 +1,5 @@
 package de.blazemcworld.fireflow.code.widget;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.action.WireAction;
 import de.blazemcworld.fireflow.code.node.Node;
@@ -12,6 +9,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.InstanceContainer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NodeIOWidget implements Widget {
 
@@ -72,10 +72,7 @@ public class NodeIOWidget implements Widget {
     public boolean interact(Interaction i) {
         if (!inBounds(i.pos())) return false;
         if (i.type() == Interaction.Type.RIGHT_CLICK) {
-            WireWidget wire = new WireWidget(this, type, i.pos());
-            connections.add(wire);
-            i.editor().rootWidgets.add(wire);
-            i.editor().setAction(i.player(), new WireAction(wire, getPos().sub(i.pos()), isInput));
+            if (!this.isInput()) i.editor().setAction(i.player(), new WireAction(this));
             return true;
         }
         if (i.type() == Interaction.Type.LEFT_CLICK && isInput && input.inset != null) {
