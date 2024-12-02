@@ -123,7 +123,7 @@ public class WireAction implements Action {
                         i.editor().rootWidgets.add(startWire);
                     }
                     else {
-                        List<WireWidget> wires = inputWire.splitWire(i.editor(), startPos);
+                        List<WireWidget> wires = inputWire.splitWire(i.editor(), firstWire.line.from);
                         wires.getFirst().connectNext(firstWire);
                     }
 
@@ -173,7 +173,7 @@ public class WireAction implements Action {
                     List<WireWidget> wires = wireWidget.splitWire(i.editor(), i.pos());
                     wires.getLast().connectPrevious(this.wires.getLast());
 
-                    WireWidget firstWire = wires.getFirst();
+                    WireWidget firstWire = this.wires.getFirst();
                     if (!permanentWires.isEmpty()) firstWire = permanentWires.getFirst().getFirst();
                     startWire.connectNext(firstWire);
                     startWire.connectPrevious(output);

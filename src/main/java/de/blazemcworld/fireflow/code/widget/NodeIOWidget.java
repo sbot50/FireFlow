@@ -115,13 +115,12 @@ public class NodeIOWidget implements Widget {
     @SuppressWarnings("unchecked")
     public void removed(WireWidget wire) {
         if (wire.type() == SignalType.INSTANCE) {
-            for (NodeIOWidget output : wire.getInputs()) {
-                ((Node.Output<Object>) output.output).connected = null;
+            if (wire.previousOutput != null) {
+                wire.previousOutput.output.connected = null;
             }
         } else {
-            for (NodeIOWidget input : wire.getOutputs()) {
-                ((Node.Input<Object>) input.input).connected = null;
-                input.input.inset = null;
+            if (wire.nextInput != null) {
+                wire.nextInput.input.connected = null;
             }
         }
         text.text(displayText());

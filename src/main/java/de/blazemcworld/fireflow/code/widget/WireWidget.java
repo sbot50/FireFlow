@@ -1,6 +1,5 @@
 package de.blazemcworld.fireflow.code.widget;
 
-import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.action.WireAction;
@@ -318,10 +317,6 @@ public class WireWidget implements Widget {
             nextWire.previousWires.remove(this);
             nextWire.previousWires.add(w2);
         }
-        FireFlow.LOGGER.info("w1 input:" + w1.previousWires);
-        FireFlow.LOGGER.info("w1 output:" + w1.nextWires);
-        FireFlow.LOGGER.info("Inputs:" + w1.getInputs());
-        FireFlow.LOGGER.info("Outputs:" + w1.getOutputs());
         NodeIOWidget previousOutput = this.previousOutput;
         if (previousOutput != null) {
             w1.setPreviousOutput(previousOutput);
@@ -336,9 +331,9 @@ public class WireWidget implements Widget {
             nextInput.removed(this);
             nextInput.connections.add(w2);
         }
+        this.remove();
         if (previousOutput != null) previousOutput.connect(w1);
         if (nextInput != null) nextInput.connect(w2);
-        this.remove();
         editor.rootWidgets.remove(this);
         w1.update(editor.space.code);
         w2.update(editor.space.code);

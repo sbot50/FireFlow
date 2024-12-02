@@ -33,7 +33,6 @@ public class DragNodeAction implements Action {
                     WireWidget nw = new WireWidget(splitWires.getFirst(), wire.type(), mid);
                     nw.addNextWire(splitWires.getLast());
                     nw.setPos(mid);
-                    splitWires.getFirst().addNextWire(nw);
                     splitWires.getFirst().nextWires.remove(splitWires.getLast());
                     splitWires.getLast().addPreviousWire(nw);
                     splitWires.getLast().previousWires.remove(splitWires.getFirst());
