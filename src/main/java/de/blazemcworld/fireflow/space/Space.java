@@ -1,7 +1,8 @@
 package de.blazemcworld.fireflow.space;
 
-import java.util.List;
-
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.CodeEvaluator;
 import de.blazemcworld.fireflow.code.VariableStore;
@@ -19,6 +20,12 @@ import net.minestom.server.instance.InstanceContainer;
 import net.minestom.server.instance.LightingChunk;
 import net.minestom.server.instance.anvil.AnvilLoader;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.timer.TaskSchedule;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.List;
 
 public class Space {
 
@@ -28,6 +35,7 @@ public class Space {
     public final CodeEditor editor;
     public CodeEvaluator evaluator;
     private long emptySince = -1;
+    private boolean loaded = true;
     public final VariableStore savedVariables = new VariableStore();
 
     public Space(SpaceInfo info) {
@@ -66,6 +74,22 @@ public class Space {
             emptySince = -1;
         });
         
+        MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+            if (!loaded) return TaskSchedule.stop();
+            if (emptySince == -1 && play.getPlayers().isEmpty() && code.getPlayers().isEmpty()) {
+                emptySince = System.currentTimeMillis();
+            }
+            return TaskSchedule.seconds(1);
+        }, TaskSchedule.seconds(1));
+
+        Path path = Path.of("spaces/" + info.id + "/variables.json");
+        if (Files.exists(path)) {
+            try {
+                savedVariables.load(JsonParser.parseString(Files.readString(path)).getAsJsonObject());
+            } catch (IOException e) {
+                FireFlow.LOGGER.error("Failed to load variables.json!", e);
+            }
+        }
     }
 
     public boolean isInactive() {
@@ -75,7 +99,7 @@ public class Space {
     public void reload(String reason) {
         evaluator.stop();
         for (Player player : play.getPlayers()) {
-            player.sendMessage(Component.text(Translations.get("reload." + reason)).color(reason == "cpu" ? NamedTextColor.RED : NamedTextColor.YELLOW));
+            player.sendMessage(Component.text(Translations.get("reload." + reason)).color(reason.equals("cpu") ? NamedTextColor.RED : NamedTextColor.YELLOW));
             if (isOwnerOrContributor(player)) {
                 Transfer.move(player, code);
             } else {
@@ -101,9 +125,17 @@ public class Space {
             }
         });
         editor.save();
+
+        JsonObject vars = savedVariables.toJson();
+        try {
+            Files.writeString(Path.of("spaces/" + info.id + "/variables.json"), vars.toString());
+        } catch (IOException e) {
+            FireFlow.LOGGER.error("Failed to save variables.json!", e);
+        }
     }
 
     public void unload() {
+        loaded = false;
         evaluator.stop();
         MinecraftServer.getInstanceManager().unregisterInstance(play);
         MinecraftServer.getInstanceManager().unregisterInstance(code);

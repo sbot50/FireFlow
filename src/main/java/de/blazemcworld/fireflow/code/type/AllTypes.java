@@ -1,9 +1,8 @@
 package de.blazemcworld.fireflow.code.type;
 
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -11,7 +10,7 @@ import com.google.gson.JsonPrimitive;
 
 public class AllTypes {
 
-    public static final Set<WireType<?>> all = new HashSet<>();
+    public static final List<WireType<?>> all = new ArrayList<>();
 
     public static void init() {
         all.add(ConditionType.INSTANCE);
@@ -21,6 +20,8 @@ public class AllTypes {
         all.add(TextType.INSTANCE);
         all.add(SignalType.INSTANCE);
         all.add(ListType.UNSPECIFIED);
+
+        all.sort(Comparator.comparing(WireType::getName));
     }
 
     public static boolean isValue(WireType<?> type) {

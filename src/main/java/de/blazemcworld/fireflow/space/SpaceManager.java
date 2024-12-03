@@ -62,6 +62,7 @@ public class SpaceManager {
             if (space.isInactive()) {
                 spaces.remove(space.info.id);
                 space.unload();
+                FireFlow.LOGGER.info("Unloading space " + space.info.id);
             }
         }
     }
@@ -95,6 +96,7 @@ public class SpaceManager {
     public static Space getOrLoadSpace(SpaceInfo info) {
         Space space = spaces.get(info.id);
         if (space == null) {
+            FireFlow.LOGGER.info("Loading space " + info.id);
             space = new Space(info);
             spaces.put(info.id, space);
         }

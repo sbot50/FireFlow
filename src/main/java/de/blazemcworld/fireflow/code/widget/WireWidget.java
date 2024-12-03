@@ -1,8 +1,5 @@
 package de.blazemcworld.fireflow.code.widget;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.action.WireAction;
@@ -11,12 +8,15 @@ import de.blazemcworld.fireflow.code.type.WireType;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.InstanceContainer;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class WireWidget implements Widget {
 
     public NodeIOWidget previousOutput;
-    public final List<WireWidget> previousWires = new ArrayList<>();
+    public List<WireWidget> previousWires = new ArrayList<>();
     public final LineElement line = new LineElement();
-    public final List<WireWidget> nextWires = new ArrayList<>();
+    public List<WireWidget> nextWires = new ArrayList<>();
     public NodeIOWidget nextInput;
     private final WireType<?> type;
 
@@ -30,8 +30,16 @@ public class WireWidget implements Widget {
         this.type = type;
     }
 
+    public WireWidget(Vec start, WireType<?> type, Vec end) {
+        line.from = start;
+        line.to = end;
+        line.color(type.color);
+        this.type = type;
+    }
+
     public WireWidget(WireWidget previousWire, WireType<?> type, Vec cursor) {
         this.previousWires.add(previousWire);
+        previousWire.nextWires.add(this);
         line.from = previousWire.line.to;
         line.to = cursor;
         line.color(previousWire.line.color());
@@ -126,48 +134,10 @@ public class WireWidget implements Widget {
             removeConnection(i.editor());
             return true;
         } else if (i.type() == Interaction.Type.RIGHT_CLICK) {
-            WireWidget w1;
-            if (this.previousWires.isEmpty()) w1 = new WireWidget(this.previousOutput, this.type(), i.pos());
-            else w1 = new WireWidget(this.previousWires, this.type(), i.pos());
-            for (WireWidget wire : this.previousWires) {
-                wire.nextWires.remove(this);
-                wire.nextWires.add(w1);
+            if (type != SignalType.INSTANCE) {
+                i.editor().setAction(i.player(), new WireAction(this, i.pos()));
+                return true;
             }
-            if (this.previousOutput != null) {
-                this.previousOutput.connections.remove(this);
-                this.previousOutput.connections.add(w1);
-            }
-            WireWidget w2 = new WireWidget(w1, this.type(), this.line.to);
-            w2.addNextWires(this.nextWires);
-
-            WireWidget wire;
-            if (this.type == SignalType.INSTANCE) {
-                wire = new WireWidget(w2, this.type, i.pos(), true);
-                w2.addPreviousWire(wire);
-            } else {
-                wire = new WireWidget(w1, this.type, i.pos());
-                w1.addNextWire(wire);
-            }
-            i.editor().rootWidgets.add(wire);
-            for (WireWidget nextWire : this.nextWires) {
-                nextWire.previousWires.remove(this);
-                nextWire.previousWires.add(w2);
-            }
-            if (this.nextInput != null) {
-                w2.nextInput = this.nextInput;
-                this.nextInput.connections.remove(this);
-                this.nextInput.connections.add(w2);
-            }
-
-            w1.addNextWire(w2);
-            this.remove();
-            i.editor().rootWidgets.remove(this);
-            i.editor().rootWidgets.add(w1);
-            w1.update(i.editor().space.code);
-            i.editor().rootWidgets.add(w2);
-            w2.update(i.editor().space.code);
-            i.editor().setAction(i.player(), new WireAction(wire, getPos().sub(i.pos()), this.type == SignalType.INSTANCE));
-            return true;
         }
         return false;
     }
@@ -197,16 +167,18 @@ public class WireWidget implements Widget {
     }
 
     private void removeNext(CodeEditor editor) {
+        List<WireWidget> nextWiresClone = new ArrayList<>(nextWires);
         this.remove();
-        for (WireWidget wire : nextWires) {
+        for (WireWidget wire : nextWiresClone) {
             wire.removeNext(editor);
             editor.rootWidgets.remove(wire);
         }
     }
 
     private void removePrevious(CodeEditor editor) {
+        List<WireWidget> previousWiresClone = new ArrayList<>(previousWires);
         this.remove();
-        for (WireWidget wire : previousWires) {
+        for (WireWidget wire : previousWiresClone) {
             wire.removePrevious(editor);
             editor.rootWidgets.remove(wire);
         }
@@ -231,8 +203,10 @@ public class WireWidget implements Widget {
     }
 
     public void removeConnection(CodeEditor editor) {
+        List<WireWidget> nextWiresClone = new ArrayList<>(nextWires);
+        List<WireWidget> previousWiresClone = new ArrayList<>(previousWires);
         this.remove();
-        for (WireWidget wire : previousWires) {
+        for (WireWidget wire : previousWiresClone) {
             if (this.type instanceof SignalType) {
                 wire.removePrevious(editor);
                 editor.rootWidgets.remove(wire);
@@ -240,7 +214,7 @@ public class WireWidget implements Widget {
             else if (wire.removeWithoutOutputs(editor)) editor.rootWidgets.remove(wire);
         }
 
-        for (WireWidget wire : nextWires) {
+        for (WireWidget wire : nextWiresClone) {
             if (!(this.type instanceof SignalType)) {
                 wire.removeNext(editor);
                 editor.rootWidgets.remove(wire);
@@ -331,33 +305,156 @@ public class WireWidget implements Widget {
         WireWidget w1;
         if (this.previousWires.isEmpty()) w1 = new WireWidget(this.previousOutput, this.type(), pos);
         else w1 = new WireWidget(this.previousWires, this.type(), pos);
+        editor.rootWidgets.add(w1);
         for (WireWidget wireWidget1 : this.previousWires) {
             wireWidget1.nextWires.remove(this);
             wireWidget1.nextWires.add(w1);
         }
-        if (this.previousOutput != null) {
-            w1.setPreviousOutput(this.previousOutput);
-            this.previousOutput.connections.remove(this);
-            this.previousOutput.connections.add(w1);
-        }
         WireWidget w2 = new WireWidget(w1, this.type(), this.line.to);
+        editor.rootWidgets.add(w2);
         w2.addNextWires(this.nextWires);
         for (WireWidget nextWire : this.nextWires) {
             nextWire.previousWires.remove(this);
             nextWire.previousWires.add(w2);
         }
-        if (this.nextInput != null) {
-            w2.setNextInput(this.nextInput);
-            this.nextInput.connections.remove(this);
-            this.nextInput.connections.add(w2);
+        NodeIOWidget previousOutput = this.previousOutput;
+        if (previousOutput != null) {
+            w1.setPreviousOutput(previousOutput);
+            previousOutput.connections.remove(this);
+            previousOutput.removed(this);
+            previousOutput.connections.add(w1);
         }
-        w1.addNextWire(w2);
+        NodeIOWidget nextInput = this.nextInput;
+        if (nextInput != null) {
+            w2.setNextInput(nextInput);
+            nextInput.connections.remove(this);
+            nextInput.removed(this);
+            nextInput.connections.add(w2);
+        }
         this.remove();
+        if (previousOutput != null) previousOutput.connect(w1);
+        if (nextInput != null) nextInput.connect(w2);
         editor.rootWidgets.remove(this);
-        editor.rootWidgets.add(w1);
         w1.update(editor.space.code);
-        editor.rootWidgets.add(w2);
         w2.update(editor.space.code);
         return List.of(w1, w2);
+    }
+
+    public boolean isValid() {
+        return !getInputs().isEmpty() && !getOutputs().isEmpty();
+    }
+
+    public void connectNext(WireWidget wire) {
+        this.nextWires.add(wire);
+        wire.previousWires.add(this);
+    }
+
+    public void connectNext(NodeIOWidget node) {
+        this.nextInput = node;
+        node.connections.add(this);
+    }
+
+    public void connectPrevious(WireWidget wire) {
+        this.previousWires.add(wire);
+        wire.nextWires.add(this);
+    }
+
+    public void connectPrevious(NodeIOWidget node) {
+        this.previousOutput = node;
+        node.connections.add(this);
+    }
+
+    public void cleanup(CodeEditor editor) {
+        while (true) {
+            if (previousWires.size() == 1 && sameDirection(previousWires.getFirst().line.from, previousWires.getFirst().line.to, line.from, line.to)) {
+                combine(previousWires.getFirst(), editor, true);
+                continue;
+            }
+            if (nextWires.size() == 1 && sameDirection(nextWires.getFirst().line.from, nextWires.getFirst().line.to, line.from, line.to)) {
+                combine(nextWires.getFirst(), editor, false);
+                continue;
+            }
+            break;
+        }
+        previousWires.forEach(wire -> wire.cleanupPrevious(editor));
+        nextWires.forEach(wire -> wire.cleanupNext(editor));
+    }
+
+    private void cleanupPrevious(CodeEditor editor) {
+        while (true) {
+            if (previousWires.size() == 1 && sameDirection(previousWires.getFirst().line.from, previousWires.getFirst().line.to, line.from, line.to)) {
+                combine(previousWires.getFirst(), editor, true);
+                continue;
+            }
+            break;
+        }
+        previousWires.forEach(wire -> wire.cleanupPrevious(editor));
+    }
+
+    private void cleanupNext(CodeEditor editor) {
+        while (true) {
+            if (nextWires.size() == 1 && sameDirection(nextWires.getFirst().line.from, nextWires.getFirst().line.to, line.from, line.to)) {
+                combine(nextWires.getFirst(), editor, false);
+                continue;
+            }
+            break;
+        }
+        nextWires.forEach(wire -> wire.cleanupNext(editor));
+    }
+
+    private void combine(WireWidget wire, CodeEditor editor, boolean isPrevious) {
+        if (isPrevious) {
+            this.previousWires.remove(wire);
+            this.previousWires.addAll(wire.previousWires);
+            this.previousWires.forEach(prevWire -> {
+                prevWire.nextWires.remove(wire);
+                prevWire.nextWires.add(this);
+            });
+            this.line.from = wire.line.from;
+            if (wire.previousOutput != null) {
+                this.previousOutput = wire.previousOutput;
+                this.previousOutput.connections.remove(wire);
+                this.previousOutput.removed(wire);
+                wire.previousOutput = null;
+                this.previousOutput.connections.add(this);
+                this.previousOutput.connect(this);
+            }
+        } else {
+            this.nextWires.remove(wire);
+            this.nextWires.addAll(wire.nextWires);
+            this.nextWires.forEach(prevWire -> {
+                prevWire.previousWires.remove(wire);
+                prevWire.previousWires.add(this);
+            });
+            this.line.to = wire.line.to;
+            if (wire.nextInput != null) {
+                this.nextInput = wire.nextInput;
+                this.nextInput.connections.remove(wire);
+                this.nextInput.removed(wire);
+                wire.nextInput = null;
+                this.nextInput.connections.add(this);
+                this.nextInput.connect(this);
+            }
+        }
+        this.update(editor.space.code);
+        wire.remove();
+        editor.rootWidgets.remove(wire);
+    }
+
+    public static boolean sameDirection(Vec u, Vec v, Vec w, Vec z) {
+        double d1x = v.x() - u.x();
+        double d1y = v.y() - u.y();
+        double d2x = z.x() - w.x();
+        double d2y = z.y() - w.y();
+
+        boolean d1IsZero = (d1x == 0 && d1y == 0);
+        boolean d2IsZero = (d2x == 0 && d2y == 0);
+        if (d1IsZero || d2IsZero) {
+            return true;
+        }
+
+        double crossProduct = d1x * d2y - d1y * d2x;
+        double dotProduct = d1x * d2x + d1y * d2y;
+        return crossProduct == 0 && dotProduct > 0;
     }
 }

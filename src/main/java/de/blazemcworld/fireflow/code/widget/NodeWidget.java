@@ -1,8 +1,5 @@
 package de.blazemcworld.fireflow.code.widget;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.action.DragNodeAction;
@@ -16,6 +13,9 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.InstanceContainer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NodeWidget implements Widget {
 

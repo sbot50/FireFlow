@@ -1,20 +1,9 @@
 package de.blazemcworld.fireflow.code;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-
 import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.action.Action;
 import de.blazemcworld.fireflow.code.node.Node;
@@ -27,12 +16,7 @@ import de.blazemcworld.fireflow.code.node.impl.function.FunctionInputsNode;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionOutputsNode;
 import de.blazemcworld.fireflow.code.type.AllTypes;
 import de.blazemcworld.fireflow.code.type.WireType;
-import de.blazemcworld.fireflow.code.widget.NodeIOWidget;
-import de.blazemcworld.fireflow.code.widget.NodeMenuWidget;
-import de.blazemcworld.fireflow.code.widget.NodeWidget;
-import de.blazemcworld.fireflow.code.widget.TypeSelectorWidget;
-import de.blazemcworld.fireflow.code.widget.Widget;
-import de.blazemcworld.fireflow.code.widget.WireWidget;
+import de.blazemcworld.fireflow.code.widget.*;
 import de.blazemcworld.fireflow.space.Space;
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
 import de.blazemcworld.fireflow.util.Translations;
@@ -46,13 +30,14 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.entity.metadata.other.InteractionMeta;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.entity.EntityAttackEvent;
-import net.minestom.server.event.player.PlayerChatEvent;
-import net.minestom.server.event.player.PlayerEntityInteractEvent;
-import net.minestom.server.event.player.PlayerSpawnEvent;
-import net.minestom.server.event.player.PlayerSwapItemEvent;
-import net.minestom.server.event.player.PlayerTickEvent;
+import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.item.Material;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 
 public class CodeEditor {
 
@@ -62,6 +47,7 @@ public class CodeEditor {
     private final HashMap<Player, Action> actions = new HashMap<>();
     private final Path codePath;
     public final HashMap<String, FunctionDefinition> functions = new HashMap<>();
+    public final Pathfinder pathfinder = new Pathfinder(this);
 
     public CodeEditor(Space space) {
         this.space = space;
@@ -496,6 +482,7 @@ public class CodeEditor {
         List<WireWidget> wireWidgets = new ArrayList<>();
         for (Widget widget : rootWidgets) {
             if (widget instanceof WireWidget wireWidget) {
+                if (!wireWidget.isValid()) continue;
                 wireWidgets.add(wireWidget);
             }
         }
