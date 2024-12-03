@@ -104,8 +104,8 @@ public class Pathfinder {
 
         List<Vec> path = new ArrayList<>();
         path.add(start);
-        path.add(start.withX(Math.round(start.x() + end.x() * 4) / 8.0));
-        path.add(end.withX(Math.round(start.x() + end.x() * 4) / 8.0));
+        path.add(start.withX(Math.round((start.x() + end.x()) * 4) / 8.0));
+        path.add(end.withX(Math.round((start.x() + end.x()) * 4) / 8.0));
         path.add(end);
         return path;
     }

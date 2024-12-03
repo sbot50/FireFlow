@@ -33,7 +33,6 @@ public class DragNodeAction implements Action {
                     WireWidget nw = new WireWidget(splitWires.getFirst(), wire.type(), mid);
                     nw.addNextWire(splitWires.getLast());
                     nw.setPos(mid);
-                    splitWires.getFirst().addNextWire(nw);
                     splitWires.getFirst().nextWires.remove(splitWires.getLast());
                     splitWires.getLast().addPreviousWire(nw);
                     splitWires.getLast().previousWires.remove(splitWires.getFirst());
@@ -51,7 +50,7 @@ public class DragNodeAction implements Action {
         for (NodeIOWidget IOWidget : iowidgets) {
             for (WireWidget wire : IOWidget.connections) {
                 if (IOWidget.isInput()) {
-                    wire.setPos(IOWidget.getPos().sub(1/8f-1/32f, 1/8f, 0));
+                    wire.line.to = IOWidget.getPos().sub(1/8f-1/32f, 1/8f, 0);
                     wire.line.from = new Vec(wire.line.from.x(), IOWidget.getPos().y()- 1/8f, wire.line.from.z());
                     wire.previousWires.getFirst().line.to = new Vec(wire.previousWires.getFirst().line.to.x(), IOWidget.getPos().y()- 1/8f, wire.previousWires.getFirst().line.to.z());
                     wire.previousWires.getFirst().update(editor.space.code);
