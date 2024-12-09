@@ -22,10 +22,11 @@ public class NodeWidget implements Widget {
     public final Node node;
     private final BorderWidget<VerticalContainerWidget> root;
     private final VerticalContainerWidget inputArea;
-    private InstanceContainer inst;
+    private final CodeEditor editor;
     private boolean refreshingInputs = false;
 
-    public NodeWidget(Node node) {
+    public NodeWidget(Node node, CodeEditor editor) {
+        this.editor = editor;
         this.node = node;
 
         VerticalContainerWidget main = new VerticalContainerWidget();
@@ -39,7 +40,7 @@ public class NodeWidget implements Widget {
         inputArea = new VerticalContainerWidget();
         ioArea.widgets.add(inputArea);
 
-        SpacingWidget spacing = new SpacingWidget(new Vec(1/8f, 0, 0));
+        SpacingWidget spacing = new SpacingWidget(new Vec(1 / 8f, 0, 0));
         ioArea.widgets.add(spacing);
 
         for (Node.Input<?> input : node.inputs) {
@@ -53,7 +54,7 @@ public class NodeWidget implements Widget {
         for (Node.Output<?> output : node.outputs) {
             outputArea.widgets.add(new NodeIOWidget(this, output));
         }
-        
+
         double needed = Math.max(0, title.getSize().x() - ioArea.getSize().x());
         spacing.size = spacing.size.withX(spacing.size.x() + Math.ceil(needed * 8) / 8);
         root = new BorderWidget<>(main);
@@ -77,14 +78,13 @@ public class NodeWidget implements Widget {
 
     @Override
     public void update(InstanceContainer inst) {
-        this.inst = inst;
         refreshInputs();
         root.update(inst);
     }
 
     public void refreshInputs() {
         if (refreshingInputs) return;
-        
+
         boolean didRemove = inputArea.widgets.removeIf(w -> {
             if (w instanceof NodeIOWidget io && !node.inputs.contains(io.input)) {
                 io.remove();
@@ -101,9 +101,9 @@ public class NodeWidget implements Widget {
             NodeIOWidget io = new NodeIOWidget(this, input);
             inputArea.widgets.add(i, io);
         }
-        if (inst != null) {
+        if (editor != null) {
             refreshingInputs = true;
-            update(inst);
+            update(editor.space.code);
             refreshingInputs = false;
         }
 
@@ -115,9 +115,32 @@ public class NodeWidget implements Widget {
                 double targetY = i.getPos().y() - 1 / 8f;
                 for (WireWidget w : i.connections) {
                     if (w.line.to.y() == targetY) continue;
-                    // FIXME: currently creates diagonal lines
-                    w.line.to = w.line.to.withY(targetY);
-                    w.line.update(inst);
+                    if (w.line.from.y() != w.line.to.y()) {
+                        w.line.to = w.line.to.withY(targetY);
+                        w.line.update(editor.space.code);
+                    } else {
+                        if (w.previousWires.isEmpty() || w.previousWires.getFirst().line.from.y() == w.previousWires.getFirst().line.to.y()) {
+                            Vec mid = w.line.from.add(w.line.to).div(2);
+                            List<WireWidget> wires = w.splitWire(editor, mid);
+                            WireWidget nw = new WireWidget(wires.getFirst(), w.type(), mid);
+                            nw.addNextWire(wires.getLast());
+                            wires.getFirst().nextWires.remove(wires.getLast());
+                            wires.getLast().addPreviousWire(nw);
+                            wires.getLast().previousWires.remove(wires.getFirst());
+                            wires.getLast().line.from = wires.getLast().line.from.withY(targetY);
+                            wires.getLast().line.to = wires.getLast().line.to.withY(targetY);
+                            nw.line.to = wires.getLast().line.from;
+                            wires.getLast().update(editor.space.code);
+                            editor.rootWidgets.add(nw);
+                            nw.update(editor.space.code);
+                        } else {
+                            w.previousWires.getFirst().line.to = w.previousWires.getFirst().line.to.withY(targetY);
+                            w.previousWires.getFirst().update(editor.space.code);
+                            w.line.from = w.line.from.withY(targetY);
+                            w.line.to = w.line.to.withY(targetY);
+                            w.line.update(editor.space.code);
+                        }
+                    }
                 }
             }
         }
@@ -126,7 +149,6 @@ public class NodeWidget implements Widget {
     @Override
     public void remove() {
         root.remove();
-        inst = null;
     }
 
     public void remove(CodeEditor editor) {
