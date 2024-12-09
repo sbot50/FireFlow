@@ -321,19 +321,15 @@ public class WireWidget implements Widget {
         if (previousOutput != null) {
             w1.setPreviousOutput(previousOutput);
             previousOutput.connections.remove(this);
-            previousOutput.removed(this);
             previousOutput.connections.add(w1);
         }
         NodeIOWidget nextInput = this.nextInput;
         if (nextInput != null) {
             w2.setNextInput(nextInput);
             nextInput.connections.remove(this);
-            nextInput.removed(this);
             nextInput.connections.add(w2);
         }
-        this.remove();
-        if (previousOutput != null) previousOutput.connect(w1);
-        if (nextInput != null) nextInput.connect(w2);
+        this.line.remove();
         editor.rootWidgets.remove(this);
         w1.update(editor.space.code);
         w2.update(editor.space.code);

@@ -1,8 +1,5 @@
 package de.blazemcworld.fireflow.code.widget;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.node.Node;
@@ -15,6 +12,9 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.InstanceContainer;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NodeMenuWidget implements Widget {
 
@@ -133,9 +133,9 @@ public class NodeMenuWidget implements Widget {
 
         NodeWidget n;
         if (types.isEmpty()) {
-            n = new NodeWidget(node.copy());
+            n = new NodeWidget(node.copy(), e.space.editor);
         } else {
-            n = new NodeWidget(node.copyWithTypes(types));
+            n = new NodeWidget(node.copyWithTypes(types), e.space.editor);
         }
 
         Vec s = n.getSize();

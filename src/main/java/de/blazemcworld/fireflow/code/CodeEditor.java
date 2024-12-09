@@ -200,8 +200,8 @@ public class CodeEditor {
 
         Vec pos = getCursor(player).mul(8).apply(Vec.Operator.CEIL).div(8).withZ(15.999);
 
-        NodeWidget inputs = new NodeWidget(function.inputsNode);
-        NodeWidget outputs = new NodeWidget(function.outputsNode);
+        NodeWidget inputs = new NodeWidget(function.inputsNode, this);
+        NodeWidget outputs = new NodeWidget(function.outputsNode, this);
 
         inputs.setPos(pos.add(inputs.getSize().x(), 0, 0));
         inputs.update(space.code);
@@ -245,7 +245,7 @@ public class CodeEditor {
                     old.remove();
                     rootWidgets.remove(old);
 
-                    NodeWidget updated = new NodeWidget(newFunction.inputsNode);
+                    NodeWidget updated = new NodeWidget(newFunction.inputsNode, this);
                     updated.setPos(old.getPos());
                     updated.update(space.code);
                     rootWidgets.add(updated);
@@ -253,7 +253,7 @@ public class CodeEditor {
                     old.remove();
                     rootWidgets.remove(old);
 
-                    NodeWidget updated = new NodeWidget(newFunction.outputsNode);
+                    NodeWidget updated = new NodeWidget(newFunction.outputsNode, this);
                     updated.setPos(old.getPos());
                     updated.update(space.code);
                     rootWidgets.add(updated);
@@ -647,7 +647,7 @@ public class CodeEditor {
                     }
                 }
 
-                NodeWidget nodeWidget = new NodeWidget(node);
+                NodeWidget nodeWidget = new NodeWidget(node, this);
                 nodeWidget.setPos(new Vec(x, y, 15.999));
                 nodeWidgets.add(nodeWidget);
                 rootWidgets.add(nodeWidget);
