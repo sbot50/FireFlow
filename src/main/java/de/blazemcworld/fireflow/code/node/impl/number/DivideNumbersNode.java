@@ -10,10 +10,14 @@ public class DivideNumbersNode extends Node {
         super("divide_numbers", Material.IRON_AXE);
         
         Input<Double> left = new Input<>("left", NumberType.INSTANCE);
-        Input<Double> right = new Input<>("right", NumberType.INSTANCE);
+        Varargs<Double> right = new Varargs<>("right", NumberType.INSTANCE);
         Output<Double> result = new Output<>("result", NumberType.INSTANCE);
-        
-        result.valueFrom((ctx) -> left.getValue(ctx) / right.getValue(ctx));
+
+        result.valueFrom((ctx) -> {
+            double out = left.getValue(ctx);
+            for (double v : right.getVarargs(ctx)) out /= v;
+            return out;
+        });
     }
 
     @Override
