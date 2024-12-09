@@ -30,8 +30,8 @@ public class LineElement {
         float angle = (float) Math.atan2(to.y() - from.y(), from.x() - to.x());
         meta.setLeftRotation(new float[]{0, 0, (float) Math.sin(angle * 0.5), (float) Math.cos(angle * 0.5)});
         Vec v = Vec.fromPoint(from).add(to).mul(0.5).add(
-                Math.cos(angle) * dist * 0.1 - Math.sin(angle) * 0.1625,
-                -Math.sin(angle) * dist * 0.1 - Math.cos(angle) * 0.1625,
+                Math.cos(angle) * dist * 0.1 - Math.sin(angle) * 0.135,
+                -Math.sin(angle) * dist * 0.1 - Math.cos(angle) * 0.135,
                 0
         );
         display.setInstance(inst, v.withZ(15.999).asPosition().withView(180f, 0f));

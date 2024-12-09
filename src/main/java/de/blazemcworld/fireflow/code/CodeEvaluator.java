@@ -1,9 +1,5 @@
 package de.blazemcworld.fireflow.code;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
-
 import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.node.Node.Varargs;
@@ -20,6 +16,10 @@ import net.minestom.server.event.EventFilter;
 import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.timer.TaskSchedule;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class CodeEvaluator {
 
@@ -110,7 +110,7 @@ public class CodeEvaluator {
                     if (!base.id.equals(next.id)) continue;
                     next.ignoreUpdates = true;
                     copy.inputs.removeAll(next.children);
-                    next.children.removeAll(next.children);
+                    next.children.clear();
 
                     for (Node.Input<?> input : base.children) {
                         next.addInput(input.id);

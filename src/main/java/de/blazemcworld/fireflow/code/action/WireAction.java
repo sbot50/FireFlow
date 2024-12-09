@@ -46,7 +46,7 @@ public class WireAction implements Action {
     @Override
     public void tick(Vec cursor, CodeEditor editor, Player player) {
         if (startWire != null) startWire.update(editor.space.code);
-        Vec endPos = cursor;
+        Vec endPos = cursor.mul(8).apply(Vec.Operator.CEIL).div(8).withZ(15.999);
         NodeIOWidget hover = null;
         WireType<?> type = (output != null) ? output.type() : inputWire.type();
         for (Widget widget : new HashSet<>(editor.rootWidgets)) {

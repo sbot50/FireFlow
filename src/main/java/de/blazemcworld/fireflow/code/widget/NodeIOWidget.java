@@ -1,5 +1,6 @@
 package de.blazemcworld.fireflow.code.widget;
 
+import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.action.WireAction;
 import de.blazemcworld.fireflow.code.node.Node;
@@ -76,7 +77,7 @@ public class NodeIOWidget implements Widget {
             return true;
         }
         if (i.type() == Interaction.Type.LEFT_CLICK && isInput && input.inset != null) {
-            insetValue(null);
+            insetValue(null, i.editor());
             parent.update(i.editor().space.code);
             return true;
         }
@@ -112,7 +113,6 @@ public class NodeIOWidget implements Widget {
         parent.refreshInputs();
     }
 
-    @SuppressWarnings("unchecked")
     public void removed(WireWidget wire) {
         if (wire.type() == SignalType.INSTANCE) {
             if (wire.previousOutput != null) {
@@ -121,19 +121,20 @@ public class NodeIOWidget implements Widget {
         } else {
             if (wire.nextInput != null) {
                 wire.nextInput.input.connected = null;
-                wire.nextInput.input.setInset(null);
+                if (wire.nextInput.input.varargsParent != null) wire.nextInput.input.varargsParent.update();
             }
         }
         text.text(displayText());
         parent.refreshInputs();
     }
 
-    public void insetValue(String value) {
+    public void insetValue(String value, CodeEditor editor) {
+        input.setInset(value);
+
         for (WireWidget w : new ArrayList<>(connections)) {
-            w.remove();
+            w.removeConnection(editor);
         }
 
-        input.setInset(value);
         text.text(displayText());
         parent.refreshInputs();
     }

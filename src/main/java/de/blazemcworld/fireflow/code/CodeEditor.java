@@ -98,8 +98,6 @@ public class CodeEditor {
             Action a = actions.get(event.getPlayer());
             if (a == null) return;
             Vec cursor = getCursor(event.getPlayer());
-            cursor = cursor.withX(Math.round(cursor.x() * 8) / 8f)
-                    .withY(Math.round(cursor.y() * 8) / 8f);
             a.tick(cursor, this, event.getPlayer());
         });
 
@@ -109,12 +107,12 @@ public class CodeEditor {
                 if (w.getWidget(pos) instanceof NodeIOWidget input) {
                     if (!input.isInput()) return;
                     event.setCancelled(true);
-                    if (input.type().parseInset(event.getMessage()) == null) {
+                    if (input.type().parseInset(event.getRawMessage()) == null) {
                         event.getPlayer().sendMessage(Component.text(Translations.get("error.invalid.inset")).color(NamedTextColor.RED));
                         return;
                     }
 
-                    input.insetValue(event.getMessage());
+                    input.insetValue(event.getRawMessage(), this);
                     input.update(space.code);
                     w.update(space.code);
                     return;
@@ -637,6 +635,8 @@ public class CodeEditor {
                         JsonArray children = entry.getValue().getAsJsonArray();
                         for (Varargs<?> varargs : node.varargs) {
                             varargs.ignoreUpdates = true;
+                            node.inputs.removeAll(varargs.children);
+                            varargs.children.clear();
                             if (varargs.id.equals(varargsId)) {
                                 for (JsonElement child : children) {
                                     varargs.addInput(child.getAsString());
@@ -660,7 +660,7 @@ public class CodeEditor {
                         
                         for (NodeIOWidget io : nodeWidget.getIOWidgets()) {
                             if (io.isInput() && io.input.id.equals(inputId)) {
-                                io.insetValue(inset);
+                                io.insetValue(inset, this);
                                 break;
                             }
                         }
@@ -703,6 +703,7 @@ public class CodeEditor {
 
                     for (Varargs<?> varargs : nodeWidget.node.varargs) {
                         varargs.ignoreUpdates = false;
+                        varargs.update();
                     }
                     nodeWidget.update(space.code);
                 });

@@ -45,6 +45,7 @@ public class DragNodeAction implements Action {
 
     @Override
     public void tick(Vec cursor, CodeEditor editor, Player player) {
+        cursor = cursor.mul(8).apply(Vec.Operator.CEIL).div(8).withZ(15.999);
         node.setPos(cursor.add(offset));
         node.update(editor.space.code);
         for (NodeIOWidget IOWidget : iowidgets) {

@@ -85,13 +85,14 @@ public class NodeWidget implements Widget {
     public void refreshInputs() {
         if (refreshingInputs) return;
         
-        inputArea.widgets.removeIf(w -> {
+        boolean didRemove = inputArea.widgets.removeIf(w -> {
             if (w instanceof NodeIOWidget io && !node.inputs.contains(io.input)) {
                 io.remove();
                 return true;
             }
             return false;
         });
+
         for (int i = 0; i < node.inputs.size(); i++) {
             Node.Input<?> input = node.inputs.get(i);
             if (i < inputArea.widgets.size() && inputArea.widgets.get(i) instanceof NodeIOWidget io && io.input == input) {
@@ -104,6 +105,21 @@ public class NodeWidget implements Widget {
             refreshingInputs = true;
             update(inst);
             refreshingInputs = false;
+        }
+
+        if (didRemove) {
+            for (NodeIOWidget i : getIOWidgets()) {
+                if (!i.isInput()) continue;
+                if (i.connections.isEmpty()) continue;
+
+                double targetY = i.getPos().y() - 1 / 8f;
+                for (WireWidget w : i.connections) {
+                    if (w.line.to.y() == targetY) continue;
+                    // FIXME: currently creates diagonal lines
+                    w.line.to = w.line.to.withY(targetY);
+                    w.line.update(inst);
+                }
+            }
         }
     }
 

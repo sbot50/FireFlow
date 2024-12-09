@@ -31,7 +31,7 @@ public class OnPlayerChatNode extends Node {
         evaluator.events.addListener(PlayerChatEvent.class, event -> {
             CodeThread thread = evaluator.newCodeThread();
             thread.setThreadValue(player, new PlayerValue(event.getPlayer()));
-            thread.setThreadValue(message, event.getMessage());
+            thread.setThreadValue(message, event.getRawMessage());
             thread.sendSignal(signal);
             thread.clearQueue();
         });

@@ -1,11 +1,5 @@
 package de.blazemcworld.fireflow.code.node;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import de.blazemcworld.fireflow.code.CodeEvaluator;
 import de.blazemcworld.fireflow.code.CodeThread;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionCallNode;
@@ -14,6 +8,12 @@ import de.blazemcworld.fireflow.code.node.impl.function.FunctionOutputsNode;
 import de.blazemcworld.fireflow.code.type.WireType;
 import de.blazemcworld.fireflow.util.Translations;
 import net.minestom.server.item.Material;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public abstract class Node {
 

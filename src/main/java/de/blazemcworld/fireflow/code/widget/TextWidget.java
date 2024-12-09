@@ -39,7 +39,7 @@ public class TextWidget implements Widget {
 
     public void update(InstanceContainer inst) {
         double width = TextWidth.calculate(meta.getText()) / 40;
-        Vec adjusted = Vec.fromPoint(pos).add(-width / 2, -1 / 32.0 - 0.25, 0);
+        Vec adjusted = Vec.fromPoint(pos).add(-width / 2, -1 / 32.0 - 0.23, 0);
         if (shiftLeft) adjusted = adjusted.add(width - Math.ceil(width * 8) / 8, 0, 0);
         display.setInstance(inst, adjusted.asPosition().withView(180, 0));
     }

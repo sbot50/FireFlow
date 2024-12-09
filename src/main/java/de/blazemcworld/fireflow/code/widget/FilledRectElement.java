@@ -24,7 +24,7 @@ public class FilledRectElement {
     }
 
     public void update(InstanceContainer inst) {
-        Vec adjustedSize = new Vec(size.x() * 8, size.y() * 3.64, 1);
+        Vec adjustedSize = new Vec(size.x() * 8, size.y() * 4, 1);
         meta.setScale(adjustedSize);
         Vec adjustedPos = new Vec(
             pos.x() - size.x() / 2.5,
