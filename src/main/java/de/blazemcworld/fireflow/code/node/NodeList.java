@@ -5,13 +5,14 @@ import de.blazemcworld.fireflow.code.VariableStore;
 import de.blazemcworld.fireflow.code.node.impl.action.player.*;
 import de.blazemcworld.fireflow.code.node.impl.event.player.OnPlayerChatNode;
 import de.blazemcworld.fireflow.code.node.impl.event.player.OnPlayerJoinNode;
-import de.blazemcworld.fireflow.code.node.impl.flow.IfNode;
-import de.blazemcworld.fireflow.code.node.impl.flow.ListForEachNode;
-import de.blazemcworld.fireflow.code.node.impl.flow.RepeatNode;
-import de.blazemcworld.fireflow.code.node.impl.flow.ScheduleNode;
+import de.blazemcworld.fireflow.code.node.impl.flow.*;
+import de.blazemcworld.fireflow.code.node.impl.info.player.IsPlayingNode;
+import de.blazemcworld.fireflow.code.node.impl.info.player.PlayerPositionNode;
 import de.blazemcworld.fireflow.code.node.impl.list.CreateListNode;
 import de.blazemcworld.fireflow.code.node.impl.list.ListAppendNode;
 import de.blazemcworld.fireflow.code.node.impl.number.*;
+import de.blazemcworld.fireflow.code.node.impl.position.PackPositionNode;
+import de.blazemcworld.fireflow.code.node.impl.position.UnpackPositionNode;
 import de.blazemcworld.fireflow.code.node.impl.text.FormatToTextNode;
 import de.blazemcworld.fireflow.code.node.impl.text.StringToTextNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.GetVariableNode;
@@ -35,16 +36,23 @@ public class NodeList {
                     .add(new SendMessageNode())
                     .add(new SpectatorModeNode())
                     .add(new SurvivalModeNode())
+                    .add(new TeleportPlayerNode())
             )
             .add(new Category("event", Material.OBSERVER)
                     .add(new OnPlayerChatNode())
                     .add(new OnPlayerJoinNode())
             )
             .add(new Category("flow", Material.COMPARATOR)
+                    .add(new ConditionalChoiceNode<>(null))
                     .add(new IfNode())
+                    .add(new InvertConditionNode())
                     .add(new ListForEachNode<>(null))
                     .add(new RepeatNode())
                     .add(new ScheduleNode())
+                    .add(new WhileNode())
+            )
+            .add(new Category("info", Material.ENDER_EYE)
+                    .add(new IsPlayingNode())
             )
             .add(new Category("list", Material.BOOKSHELF)
                     .add(new CreateListNode<>(null))
@@ -53,10 +61,19 @@ public class NodeList {
             .add(new Category("number", Material.CLOCK)
                     .add(new AddNumbersNode())
                     .add(new DivideNumbersNode())
+                    .add(new GreaterEqualNode())
+                    .add(new GreaterThanNode())
+                    .add(new LessEqualNode())
+                    .add(new LessThanNode())
                     .add(new NumberToTextNode())
                     .add(new MultiplyNumbersNode())
                     .add(new ParseNumberNode())
                     .add(new SubtractNumbersNode())
+            )
+            .add(new Category("position", Material.COMPASS)
+                    .add(new PackPositionNode())
+                    .add(new PlayerPositionNode())
+                    .add(new UnpackPositionNode())
             )
             .add(new Category("text", Material.WRITABLE_BOOK)
                     .add(new FormatToTextNode())

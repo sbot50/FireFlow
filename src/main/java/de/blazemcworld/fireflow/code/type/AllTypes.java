@@ -1,12 +1,12 @@
 package de.blazemcworld.fireflow.code.type;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 public class AllTypes {
 
@@ -14,12 +14,13 @@ public class AllTypes {
 
     public static void init() {
         all.add(ConditionType.INSTANCE);
+        all.add(ListType.UNSPECIFIED);
         all.add(NumberType.INSTANCE);
         all.add(PlayerType.INSTANCE);
+        all.add(PositionType.INSTANCE);
+        all.add(SignalType.INSTANCE);
         all.add(StringType.INSTANCE);
         all.add(TextType.INSTANCE);
-        all.add(SignalType.INSTANCE);
-        all.add(ListType.UNSPECIFIED);
 
         all.sort(Comparator.comparing(WireType::getName));
     }
