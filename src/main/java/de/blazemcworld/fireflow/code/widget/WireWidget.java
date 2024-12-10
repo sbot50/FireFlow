@@ -2,6 +2,7 @@ package de.blazemcworld.fireflow.code.widget;
 
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
+import de.blazemcworld.fireflow.code.action.DragWireAction;
 import de.blazemcworld.fireflow.code.action.WireAction;
 import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.type.WireType;
@@ -131,11 +132,20 @@ public class WireWidget implements Widget {
     public boolean interact(Interaction i) {
         if (!inBounds(i.pos())) return false;
         if (i.type() == Interaction.Type.LEFT_CLICK) {
+            List<NodeIOWidget> inputs = getInputs();
+            List<NodeIOWidget> outputs = getOutputs();
             removeConnection(i.editor());
+            if (this.type == SignalType.INSTANCE && !outputs.getFirst().connections.isEmpty()) outputs.getFirst().connections.getFirst().cleanup(i.editor());
+            else if (!inputs.getFirst().connections.isEmpty()) inputs.getFirst().connections.getFirst().cleanup(i.editor());
             return true;
-        } else if (i.type() == Interaction.Type.RIGHT_CLICK) {
+        } else if (i.type() == Interaction.Type.SWAP_HANDS) {
             if (type != SignalType.INSTANCE) {
                 i.editor().setAction(i.player(), new WireAction(this, i.pos()));
+                return true;
+            }
+        } else if (i.type() == Interaction.Type.RIGHT_CLICK) {
+            if (!previousWires.isEmpty() && !nextWires.isEmpty()) {
+                i.editor().setAction(i.player(), new DragWireAction(this));
                 return true;
             }
         }
@@ -362,11 +372,11 @@ public class WireWidget implements Widget {
 
     public void cleanup(CodeEditor editor) {
         while (true) {
-            if (previousWires.size() == 1 && sameDirection(previousWires.getFirst().line.from, previousWires.getFirst().line.to, line.from, line.to)) {
+            if (previousWires.size() == 1 && previousWires.getFirst().nextWires.size() == 1 && sameDirection(previousWires.getFirst().line.from, previousWires.getFirst().line.to, line.from, line.to)) {
                 combine(previousWires.getFirst(), editor, true);
                 continue;
             }
-            if (nextWires.size() == 1 && sameDirection(nextWires.getFirst().line.from, nextWires.getFirst().line.to, line.from, line.to)) {
+            if (nextWires.size() == 1 && nextWires.getFirst().previousWires.size() == 1 && sameDirection(nextWires.getFirst().line.from, nextWires.getFirst().line.to, line.from, line.to)) {
                 combine(nextWires.getFirst(), editor, false);
                 continue;
             }
@@ -378,7 +388,7 @@ public class WireWidget implements Widget {
 
     private void cleanupPrevious(CodeEditor editor) {
         while (true) {
-            if (previousWires.size() == 1 && sameDirection(previousWires.getFirst().line.from, previousWires.getFirst().line.to, line.from, line.to)) {
+            if (previousWires.size() == 1 && previousWires.getFirst().nextWires.size() == 1 && sameDirection(previousWires.getFirst().line.from, previousWires.getFirst().line.to, line.from, line.to)) {
                 combine(previousWires.getFirst(), editor, true);
                 continue;
             }
@@ -389,7 +399,7 @@ public class WireWidget implements Widget {
 
     private void cleanupNext(CodeEditor editor) {
         while (true) {
-            if (nextWires.size() == 1 && sameDirection(nextWires.getFirst().line.from, nextWires.getFirst().line.to, line.from, line.to)) {
+            if (nextWires.size() == 1 && nextWires.getFirst().previousWires.size() == 1 && sameDirection(nextWires.getFirst().line.from, nextWires.getFirst().line.to, line.from, line.to)) {
                 combine(nextWires.getFirst(), editor, false);
                 continue;
             }
