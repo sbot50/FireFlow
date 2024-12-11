@@ -1,22 +1,8 @@
 package de.blazemcworld.fireflow;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Base64;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import de.blazemcworld.fireflow.code.node.NodeList;
 import de.blazemcworld.fireflow.code.type.AllTypes;
-import de.blazemcworld.fireflow.command.CodeCommand;
-import de.blazemcworld.fireflow.command.FunctionCommand;
-import de.blazemcworld.fireflow.command.JoinCommand;
-import de.blazemcworld.fireflow.command.LobbyCommand;
-import de.blazemcworld.fireflow.command.PlayCommand;
-import de.blazemcworld.fireflow.command.ReloadCommand;
-import de.blazemcworld.fireflow.command.SpaceCommand;
+import de.blazemcworld.fireflow.command.*;
 import de.blazemcworld.fireflow.space.Lobby;
 import de.blazemcworld.fireflow.space.SpaceManager;
 import de.blazemcworld.fireflow.util.Config;
@@ -29,10 +15,18 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.event.player.PlayerDeathEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
 import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.ping.ResponseData;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Base64;
 
 public class FireFlow {
 
@@ -72,6 +66,10 @@ public class FireFlow {
 
         events.addListener(PlayerDisconnectEvent.class, event -> {
             events.call(new PlayerExitInstanceEvent(event.getPlayer()));
+        });
+
+        events.addListener(PlayerDeathEvent.class, event -> {
+            event.setChatMessage(null);
         });
 
         events.addListener(ServerListPingEvent.class, event -> {
