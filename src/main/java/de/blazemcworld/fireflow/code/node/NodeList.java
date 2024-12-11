@@ -3,20 +3,22 @@ package de.blazemcworld.fireflow.code.node;
 import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.VariableStore;
 import de.blazemcworld.fireflow.code.node.impl.action.player.*;
-import de.blazemcworld.fireflow.code.node.impl.event.player.OnPlayerChatNode;
-import de.blazemcworld.fireflow.code.node.impl.event.player.OnPlayerJoinNode;
+import de.blazemcworld.fireflow.code.node.impl.event.player.*;
 import de.blazemcworld.fireflow.code.node.impl.flow.*;
-import de.blazemcworld.fireflow.code.node.impl.info.player.IsPlayingNode;
-import de.blazemcworld.fireflow.code.node.impl.info.player.PlayerPositionNode;
+import de.blazemcworld.fireflow.code.node.impl.info.player.*;
 import de.blazemcworld.fireflow.code.node.impl.list.CreateListNode;
 import de.blazemcworld.fireflow.code.node.impl.list.ListAppendNode;
 import de.blazemcworld.fireflow.code.node.impl.number.*;
+import de.blazemcworld.fireflow.code.node.impl.position.FacingVectorNode;
 import de.blazemcworld.fireflow.code.node.impl.position.PackPositionNode;
 import de.blazemcworld.fireflow.code.node.impl.position.UnpackPositionNode;
 import de.blazemcworld.fireflow.code.node.impl.text.FormatToTextNode;
 import de.blazemcworld.fireflow.code.node.impl.text.StringToTextNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.GetVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.SetVariableNode;
+import de.blazemcworld.fireflow.code.node.impl.vector.PackVectorNode;
+import de.blazemcworld.fireflow.code.node.impl.vector.SetVectorLengthNode;
+import de.blazemcworld.fireflow.code.node.impl.vector.UnpackVectorNode;
 import de.blazemcworld.fireflow.util.Translations;
 import net.minestom.server.item.Material;
 
@@ -33,7 +35,19 @@ public class NodeList {
             .add(new Category("action", Material.REDSTONE)
                     .add(new AdventureModeNode())
                     .add(new CreativeModeNode())
+                    .add(new KillPlayerNode())
                     .add(new SendMessageNode())
+                    .add(new SendTitleNode())
+                    .add(new SetAllowFlyingNode())
+                    .add(new SetExperienceLevelNode())
+                    .add(new SetExperiencePercentageNode())
+                    .add(new SetHeldSlotNode())
+                    .add(new SetPlayerFlyingNode())
+                    .add(new SetPlayerFoodNode())
+                    .add(new SetPlayerHealthNode())
+                    .add(new SetPlayerInvulnerableNode())
+                    .add(new SetPlayerSaturationNode())
+                    .add(new SetPlayerVelocityNode())
                     .add(new SpectatorModeNode())
                     .add(new SurvivalModeNode())
                     .add(new TeleportPlayerNode())
@@ -41,6 +55,14 @@ public class NodeList {
             .add(new Category("event", Material.OBSERVER)
                     .add(new OnPlayerChatNode())
                     .add(new OnPlayerJoinNode())
+                    .add(new OnPlayerStartFlyingNode())
+                    .add(new OnPlayerStartGlidingNode())
+                    .add(new OnPlayerStartSneakingNode())
+                    .add(new OnPlayerStartSprintingNode())
+                    .add(new OnPlayerStopFlyingNode())
+                    .add(new OnPlayerStopGlidingNode())
+                    .add(new OnPlayerStopSneakingNode())
+                    .add(new OnPlayerStopSprintingNode())
             )
             .add(new Category("flow", Material.COMPARATOR)
                     .add(new ConditionalChoiceNode<>(null))
@@ -52,7 +74,16 @@ public class NodeList {
                     .add(new WhileNode())
             )
             .add(new Category("info", Material.ENDER_EYE)
+                    .add(new GetExperienceLevelNode())
+                    .add(new GetExperiencePercentageNode())
+                    .add(new GetPlayerFoodNode())
+                    .add(new GetPlayerHealthNode())
+                    .add(new GetPlayerSaturationNode())
+                    .add(new GetHeldSlotNode())
+                    .add(new IsPlayerInvulnerableNode())
                     .add(new IsPlayingNode())
+                    .add(new PlayerCanFlyNode())
+                    .add(new PlayerIsFlyingNode())
             )
             .add(new Category("list", Material.BOOKSHELF)
                     .add(new CreateListNode<>(null))
@@ -71,9 +102,15 @@ public class NodeList {
                     .add(new SubtractNumbersNode())
             )
             .add(new Category("position", Material.COMPASS)
+                    .add(new FacingVectorNode())
                     .add(new PackPositionNode())
                     .add(new PlayerPositionNode())
                     .add(new UnpackPositionNode())
+            )
+            .add(new Category("vector", Material.ARROW)
+                    .add(new PackVectorNode())
+                    .add(new SetVectorLengthNode())
+                    .add(new UnpackVectorNode())
             )
             .add(new Category("text", Material.WRITABLE_BOOK)
                     .add(new FormatToTextNode())

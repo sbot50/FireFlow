@@ -21,6 +21,7 @@ public class AllTypes {
         all.add(SignalType.INSTANCE);
         all.add(StringType.INSTANCE);
         all.add(TextType.INSTANCE);
+        all.add(VectorType.INSTANCE);
 
         all.sort(Comparator.comparing(WireType::getName));
     }

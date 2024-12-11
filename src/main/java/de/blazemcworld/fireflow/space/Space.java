@@ -117,13 +117,6 @@ public class Space {
                 }
             }
         });
-        code.saveChunksToStorage().thenAccept((v) -> {
-            for (Chunk c : List.copyOf(code.getChunks())) {
-                if (c.getViewers().isEmpty() && code.getChunkEntities(c).isEmpty()) {
-                    code.unloadChunk(c);
-                }
-            }
-        });
         editor.save();
 
         JsonObject vars = savedVariables.toJson();
