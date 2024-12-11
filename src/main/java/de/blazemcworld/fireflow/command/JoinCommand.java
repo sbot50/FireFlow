@@ -20,7 +20,7 @@ public class JoinCommand extends Command {
                 sender.sendMessage(Component.text(Translations.get("error.needs.player")).color(NamedTextColor.RED));
                 return;
             }
-            SpaceInfo info = SpaceManager.info.get(ctx.get("id"));
+            SpaceInfo info = SpaceManager.info.get(ctx.<Integer>get("id"));
             if (info == null) {
                 sender.sendMessage(Component.text(Translations.get("error.invalid.space")).color(NamedTextColor.RED));
                 return;
