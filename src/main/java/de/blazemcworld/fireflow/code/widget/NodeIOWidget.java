@@ -132,7 +132,11 @@ public class NodeIOWidget implements Widget {
         input.setInset(value);
 
         for (WireWidget w : new ArrayList<>(connections)) {
+            List<NodeIOWidget> inputs = w.getInputs();
+            List<NodeIOWidget> outputs = w.getOutputs();
             w.removeConnection(editor);
+            if (w.type() == SignalType.INSTANCE && !outputs.getFirst().connections.isEmpty()) outputs.getFirst().connections.getFirst().cleanup(editor);
+            else if (!inputs.getFirst().connections.isEmpty()) inputs.getFirst().connections.getFirst().cleanup(editor);
         }
 
         text.text(displayText());

@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.action.Action;
+import de.blazemcworld.fireflow.code.action.DeleteSelectAction;
 import de.blazemcworld.fireflow.code.action.SelectAction;
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.node.Node.Input;
@@ -145,6 +146,8 @@ public class CodeEditor {
             n.setPos(pos.add(Math.round(s.x() * 4) / 8f, Math.round(s.y() * 4) / 8f, 0));
             n.update(space.code);
             rootWidgets.add(n);
+        } else if (type == Interaction.Type.LEFT_CLICK) {
+            actions.put(player, new DeleteSelectAction(pos));
         }
     }
 

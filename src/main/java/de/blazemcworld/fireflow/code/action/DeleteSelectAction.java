@@ -2,6 +2,7 @@ package de.blazemcworld.fireflow.code.action;
 
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
+import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.widget.*;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Vec;
@@ -11,14 +12,14 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-public class SelectAction implements Action {
+public class DeleteSelectAction implements Action {
     private final RectElement box;
 
-    public SelectAction(Vec pos) {
+    public DeleteSelectAction(Vec pos) {
         box = new RectElement();
         box.pos = pos;
         box.size = Vec.ZERO;
-        box.color(NamedTextColor.AQUA);
+        box.color(NamedTextColor.RED);
     }
 
     @Override
@@ -31,11 +32,29 @@ public class SelectAction implements Action {
     public void interact(Interaction i) {
         if (i.type() == Interaction.Type.LEFT_CLICK) i.editor().stopAction(i.player());
         else if (i.type() == Interaction.Type.RIGHT_CLICK) {
+            List<Widget> widgets = getAllWidgets(i);
+            widgets.sort((w1, w2) -> {
+                if (w1 instanceof WireWidget && w2 instanceof NodeWidget) return -1;
+                if (w2 instanceof WireWidget && w1 instanceof NodeWidget) return 1;
+                return 0;
+            });
+            for (Widget w : widgets) {
+                if (w instanceof NodeWidget nodeWidget) {
+                    for (NodeIOWidget io : nodeWidget.getIOWidgets()) {
+                        for (WireWidget wire : new ArrayList<>(io.connections)) {
+                            if (widgets.contains(wire)) continue;
+                            List<NodeIOWidget> inputs = wire.getInputs();
+                            List<NodeIOWidget> outputs = wire.getOutputs();
+                            wire.removeConnection(i.editor());
+                            if (wire.type() == SignalType.INSTANCE && !outputs.getFirst().connections.isEmpty()) outputs.getFirst().connections.getFirst().cleanup(i.editor());
+                            else if (!inputs.getFirst().connections.isEmpty()) inputs.getFirst().connections.getFirst().cleanup(i.editor());
+                        }
+                    }
+                }
+                w.remove();
+                i.editor().rootWidgets.remove(w);
+            }
             i.editor().stopAction(i.player());
-            i.editor().setAction(i.player(), new DragSelectionAction(getAllWidgets(i), i.pos(), i.editor()));
-        } else if (i.type() == Interaction.Type.SWAP_HANDS) {
-            i.editor().stopAction(i.player());
-            i.editor().setAction(i.player(), new CopySelectionAction(getAllWidgets(i), i.pos(), i.editor()));
         }
     }
 
@@ -52,7 +71,6 @@ public class SelectAction implements Action {
         for (NodeWidget w : nodeWidgets) {
             for (NodeIOWidget io : w.getIOWidgets()) {
                 for (WireWidget wire : io.connections) {
-                    if (widgets.contains(wire)) continue;
                     List<NodeWidget> inputs = wire.getInputs().stream().map(widget -> widget.parent).toList();
                     List<NodeWidget> outputs = wire.getOutputs().stream().map(widget -> widget.parent).toList();
                     if (new HashSet<>(widgets).containsAll(inputs) && new HashSet<>(widgets).containsAll(outputs)) {

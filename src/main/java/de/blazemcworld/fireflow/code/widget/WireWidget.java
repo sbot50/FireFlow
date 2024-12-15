@@ -463,4 +463,40 @@ public class WireWidget implements Widget {
         double dotProduct = d1x * d2x + d1y * d2y;
         return crossProduct == 0 && dotProduct > 0;
     }
+
+    public List<WireWidget> getFullWire() {
+        List<WireWidget> wires = new ArrayList<>();
+        wires.add(this);
+        wires.addAll(previousWires);
+        wires.addAll(nextWires);
+        previousWires.forEach(wire -> wires.addAll(wire.getFullPreviousWires(this)));
+        nextWires.forEach(wire -> wires.addAll(wire.getFullNextWires(this)));
+        return wires;
+    }
+
+    private List<WireWidget> getFullPreviousWires(WireWidget avoid) {
+        List<WireWidget> wires = new ArrayList<>(previousWires);
+        List<WireWidget> nextWiresClone = new ArrayList<>(nextWires);
+        nextWiresClone.remove(avoid);
+        wires.addAll(nextWiresClone);
+        previousWires.forEach(wire -> wires.addAll(wire.getFullPreviousWires(this)));
+        nextWires.forEach(wire -> {
+            if (wire == avoid) return;
+            wires.addAll(wire.getFullNextWires(this));
+        });
+        return wires;
+    }
+
+    private List<WireWidget> getFullNextWires(WireWidget avoid) {
+        List<WireWidget> wires = new ArrayList<>(nextWires);
+        List<WireWidget> previousWiresClone = new ArrayList<>(previousWires);
+        previousWiresClone.remove(avoid);
+        wires.addAll(previousWiresClone);
+        previousWires.forEach(wire -> {
+            if (wire == avoid) return;
+            wires.addAll(wire.getFullPreviousWires(this));
+        });
+        nextWires.forEach(wire -> wires.addAll(wire.getFullNextWires(this)));
+        return wires;
+    }
 }
