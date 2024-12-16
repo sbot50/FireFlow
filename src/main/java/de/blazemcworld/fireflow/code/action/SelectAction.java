@@ -12,7 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 
 public class SelectAction implements Action {
-    private final RectElement box;
+    final RectElement box;
 
     public SelectAction(Vec pos) {
         box = new RectElement();
@@ -39,7 +39,7 @@ public class SelectAction implements Action {
         }
     }
 
-    private List<Widget> getAllWidgets(Interaction i) {
+    List<Widget> getAllWidgets(Interaction i) {
         List<NodeWidget> nodeWidgets = new ArrayList<>();
         for (Widget w : new HashSet<>(i.editor().rootWidgets)) {
             if (w instanceof NodeWidget nodeWidget) {
