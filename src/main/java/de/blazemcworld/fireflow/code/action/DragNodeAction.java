@@ -75,5 +75,10 @@ public class DragNodeAction implements Action {
     public void stop(CodeEditor editor, Player player) {
         node.borderColor(NamedTextColor.WHITE);
         editor.unlockWidget(node, player);
+        for (NodeIOWidget IOWidget : iowidgets) {
+            for (WireWidget wire : IOWidget.connections) {
+                wire.cleanup(editor);
+            }
+        }
     }
 }

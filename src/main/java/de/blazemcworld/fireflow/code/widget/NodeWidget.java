@@ -7,6 +7,7 @@ import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionCallNode;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionInputsNode;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionOutputsNode;
+import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.util.Translations;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -154,7 +155,11 @@ public class NodeWidget implements Widget {
     public void remove(CodeEditor editor) {
         for (NodeIOWidget io : getIOWidgets()) {
             for (WireWidget wire : new ArrayList<>(io.connections)) {
+                List<NodeIOWidget> inputs = wire.getInputs();
+                List<NodeIOWidget> outputs = wire.getOutputs();
                 wire.removeConnection(editor);
+                if (wire.type() == SignalType.INSTANCE && !outputs.getFirst().connections.isEmpty()) outputs.getFirst().connections.getFirst().cleanup(editor);
+                else if (!inputs.getFirst().connections.isEmpty()) inputs.getFirst().connections.getFirst().cleanup(editor);
             }
         }
         remove();

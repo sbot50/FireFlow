@@ -10,7 +10,9 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.InstanceContainer;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class WireWidget implements Widget {
 
@@ -462,5 +464,41 @@ public class WireWidget implements Widget {
         double crossProduct = d1x * d2y - d1y * d2x;
         double dotProduct = d1x * d2x + d1y * d2y;
         return crossProduct == 0 && dotProduct > 0;
+    }
+
+    public Set<WireWidget> getFullWire() {
+        Set<WireWidget> wires = new HashSet<>();
+        wires.add(this);
+        wires.addAll(previousWires);
+        wires.addAll(nextWires);
+        previousWires.forEach(wire -> wires.addAll(wire.getFullPreviousWires(this)));
+        nextWires.forEach(wire -> wires.addAll(wire.getFullNextWires(this)));
+        return wires;
+    }
+
+    private Set<WireWidget> getFullPreviousWires(WireWidget avoid) {
+        Set<WireWidget> wires = new HashSet<>(previousWires);
+        Set<WireWidget> nextWiresClone = new HashSet<>(nextWires);
+        nextWiresClone.remove(avoid);
+        wires.addAll(nextWiresClone);
+        previousWires.forEach(wire -> wires.addAll(wire.getFullPreviousWires(this)));
+        nextWires.forEach(wire -> {
+            if (wire == avoid) return;
+            wires.addAll(wire.getFullNextWires(this));
+        });
+        return wires;
+    }
+
+    private Set<WireWidget> getFullNextWires(WireWidget avoid) {
+        Set<WireWidget> wires = new HashSet<>(nextWires);
+        Set<WireWidget> previousWiresClone = new HashSet<>(previousWires);
+        previousWiresClone.remove(avoid);
+        wires.addAll(previousWiresClone);
+        previousWires.forEach(wire -> {
+            if (wire == avoid) return;
+            wires.addAll(wire.getFullPreviousWires(this));
+        });
+        nextWires.forEach(wire -> wires.addAll(wire.getFullNextWires(this)));
+        return wires;
     }
 }
