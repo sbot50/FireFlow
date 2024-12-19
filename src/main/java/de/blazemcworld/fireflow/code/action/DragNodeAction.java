@@ -17,9 +17,11 @@ public class DragNodeAction implements Action {
     private final Vec offset;
     private final List<NodeIOWidget> iowidgets;
 
-    public DragNodeAction(NodeWidget node, Vec offset, CodeEditor editor) {
+    public DragNodeAction(NodeWidget node, Vec offset, CodeEditor editor, Player player) {
         this.node = node;
         this.offset = offset;
+
+        editor.lockWidget(node, player);
         node.borderColor(NamedTextColor.AQUA);
         iowidgets = node.getIOWidgets();
         for (NodeIOWidget IOWidget : new ArrayList<>(iowidgets)) {
@@ -80,5 +82,7 @@ public class DragNodeAction implements Action {
                 wire.cleanup(editor);
             }
         }
+
+        editor.unlockWidget(node, player);
     }
 }

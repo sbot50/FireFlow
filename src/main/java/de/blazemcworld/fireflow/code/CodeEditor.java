@@ -109,6 +109,10 @@ public class CodeEditor {
                 if (w.getWidget(pos) instanceof NodeIOWidget input) {
                     if (!input.isInput()) return;
                     event.setCancelled(true);
+                    if (isLocked(w) != null && !isLockedByPlayer(w, event.getPlayer())) {
+                        event.getPlayer().sendMessage(Component.text(Translations.get("error.locked", isLocked(w).getUsername())).color(NamedTextColor.RED));
+                        return;
+                    }
                     if (input.type().parseInset(event.getRawMessage()) == null) {
                         event.getPlayer().sendMessage(Component.text(Translations.get("error.invalid.inset")).color(NamedTextColor.RED));
                         return;
@@ -135,7 +139,13 @@ public class CodeEditor {
         }
 
         for (Widget w : new HashSet<>(rootWidgets)) {
-            if (w.interact(i)) return;
+            if (w.interact(i)) {
+                if (isLocked(w) != null && !isLockedByPlayer(w, player)) {
+                    player.sendMessage(Component.text(Translations.get("error.locked", isLocked(w).getUsername())).color(NamedTextColor.RED));
+                    return;
+                }
+                return;
+            }
         }
 
         if (type == Interaction.Type.RIGHT_CLICK) {
@@ -169,16 +179,38 @@ public class CodeEditor {
         lockedWidgets.computeIfAbsent(player, p -> new HashSet<>()).remove(widget);
     }
 
+    public void unlockWidgets(List<Widget> widgets, Player player) {
+        widgets.forEach(lockedWidgets.computeIfAbsent(player, p -> new HashSet<>())::remove);
+    }
+
     public void unlockWidgets(Player player) {
         lockedWidgets.remove(player);
     }
 
-    public boolean lockWidget(Widget widget, Player player) {
-        for (Map.Entry<Player, Set<Widget>> entry : lockedWidgets.entrySet()) {
-            if (entry.getValue().contains(widget)) return entry.getKey() == player;
+    public List<Widget> lockWidgets(List<Widget> widgets, Player player) {
+        List<Widget> failed = new ArrayList<>();
+        for (Widget widget : widgets) {
+            if (!lockWidget(widget, player)) failed.add(widget);
         }
+        return failed;
+    }
+
+    public boolean lockWidget(Widget widget, Player player) {
+        Player widgetLockedBy = isLocked(widget);
+        if (widgetLockedBy != null) return widgetLockedBy == player;
         lockedWidgets.computeIfAbsent(player, p -> new HashSet<>()).add(widget);
         return true;
+    }
+
+    public Player isLocked(Widget widget) {
+        for (Map.Entry<Player, Set<Widget>> entry : lockedWidgets.entrySet()) {
+            if (entry.getValue().contains(widget)) return entry.getKey();
+        }
+        return null;
+    }
+
+    public boolean isLockedByPlayer(Widget widget, Player player) {
+        return lockedWidgets.containsKey(player) && lockedWidgets.get(player).contains(widget);
     }
 
     public void setAction(Player player, Action action) {

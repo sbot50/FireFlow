@@ -25,11 +25,12 @@ public class WireAction implements Action {
     private WireWidget startWire;
     private WireWidget endWire;
 
-    public WireAction(NodeIOWidget io) {
+    public WireAction(NodeIOWidget io, CodeEditor editor, Player player) {
         if (!io.isInput()) {
             output = io;
             startPos = io.getPos().sub(output.getSize().sub(-1 / 4f, 1 / 8f, 0));
             startWire = new WireWidget(io.getPos().sub(output.getSize().sub(1 / 8f, 1 / 8f, 0)), output.type(), startPos);
+            editor.lockWidget(io.parent, player);
         }
 //        else {
 //            input = io;
@@ -100,6 +101,7 @@ public class WireAction implements Action {
     public void interact(Interaction i) {
         if (i.type() == Interaction.Type.RIGHT_CLICK) {
             for (Widget widget : new HashSet<>(i.editor().rootWidgets)) {
+                if (i.editor().isLocked(widget) != null && !i.editor().isLockedByPlayer(widget, i.player())) continue;
                 if (widget.getWidget(i.pos()) instanceof NodeIOWidget nodeIOWidget) {
                     WireType<?> type = (output != null) ? output.type() : inputWire.type();
                     if (endWire == null) return;
@@ -224,5 +226,7 @@ public class WireAction implements Action {
         if (endWire != null) endWire.remove();
         if (permanentWires != null && !permanentWires.isEmpty()) permanentWires.clear();
         if (wires != null && !wires.isEmpty()) wires.clear();
+
+        editor.lockWidget((output != null ? output : input).parent, player);
     }
 }

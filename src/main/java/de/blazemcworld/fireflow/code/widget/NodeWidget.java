@@ -182,7 +182,7 @@ public class NodeWidget implements Widget {
             return true;
         }
         if (i.type() == Interaction.Type.RIGHT_CLICK && i.editor().lockWidget(this, i.player())) {
-            i.editor().setAction(i.player(), new DragNodeAction(this, getPos().sub(i.pos()), i.editor()));
+            i.editor().setAction(i.player(), new DragNodeAction(this, getPos().sub(i.pos()), i.editor(), i.player()));
             return true;
         }
         return false;

@@ -32,7 +32,7 @@ public class SelectAction implements Action {
         if (i.type() == Interaction.Type.LEFT_CLICK) i.editor().stopAction(i.player());
         else if (i.type() == Interaction.Type.RIGHT_CLICK) {
             i.editor().stopAction(i.player());
-            i.editor().setAction(i.player(), new DragSelectionAction(getAllWidgets(i), i.pos(), i.editor()));
+            i.editor().setAction(i.player(), new DragSelectionAction(getAllWidgets(i), i.pos(), i.editor(), i.player()));
         } else if (i.type() == Interaction.Type.SWAP_HANDS) {
             i.editor().stopAction(i.player());
             i.editor().setAction(i.player(), new CopySelectionAction(getAllWidgets(i), i.pos(), i.editor()));
@@ -43,7 +43,7 @@ public class SelectAction implements Action {
         List<NodeWidget> nodeWidgets = new ArrayList<>();
         for (Widget w : new HashSet<>(i.editor().rootWidgets)) {
             if (w instanceof NodeWidget nodeWidget) {
-                if (isVectorBetween(nodeWidget.getPos(), box.pos, i.pos()) && isVectorBetween(nodeWidget.getPos().sub(nodeWidget.getSize()), box.pos, i.pos()))
+                if ((i.editor().isLockedByPlayer(nodeWidget, i.player()) || i.editor().isLocked(nodeWidget) == null) && isVectorBetween(nodeWidget.getPos(), box.pos, i.pos()) && isVectorBetween(nodeWidget.getPos().sub(nodeWidget.getSize()), box.pos, i.pos()))
                     nodeWidgets.add(nodeWidget);
             }
         }
@@ -56,7 +56,7 @@ public class SelectAction implements Action {
                     List<NodeWidget> inputs = wire.getInputs().stream().map(widget -> widget.parent).toList();
                     List<NodeWidget> outputs = wire.getOutputs().stream().map(widget -> widget.parent).toList();
                     if (new HashSet<>(widgets).containsAll(inputs) && new HashSet<>(widgets).containsAll(outputs)) {
-                        widgets.addAll(wire.getFullWire());
+                        if (i.editor().isLockedByPlayer(wire, i.player()) || i.editor().isLocked(wire) == null) widgets.addAll(wire.getFullWire());
                     }
                 }
             }
