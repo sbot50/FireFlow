@@ -2,14 +2,10 @@ package de.blazemcworld.fireflow.code.action;
 
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
-import de.blazemcworld.fireflow.code.widget.*;
+import de.blazemcworld.fireflow.code.widget.RectElement;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
 
 public class SelectAction implements Action {
     final RectElement box;
@@ -29,7 +25,7 @@ public class SelectAction implements Action {
 
     @Override
     public void interact(Interaction i) {
-        List<Widget> widgets = getAllWidgets(i);
+        List<Widget> widgets = i.editor().getAllWidgetsBetween(i, box.pos, i.pos())
         if (i.type() == Interaction.Type.LEFT_CLICK || widgets.isEmpty()) i.editor().stopAction(i.player());
         else if (i.type() == Interaction.Type.RIGHT_CLICK) {
             i.editor().stopAction(i.player());
@@ -72,16 +68,6 @@ public class SelectAction implements Action {
                 }
             }
         }
-
-        return widgets;
-    }
-
-    private static boolean isVectorBetween(Vec v, Vec p1, Vec p2) {
-        Vec min = p1.min(p2);
-        Vec max = p1.max(p2);
-
-        return min.x() < v.x() && min.y() < v.y()
-                && max.x() > v.x() && max.y() > v.y();
     }
 
     @Override
