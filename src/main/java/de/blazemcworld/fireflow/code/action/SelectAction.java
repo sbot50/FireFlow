@@ -3,9 +3,12 @@ package de.blazemcworld.fireflow.code.action;
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.widget.RectElement;
+import de.blazemcworld.fireflow.code.widget.Widget;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
+
+import java.util.List;
 
 public class SelectAction implements Action {
     final RectElement box;
@@ -25,10 +28,14 @@ public class SelectAction implements Action {
 
     @Override
     public void interact(Interaction i) {
-        if (i.type() == Interaction.Type.LEFT_CLICK) i.editor().stopAction(i.player());
+        List<Widget> widgets = i.editor().getAllWidgetsBetween(i, box.pos, i.pos());
+        if (i.type() == Interaction.Type.LEFT_CLICK || widgets.isEmpty()) i.editor().stopAction(i.player());
         else if (i.type() == Interaction.Type.RIGHT_CLICK) {
             i.editor().stopAction(i.player());
-            i.editor().setAction(i.player(), new DragSelectionAction(i.editor().getAllWidgetsBetween(i, box.pos, i.pos()), i.pos(), i.editor()));
+            i.editor().setAction(i.player(), new DragSelectionAction(widgets, i.pos(), i.editor(), i.player()));
+        } else if (i.type() == Interaction.Type.SWAP_HANDS) {
+            i.editor().stopAction(i.player());
+            i.editor().setAction(i.player(), new CopySelectionAction(widgets, i.pos(), i.editor()));
         }
     }
 

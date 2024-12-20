@@ -7,6 +7,7 @@ import de.blazemcworld.fireflow.code.action.WireAction;
 import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.type.WireType;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.InstanceContainer;
 
 import java.util.ArrayList;
@@ -142,12 +143,12 @@ public class WireWidget implements Widget {
             return true;
         } else if (i.type() == Interaction.Type.SWAP_HANDS) {
             if (type != SignalType.INSTANCE) {
-                i.editor().setAction(i.player(), new WireAction(this, i.pos()));
+                i.editor().setAction(i.player(), new WireAction(this, i.pos(), i.editor(), i.player()));
                 return true;
             }
         } else if (i.type() == Interaction.Type.RIGHT_CLICK) {
             if (!previousWires.isEmpty() && !nextWires.isEmpty()) {
-                i.editor().setAction(i.player(), new DragWireAction(this));
+                i.editor().setAction(i.player(), new DragWireAction(this, i.editor(), i.player()));
                 return true;
             }
         }
@@ -464,6 +465,15 @@ public class WireWidget implements Widget {
         double crossProduct = d1x * d2y - d1y * d2x;
         double dotProduct = d1x * d2x + d1y * d2y;
         return crossProduct == 0 && dotProduct > 0;
+    }
+
+    public boolean lockWire(CodeEditor editor, Player player) {
+        List<Widget> widgets = editor.lockWidgets(new ArrayList<>(getFullWire()), player);
+        return widgets.isEmpty();
+    }
+
+    public void unlockWire(CodeEditor editor, Player player) {
+        editor.unlockWidgets(new ArrayList<>(getFullWire()), player);
     }
 
     public Set<WireWidget> getFullWire() {

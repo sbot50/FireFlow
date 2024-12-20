@@ -95,6 +95,7 @@ public class CopySelectionAction implements Action {
     @Override
     public void tick(Vec cursor, CodeEditor editor, Player player) {
         editor.stopAction(player);
-        editor.setAction(player, new DragSelectionAction(widgets, offset, editor));
+        editor.lockWidgets(widgets, player);
+        editor.setAction(player, new DragSelectionAction(widgets, offset, editor, player));
     }
 }

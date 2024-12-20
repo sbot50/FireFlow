@@ -73,7 +73,7 @@ public class NodeIOWidget implements Widget {
     public boolean interact(Interaction i) {
         if (!inBounds(i.pos())) return false;
         if (i.type() == Interaction.Type.RIGHT_CLICK) {
-            if (!this.isInput()) i.editor().setAction(i.player(), new WireAction(this));
+            if (!this.isInput()) i.editor().setAction(i.player(), new WireAction(this, i.editor(), i.player()));
             return true;
         }
         if (i.type() == Interaction.Type.LEFT_CLICK && isInput && input.inset != null) {

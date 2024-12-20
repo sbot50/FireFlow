@@ -9,8 +9,9 @@ import net.minestom.server.entity.Player;
 public class DragWireAction implements Action {
     private final WireWidget wire;
 
-    public DragWireAction(WireWidget wire) {
+    public DragWireAction(WireWidget wire, CodeEditor editor, Player player) {
         this.wire = wire;
+        wire.lockWire(editor, player);
     }
 
     @Override
@@ -68,6 +69,7 @@ public class DragWireAction implements Action {
 
     @Override
     public void stop(CodeEditor editor, Player player) {
+        wire.unlockWire(editor, player);
         wire.cleanup(editor);
     }
 }

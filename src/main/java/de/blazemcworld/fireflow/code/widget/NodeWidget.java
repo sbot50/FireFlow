@@ -13,6 +13,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.entity.Player;
 import net.minestom.server.instance.InstanceContainer;
 
 import java.util.ArrayList;
@@ -172,17 +173,33 @@ public class NodeWidget implements Widget {
     public boolean interact(Interaction i) {
         if (!inBounds(i.pos())) return false;
         if (root.interact(i)) return true;
-        if (i.type() == Interaction.Type.LEFT_CLICK) {
-            if (node instanceof FunctionInputsNode || node instanceof FunctionOutputsNode) {
-                i.player().sendMessage(Component.text(Translations.get("error.function.delete_command")).color(NamedTextColor.RED));
-                return true;
+        boolean lockedWire = false;
+        Player lockPlayer = i.player();
+        for (NodeIOWidget io : getIOWidgets()) {
+            for (WireWidget wire : io.connections) {
+                if (editor.isLocked(wire) != null && !editor.isLockedByPlayer(wire, i.player())) {
+                    lockedWire = true;
+                    lockPlayer = editor.isLocked(wire);
+                    break;
+                }
             }
-            remove(i.editor());
-            i.editor().rootWidgets.remove(this);
+        }
+        if (i.type() == Interaction.Type.LEFT_CLICK) {
+            if (lockedWire) {
+                i.player().sendMessage(Component.text(Translations.get("error.locked.connected", lockPlayer.getUsername())).color(NamedTextColor.RED));
+            } else {
+                if (node instanceof FunctionInputsNode || node instanceof FunctionOutputsNode) {
+                    i.player().sendMessage(Component.text(Translations.get("error.function.delete_command")).color(NamedTextColor.RED));
+                    return true;
+                }
+                remove(i.editor());
+                i.editor().rootWidgets.remove(this);
+            }
             return true;
         }
         if (i.type() == Interaction.Type.RIGHT_CLICK && i.editor().lockWidget(this, i.player())) {
-            i.editor().setAction(i.player(), new DragNodeAction(this, getPos().sub(i.pos()), i.editor()));
+            if (!lockedWire) i.editor().setAction(i.player(), new DragNodeAction(this, getPos().sub(i.pos()), i.editor(), i.player()));
+            else i.player().sendMessage(Component.text(Translations.get("error.locked.connected", lockPlayer.getUsername())).color(NamedTextColor.RED));
             return true;
         }
         return false;

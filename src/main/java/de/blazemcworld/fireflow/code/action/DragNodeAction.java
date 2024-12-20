@@ -17,9 +17,11 @@ public class DragNodeAction implements Action {
     private final Vec offset;
     private final List<NodeIOWidget> iowidgets;
 
-    public DragNodeAction(NodeWidget node, Vec offset, CodeEditor editor) {
+    public DragNodeAction(NodeWidget node, Vec offset, CodeEditor editor, Player player) {
         this.node = node;
         this.offset = offset;
+
+        editor.lockWidget(node, player);
         node.borderColor(NamedTextColor.AQUA);
         iowidgets = node.getIOWidgets();
         for (NodeIOWidget IOWidget : new ArrayList<>(iowidgets)) {
@@ -38,6 +40,9 @@ public class DragNodeAction implements Action {
                     splitWires.getLast().previousWires.remove(splitWires.getFirst());
                     editor.rootWidgets.add(nw);
                     nw.update(editor.space.code);
+                    nw.lockWire(editor, player);
+                } else {
+                    wire.lockWire(editor, player);
                 }
             }
         }
@@ -81,7 +86,7 @@ public class DragNodeAction implements Action {
             copy.update(i.editor().space.code);
             i.editor().rootWidgets.add(copy);
             i.editor().stopAction(i.player());
-            i.editor().setAction(i.player(), new DragNodeAction(copy, offset, i.editor()));
+            i.editor().setAction(i.player(), new DragNodeAction(copy, offset, i.editor(), i.player()));
         }
     }
 
@@ -91,8 +96,11 @@ public class DragNodeAction implements Action {
         editor.unlockWidget(node, player);
         for (NodeIOWidget IOWidget : iowidgets) {
             for (WireWidget wire : IOWidget.connections) {
+                wire.unlockWire(editor, player);
                 wire.cleanup(editor);
             }
         }
+
+        editor.unlockWidget(node, player);
     }
 }

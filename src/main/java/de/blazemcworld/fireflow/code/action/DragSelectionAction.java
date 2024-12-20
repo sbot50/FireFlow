@@ -20,9 +20,10 @@ public class DragSelectionAction implements Action {
     private final List<NodeIOWidget> ioWidgets = new ArrayList<>();
     private final Vec offset;
 
-    public DragSelectionAction(List<Widget> widgets, Vec offset, CodeEditor editor) {
+    public DragSelectionAction(List<Widget> widgets, Vec offset, CodeEditor editor, Player player) {
         this.offset = offset;
 
+        editor.lockWidgets(widgets, player);
         for (Widget w : widgets) {
             if (w instanceof NodeWidget nodeWidget) {
                 nodeWidget.borderColor(NamedTextColor.AQUA);
@@ -133,5 +134,9 @@ public class DragSelectionAction implements Action {
                 wire.cleanup(editor);
             }
         }
+
+        List<Widget> widgets = new ArrayList<>(nodeWidgets.keySet());
+        widgets.addAll(wireWidgets.keySet());
+        editor.unlockWidgets(widgets, player);
     }
 }
