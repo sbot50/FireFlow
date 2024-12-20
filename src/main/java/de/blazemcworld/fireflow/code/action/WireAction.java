@@ -7,6 +7,9 @@ import de.blazemcworld.fireflow.code.type.WireType;
 import de.blazemcworld.fireflow.code.widget.NodeIOWidget;
 import de.blazemcworld.fireflow.code.widget.Widget;
 import de.blazemcworld.fireflow.code.widget.WireWidget;
+import de.blazemcworld.fireflow.util.Translations;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 
@@ -39,9 +42,10 @@ public class WireAction implements Action {
 //        }
     }
 
-    public WireAction(WireWidget wire, Vec cursor) {
+    public WireAction(WireWidget wire, Vec cursor, CodeEditor editor, Player player) {
         inputWire = wire;
         startPos = cursor;
+        wire.lockWire(editor, player);
     }
 
     @Override
@@ -101,13 +105,16 @@ public class WireAction implements Action {
     public void interact(Interaction i) {
         if (i.type() == Interaction.Type.RIGHT_CLICK) {
             for (Widget widget : new HashSet<>(i.editor().rootWidgets)) {
-                if (i.editor().isLocked(widget) != null && !i.editor().isLockedByPlayer(widget, i.player())) continue;
                 if (widget.getWidget(i.pos()) instanceof NodeIOWidget nodeIOWidget) {
                     WireType<?> type = (output != null) ? output.type() : inputWire.type();
                     if (endWire == null) return;
                     if (nodeIOWidget.type() != type) return;
                     if (!nodeIOWidget.isInput()) return;
                     if (!nodeIOWidget.connections.isEmpty() && type != SignalType.INSTANCE) return;
+                    if (i.editor().isLocked(widget) != null && !i.editor().isLockedByPlayer(widget, i.player())) {
+                        i.player().sendMessage(Component.text(Translations.get("error.locked", i.editor().isLocked(widget).getUsername())).color(NamedTextColor.RED));
+                        return;
+                    }
                     input = nodeIOWidget;
 
                     for (int j = 0; j < permanentWires.size(); j++) {
@@ -227,6 +234,7 @@ public class WireAction implements Action {
         if (permanentWires != null && !permanentWires.isEmpty()) permanentWires.clear();
         if (wires != null && !wires.isEmpty()) wires.clear();
 
-        editor.lockWidget((output != null ? output : input).parent, player);
+        if (output != null || input != null) editor.unlockWidget((output != null ? output : input).parent, player);
+        if (inputWire != null) inputWire.unlockWire(editor, player);
     }
 }

@@ -29,13 +29,14 @@ public class SelectAction implements Action {
 
     @Override
     public void interact(Interaction i) {
-        if (i.type() == Interaction.Type.LEFT_CLICK) i.editor().stopAction(i.player());
+        List<Widget> widgets = getAllWidgets(i);
+        if (i.type() == Interaction.Type.LEFT_CLICK || widgets.isEmpty()) i.editor().stopAction(i.player());
         else if (i.type() == Interaction.Type.RIGHT_CLICK) {
             i.editor().stopAction(i.player());
-            i.editor().setAction(i.player(), new DragSelectionAction(getAllWidgets(i), i.pos(), i.editor(), i.player()));
+            i.editor().setAction(i.player(), new DragSelectionAction(widgets, i.pos(), i.editor(), i.player()));
         } else if (i.type() == Interaction.Type.SWAP_HANDS) {
             i.editor().stopAction(i.player());
-            i.editor().setAction(i.player(), new CopySelectionAction(getAllWidgets(i), i.pos(), i.editor()));
+            i.editor().setAction(i.player(), new CopySelectionAction(widgets, i.pos(), i.editor()));
         }
     }
 
@@ -43,8 +44,18 @@ public class SelectAction implements Action {
         List<NodeWidget> nodeWidgets = new ArrayList<>();
         for (Widget w : new HashSet<>(i.editor().rootWidgets)) {
             if (w instanceof NodeWidget nodeWidget) {
-                if ((i.editor().isLockedByPlayer(nodeWidget, i.player()) || i.editor().isLocked(nodeWidget) == null) && isVectorBetween(nodeWidget.getPos(), box.pos, i.pos()) && isVectorBetween(nodeWidget.getPos().sub(nodeWidget.getSize()), box.pos, i.pos()))
-                    nodeWidgets.add(nodeWidget);
+                if ((i.editor().isLockedByPlayer(nodeWidget, i.player()) || i.editor().isLocked(nodeWidget) == null) && isVectorBetween(nodeWidget.getPos(), box.pos, i.pos()) && isVectorBetween(nodeWidget.getPos().sub(nodeWidget.getSize()), box.pos, i.pos())) {
+                    boolean foundLocked = false;
+                    for (NodeIOWidget io : nodeWidget.getIOWidgets()) {
+                        for (WireWidget wire : io.connections) {
+                            if (i.editor().isLocked(wire) != null && !i.editor().isLockedByPlayer(wire, i.player())) {
+                                foundLocked = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (!foundLocked) nodeWidgets.add(nodeWidget);
+                }
             }
         }
 

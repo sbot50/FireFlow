@@ -143,7 +143,7 @@ public class WireWidget implements Widget {
             return true;
         } else if (i.type() == Interaction.Type.SWAP_HANDS) {
             if (type != SignalType.INSTANCE) {
-                i.editor().setAction(i.player(), new WireAction(this, i.pos()));
+                i.editor().setAction(i.player(), new WireAction(this, i.pos(), i.editor(), i.player()));
                 return true;
             }
         } else if (i.type() == Interaction.Type.RIGHT_CLICK) {

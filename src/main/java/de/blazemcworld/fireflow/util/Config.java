@@ -1,13 +1,12 @@
 package de.blazemcworld.fireflow.util;
 
+import com.google.gson.Gson;
+import de.blazemcworld.fireflow.FireFlow;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import com.google.gson.Gson;
-
-import de.blazemcworld.fireflow.FireFlow;
 
 public class Config {
 
@@ -16,7 +15,7 @@ public class Config {
     private static Store readConfig() {
         Path file = Path.of("config.json").toAbsolutePath();
         if (!Files.exists(file)) {
-            try (InputStream cfg = FireFlow.class.getResourceAsStream("defaultConfig.json")) {
+            try (InputStream cfg = FireFlow.class.getClassLoader().getResourceAsStream("defaultConfig.json")) {
                 if (!Files.exists(file.getParent())) Files.createDirectories(file.getParent());
                 Files.copy(cfg, file);
             } catch (IOException e) {

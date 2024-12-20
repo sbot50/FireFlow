@@ -139,12 +139,14 @@ public class CodeEditor {
         }
 
         for (Widget w : new HashSet<>(rootWidgets)) {
-            if (w.interact(i)) {
+            if (w.inBounds(i.pos())) {
                 if (isLocked(w) != null && !isLockedByPlayer(w, player)) {
                     player.sendMessage(Component.text(Translations.get("error.locked", isLocked(w).getUsername())).color(NamedTextColor.RED));
                     return;
                 }
-                return;
+                if (w.interact(i)) {
+                    return;
+                }
             }
         }
 
