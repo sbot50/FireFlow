@@ -450,7 +450,7 @@ public class CodeEditor {
         return widgets;
     }
 
-    private static boolean isVectorBetween(Vec v, Vec p1, Vec p2) {
+    public static boolean isVectorBetween(Vec v, Vec p1, Vec p2) {
         Vec min = p1.min(p2);
         Vec max = p1.max(p2);
 

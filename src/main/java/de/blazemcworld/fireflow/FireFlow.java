@@ -18,6 +18,7 @@ import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerDeathEvent;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.event.server.ServerListPingEvent;
+import net.minestom.server.extras.MojangAuth;
 import net.minestom.server.ping.ResponseData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -37,7 +38,7 @@ public class FireFlow {
         MinecraftServer server = MinecraftServer.init();
 
         MinecraftServer.setBrandName("FireFlow");
-//        MojangAuth.init();
+        MojangAuth.init();
 
         Translations.init();
         NodeList.init();

@@ -86,7 +86,7 @@ public class DragNodeAction implements Action {
             copy.update(i.editor().space.code);
             i.editor().rootWidgets.add(copy);
             i.editor().stopAction(i.player());
-            i.editor().setAction(i.player(), new DragNodeAction(copy, offset, i.editor()));
+            i.editor().setAction(i.player(), new DragNodeAction(copy, offset, i.editor(), i.player()));
         }
     }
 
