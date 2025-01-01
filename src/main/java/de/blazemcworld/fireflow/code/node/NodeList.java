@@ -6,6 +6,9 @@ import de.blazemcworld.fireflow.code.node.impl.action.player.*;
 import de.blazemcworld.fireflow.code.node.impl.event.player.*;
 import de.blazemcworld.fireflow.code.node.impl.flow.*;
 import de.blazemcworld.fireflow.code.node.impl.info.player.*;
+import de.blazemcworld.fireflow.code.node.impl.item.CreateItemNode;
+import de.blazemcworld.fireflow.code.node.impl.item.ItemsEqualNode;
+import de.blazemcworld.fireflow.code.node.impl.item.SetItemCountNode;
 import de.blazemcworld.fireflow.code.node.impl.list.CreateListNode;
 import de.blazemcworld.fireflow.code.node.impl.list.ListAppendNode;
 import de.blazemcworld.fireflow.code.node.impl.number.*;
@@ -36,6 +39,7 @@ public class NodeList {
                     .add(new AdventureModeNode())
                     .add(new ClearInventoryNode())
                     .add(new CreativeModeNode())
+                    .add(new GivePlayerItemNode())
                     .add(new KillPlayerNode())
                     .add(new RespawnPlayerNode())
                     .add(new SendMessageNode())
@@ -65,6 +69,7 @@ public class NodeList {
                     .add(new OnPlayerStopGlidingNode())
                     .add(new OnPlayerStopSneakingNode())
                     .add(new OnPlayerStopSprintingNode())
+                    .add(new OnPlayerUseItemNode())
             )
             .add(new Category("flow", Material.COMPARATOR)
                     .add(new ConditionalChoiceNode<>(null))
@@ -74,6 +79,11 @@ public class NodeList {
                     .add(new RepeatNode())
                     .add(new ScheduleNode())
                     .add(new WhileNode())
+            )
+            .add(new Category("item", Material.ITEM_FRAME)
+                    .add(new CreateItemNode())
+                    .add(new ItemsEqualNode())
+                    .add(new SetItemCountNode())
             )
             .add(new Category("info", Material.ENDER_EYE)
                     .add(new GetExperienceLevelNode())
@@ -87,6 +97,7 @@ public class NodeList {
                     .add(new IsPlayingNode())
                     .add(new PlayerCanFlyNode())
                     .add(new PlayerIsFlyingNode())
+                    .add(new PlayerMainItemNode())
             )
             .add(new Category("list", Material.BOOKSHELF)
                     .add(new CreateListNode<>(null))

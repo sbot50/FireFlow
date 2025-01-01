@@ -14,6 +14,7 @@ public class AllTypes {
 
     public static void init() {
         all.add(ConditionType.INSTANCE);
+        all.add(ItemType.INSTANCE);
         all.add(ListType.UNSPECIFIED);
         all.add(NumberType.INSTANCE);
         all.add(PlayerType.INSTANCE);
