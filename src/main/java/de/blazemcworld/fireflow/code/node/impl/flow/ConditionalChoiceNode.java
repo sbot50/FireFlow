@@ -56,7 +56,7 @@ public class ConditionalChoiceNode<T> extends Node {
 
     @Override
     public Node copyWithTypes(List<WireType<?>> types) {
-        return new ListForEachNode<>(types.getFirst());
+        return new ConditionalChoiceNode<>(types.getFirst());
     }
 
 }

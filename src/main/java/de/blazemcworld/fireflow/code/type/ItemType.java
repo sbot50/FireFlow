@@ -41,4 +41,9 @@ public class ItemType extends WireType<ItemStack> {
         buffer.write(NetworkBuffer.RAW_BYTES, Base64.getDecoder().decode(json.getAsString()));
         return buffer.read(ItemStack.NETWORK_TYPE);
     }
+
+    @Override
+    protected String stringifyInternal(ItemStack value) {
+        return value.material().name() + " x" + value.amount();
+    }
 }

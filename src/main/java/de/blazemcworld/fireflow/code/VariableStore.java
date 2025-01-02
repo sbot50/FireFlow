@@ -1,16 +1,13 @@
 package de.blazemcworld.fireflow.code;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 import de.blazemcworld.fireflow.code.type.AllTypes;
 import de.blazemcworld.fireflow.code.type.WireType;
+
+import java.util.*;
+import java.util.function.Predicate;
 
 public class VariableStore {
 
@@ -72,4 +69,17 @@ public class VariableStore {
             this.values.put(name, type.fromJson(value));
         }
     }
+
+    public Set<VarEntry> iterator(Predicate<String> filter, int limit) {
+        Set<VarEntry> out = new HashSet<>();
+        for (String name : this.values.keySet()) {
+            if (!filter.test(name)) continue;
+            WireType<?> type = this.types.get(name);
+            out.add(new VarEntry(name, type, this.values.get(name)));
+            if (out.size() >= limit) break;
+        }
+        return out;
+    }
+
+    public record VarEntry(String name, WireType<?> type, Object value) {}
 }

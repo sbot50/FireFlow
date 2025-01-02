@@ -47,4 +47,15 @@ public class PositionType extends WireType<Pos> {
                 obj.get("yaw").getAsFloat()
         );
     }
+
+    @Override
+    protected String stringifyInternal(Pos value) {
+        return "(%.2f, %.2f, %.2f, %.2f, %.2f)".formatted(
+                value.x(),
+                value.y(),
+                value.z(),
+                value.pitch(),
+                value.yaw()
+        );
+    }
 }

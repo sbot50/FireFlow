@@ -63,7 +63,7 @@ public class WireAction implements Action {
                 break;
             }
         }
-        List<Vec> positions = editor.pathfinder.findPath(startPos, endPos, 5, 1000);
+        List<Vec> positions = editor.pathfinder.findPath(startPos, endPos, 5, 256);
         if (wires.isEmpty()) {
             WireWidget lastWire = new WireWidget(startPos, type, startPos);
             lastWire.update(editor.space.code);

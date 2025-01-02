@@ -27,12 +27,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Base64;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class FireFlow {
 
     public static final Logger LOGGER = LogManager.getLogger("FireFlow");
+    public static final ExecutorService POOL = Executors.newCachedThreadPool();
     private static final Component motd = MiniMessage.miniMessage().deserialize(Config.store.motd());
-    
+
     public static void main(String[] args) {
         LOGGER.info("Starting...");
         MinecraftServer server = MinecraftServer.init();
@@ -54,7 +58,8 @@ public class FireFlow {
                 new ReloadCommand(),
                 new LobbyCommand(),
                 new FunctionCommand(),
-                new SpaceCommand()
+                new SpaceCommand(),
+                new SnippetCommand()
         );
 
         GlobalEventHandler events = MinecraftServer.getGlobalEventHandler();
@@ -85,6 +90,18 @@ public class FireFlow {
             }
 
             event.setResponseData(res);
+        });
+
+        MinecraftServer.getSchedulerManager().buildShutdownTask(() -> {
+            try {
+                POOL.shutdown();
+                boolean timeout = POOL.awaitTermination(10, TimeUnit.SECONDS);
+                if (timeout) {
+                    FireFlow.LOGGER.error("Timeout stopping thread pool");
+                }
+            } catch (InterruptedException e) {
+                FireFlow.LOGGER.error("Error stopping thread pool", e);
+            }
         });
 
         server.start("0.0.0.0", Config.store.port());

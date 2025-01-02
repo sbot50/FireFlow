@@ -33,5 +33,10 @@ public class SignalType extends WireType<Void> {
     public Void fromJson(JsonElement json) {
         return null;
     }
-    
+
+    @Override
+    protected String stringifyInternal(Void value) {
+        return "SIGNAL";
+    }
+
 }

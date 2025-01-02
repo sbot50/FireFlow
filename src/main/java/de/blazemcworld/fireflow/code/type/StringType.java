@@ -25,6 +25,11 @@ public class StringType extends WireType<String> {
     }
 
     @Override
+    protected String stringifyInternal(String value) {
+        return value;
+    }
+
+    @Override
     public String convert(Object obj) {
         if (obj instanceof String str) return str;
         return null;

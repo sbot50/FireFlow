@@ -1,12 +1,11 @@
 package de.blazemcworld.fireflow.code.type;
 
-import java.util.List;
-
 import com.google.gson.JsonElement;
-
 import de.blazemcworld.fireflow.util.Translations;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.item.Material;
+
+import java.util.List;
 
 public abstract class WireType<T> {
 
@@ -52,4 +51,11 @@ public abstract class WireType<T> {
     public String getName() {
         return Translations.get("type." + id);
     }
+
+    public String stringify(Object value) {
+        return stringifyInternal(convert(value));
+    }
+
+    protected abstract String stringifyInternal(T value);
+
 }

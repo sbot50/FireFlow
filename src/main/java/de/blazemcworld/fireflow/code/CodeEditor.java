@@ -1,7 +1,5 @@
 package de.blazemcworld.fireflow.code;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.blazemcworld.fireflow.FireFlow;
@@ -9,20 +7,18 @@ import de.blazemcworld.fireflow.code.action.Action;
 import de.blazemcworld.fireflow.code.action.DeleteSelectAction;
 import de.blazemcworld.fireflow.code.action.SelectAction;
 import de.blazemcworld.fireflow.code.node.Node;
-import de.blazemcworld.fireflow.code.node.Node.Input;
-import de.blazemcworld.fireflow.code.node.Node.Varargs;
 import de.blazemcworld.fireflow.code.node.NodeList;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionCallNode;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionDefinition;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionInputsNode;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionOutputsNode;
 import de.blazemcworld.fireflow.code.type.AllTypes;
-import de.blazemcworld.fireflow.code.type.WireType;
 import de.blazemcworld.fireflow.code.widget.*;
 import de.blazemcworld.fireflow.space.Space;
 import de.blazemcworld.fireflow.util.PlayerExitInstanceEvent;
 import de.blazemcworld.fireflow.util.Translations;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -36,10 +32,15 @@ import net.minestom.server.event.player.*;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.item.Material;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 public class CodeEditor {
 
@@ -259,8 +260,20 @@ public class CodeEditor {
             if (w instanceof NodeWidget nodeWidget && nodeWidget.inBounds(pos)) {
                 if (nodeWidget.node instanceof FunctionInputsNode inputsNode) {
                     function = inputsNode.function;
+
+                    for (Node.Output<?> output : function.outputsNode.outputs) {
+                        if (output.connected == null) continue;
+                        player.sendMessage(Component.text(Translations.get("error.function.in_use")).color(NamedTextColor.RED));
+                        return null;
+                    }
                 } else if (nodeWidget.node instanceof FunctionOutputsNode outputsNode) {
                     function = outputsNode.function;
+
+                    for (Node.Input<?> input : function.inputsNode.inputs) {
+                        if (input.connected == null) continue;
+                        player.sendMessage(Component.text(Translations.get("error.function.in_use")).color(NamedTextColor.RED));
+                        return null;
+                    }
                 }
             }
         }
@@ -424,6 +437,142 @@ public class CodeEditor {
         refreshFunctionWidgets(function, adjusted);
     }
 
+    public void createSnippet(Player player) {
+        Set<NodeWidget> nodes = new HashSet<>();
+        Set<WireWidget> wires = new HashSet<>();
+        Set<FunctionDefinition> functions = new HashSet<>();
+        Set<NodeWidget> todo = new HashSet<>();
+
+        Vec cursor = getCursor(player).mul(8).apply(Vec.Operator.CEIL).div(8).withZ(15.999);
+        for (Widget w : rootWidgets) {
+            if (!(w instanceof NodeWidget n)) continue;
+            if (w.inBounds(cursor)) {
+                todo.add(n);
+                nodes.add(n);
+            }
+        }
+
+        while (!todo.isEmpty()) {
+            NodeWidget n = todo.iterator().next();
+            todo.remove(n);
+
+            for (NodeIOWidget io : n.getIOWidgets()) {
+                for (WireWidget wire : io.connections) {
+                    wires.add(wire);
+                    for (NodeIOWidget other : wire.getInputs()) {
+                        if (nodes.contains(other.parent)) continue;
+                        nodes.add(other.parent);
+                        todo.add(other.parent);
+                    }
+                    for (NodeIOWidget other : wire.getOutputs()) {
+                        if (nodes.contains(other.parent)) continue;
+                        nodes.add(other.parent);
+                        todo.add(other.parent);
+                    }
+                }
+            }
+
+            if (n.node instanceof FunctionInputsNode f) {
+                gatherSnippetFunction(f.function, nodes, todo);
+                functions.add(f.function);
+            }
+            if (n.node instanceof FunctionOutputsNode f) {
+                gatherSnippetFunction(f.function, nodes, todo);
+                functions.add(f.function);
+            }
+            if (n.node instanceof FunctionCallNode f) {
+                gatherSnippetFunction(f.function, nodes, todo);
+                functions.add(f.function);
+            }
+        }
+
+        List<NodeWidget> nodeList = new ArrayList<>(nodes);
+        List<WireWidget> wireList = new ArrayList<>(wires);
+
+        JsonObject json = new JsonObject();
+        json.add("nodes", CodeJSON.nodeToJson(nodeList, v -> v.sub(cursor)));
+        json.add("wires", CodeJSON.wireToJson(wireList, nodeList::indexOf, v -> v.sub(cursor)));
+        json.add("functions", CodeJSON.fnToJson(functions));
+
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        try {
+            GZIPOutputStream gz = new GZIPOutputStream(out);
+            gz.write(json.toString().getBytes(StandardCharsets.UTF_8));
+            gz.finish();
+        } catch (Exception e) {
+            FireFlow.LOGGER.error("Error gzipping snippet!", e);
+            player.sendMessage(Component.text(Translations.get("error.internal")).color(NamedTextColor.RED));
+            return;
+        }
+
+        String data = new String(Base64.getEncoder().encode(out.toByteArray()));
+        player.sendMessage(Component.text(Translations.get("success.snippet.create", String.valueOf(nodes.size())))
+                .clickEvent(ClickEvent.copyToClipboard(data)).color(NamedTextColor.AQUA));
+    }
+
+    public void placeSnippet(Player player, byte[] base64Str) {
+        try {
+            ByteArrayInputStream in = new ByteArrayInputStream(Base64.getDecoder().decode(base64Str));
+            GZIPInputStream gz = new GZIPInputStream(in);
+            JsonObject json = JsonParser.parseString(new String(gz.readNBytes(1048576))).getAsJsonObject();
+
+            List<FunctionDefinition> definitions = CodeJSON.fnFromJson(json.getAsJsonArray("functions"));
+
+            Set<String> newFunctionNames = new HashSet<>();
+            for (FunctionDefinition fn : definitions) {
+                if (functions.containsKey(fn.name) || newFunctionNames.contains(fn.name)) {
+                    player.sendMessage(Component.text(Translations.get("error.internal")).color(NamedTextColor.RED));
+                    return;
+                }
+                newFunctionNames.add(fn.name);
+            }
+
+            Vec cursor = getCursor(player).mul(8).apply(Vec.Operator.CEIL).div(8).withZ(0);
+            List<NodeWidget> nodeWidgets = CodeJSON.nodeFromJson(json.getAsJsonArray("nodes"), (id) -> {
+                if (functions.containsKey(id)) {
+                    return functions.get(id);
+                } else {
+                    for (FunctionDefinition definition : definitions) {
+                        if (definition.name.equals(id)) return definition;
+                    }
+                }
+                return null;
+            }, this, v -> v.add(cursor));
+            List<WireWidget> wireWidgets = CodeJSON.wireFromJson(json.getAsJsonArray("wires"), nodeWidgets::get, v -> v.add(cursor));
+
+            rootWidgets.addAll(nodeWidgets);
+            rootWidgets.addAll(wireWidgets);
+            for (NodeWidget n : nodeWidgets) n.update(space.code);
+            for (WireWidget w : wireWidgets) w.update(space.code);
+
+            player.sendMessage(Component.text(Translations.get("success.snippet.place", String.valueOf(nodeWidgets.size()))).color(NamedTextColor.AQUA));
+        } catch (Exception e) {
+            FireFlow.LOGGER.warn("Error reading snippet!", e);
+            player.sendMessage(Component.text(Translations.get("error.internal")).color(NamedTextColor.RED));
+        }
+    }
+
+    private void gatherSnippetFunction(FunctionDefinition fn, Set<NodeWidget> all, Set<NodeWidget> todo) {
+        for (Widget w : rootWidgets) {
+            if (!(w instanceof NodeWidget other)) continue;
+            if (other.node instanceof FunctionOutputsNode otherFn && otherFn.function == fn) {
+                if (all.contains(other)) continue;
+                all.add(other);
+                todo.add(other);
+            }
+            if (other.node instanceof FunctionInputsNode otherFn && otherFn.function == fn) {
+                if (all.contains(other)) continue;
+                all.add(other);
+                todo.add(other);
+            }
+            if (other.node instanceof FunctionCallNode otherFn && otherFn.function == fn) {
+                if (all.contains(other)) continue;
+                all.add(other);
+                todo.add(other);
+            }
+        }
+    }
+
     public List<Widget> getAllWidgetsBetween(Interaction i, Vec p1, Vec p2) {
         List<NodeWidget> nodeWidgets = new ArrayList<>();
         for (Widget w : new HashSet<>(i.editor().rootWidgets)) {
@@ -460,97 +609,15 @@ public class CodeEditor {
 
     public void save() {
         JsonObject data = new JsonObject();
-        JsonArray nodes = new JsonArray();
-        JsonArray wires = new JsonArray();
-        
+
         List<NodeWidget> nodeWidgets = new ArrayList<>();
         for (Widget widget : rootWidgets) {
             if (widget instanceof NodeWidget nodeWidget) {
                 nodeWidgets.add(nodeWidget);
             }
         }
-        for (NodeWidget nodeWidget : nodeWidgets) {
-            JsonObject entry = new JsonObject();
-            entry.addProperty("type", nodeWidget.node.id);
-            entry.addProperty("x", nodeWidget.getPos().x());
-            entry.addProperty("y", nodeWidget.getPos().y());
-            
-            if (nodeWidget.node.getTypeCount() > 0) {
-                JsonArray types = new JsonArray();
-                for (WireType<?> type : nodeWidget.node.getTypes()) {
-                    types.add(AllTypes.toJson(type));
-                }
-                entry.add("types", types);
-            }
+        data.add("nodes", CodeJSON.nodeToJson(nodeWidgets, v -> v));
 
-            JsonObject insets = new JsonObject();
-            for (NodeIOWidget io : nodeWidget.getIOWidgets()) {
-                if (io.isInput() && io.input.inset != null) {
-                    insets.addProperty(io.input.id, io.input.inset);
-                }
-            }
-            if (!insets.isEmpty()) {
-                entry.add("insets", insets);
-            }
-
-            JsonObject inputs = new JsonObject();
-            JsonObject outputs = new JsonObject();
-            for (NodeIOWidget io : nodeWidget.getIOWidgets()) {
-                if (io.isInput() && io.input.connected != null) {
-                    int nodeIndex = 0;
-                    for (NodeWidget node : nodeWidgets) {
-                        if (node.node != io.input.connected.getNode()) {
-                            nodeIndex++;
-                            continue;
-                        }
-                        int outputIndex = node.node.outputs.indexOf(io.input.connected);
-                        inputs.addProperty(io.input.id, nodeIndex + ":" + outputIndex);
-                        break;
-                    }
-                } else if (!io.isInput() && io.output.connected != null) {
-                    int nodeIndex = 0;
-                    for (NodeWidget node : nodeWidgets) {
-                        if (node.node != io.output.connected.getNode()) {
-                            nodeIndex++;
-                            continue;
-                        }
-                        int inputIndex = node.node.inputs.indexOf(io.output.connected);
-                        outputs.addProperty(io.output.id, nodeIndex + ":" + inputIndex);
-                        break;
-                    }
-                }
-            }
-            if (!inputs.isEmpty()) {
-                entry.add("inputs", inputs);
-            }
-            if (!outputs.isEmpty()) {
-                entry.add("outputs", outputs);
-            }
-
-            if (!nodeWidget.node.varargs.isEmpty()) {
-                JsonObject varargsObj = new JsonObject();
-                for (Varargs<?> varargs : nodeWidget.node.varargs) {
-                    JsonArray varargsEntry = new JsonArray();
-                    for (Input<?> input : varargs.children) {
-                        if (input.inset == null && input.connected == null) continue;
-                        varargsEntry.add(input.id);
-                    }
-                    varargsObj.add(varargs.id, varargsEntry);
-                }
-                entry.add("varargs", varargsObj);
-            }
-
-            if (nodeWidget.node instanceof FunctionInputsNode inputsNode) {
-                entry.addProperty("function", inputsNode.function.name);
-            } else if (nodeWidget.node instanceof FunctionOutputsNode outputsNode) {
-                entry.addProperty("function", outputsNode.function.name);
-            } else if (nodeWidget.node instanceof FunctionCallNode callNode) {
-                entry.addProperty("function", callNode.function.name);
-            }
-
-            nodes.add(entry);
-        }
-        
         List<WireWidget> wireWidgets = new ArrayList<>();
         for (Widget widget : rootWidgets) {
             if (widget instanceof WireWidget wireWidget) {
@@ -558,71 +625,8 @@ public class CodeEditor {
                 wireWidgets.add(wireWidget);
             }
         }
-
-        for (WireWidget wireWidget : wireWidgets) {
-            JsonObject wireObj = new JsonObject();
-            wireObj.add("type", AllTypes.toJson(wireWidget.type()));
-            wireObj.addProperty("fromX", wireWidget.line.from.x());
-            wireObj.addProperty("fromY", wireWidget.line.from.y());
-            wireObj.addProperty("toX", wireWidget.line.to.x());
-            wireObj.addProperty("toY", wireWidget.line.to.y());
-            
-            if (wireWidget.previousOutput != null) {
-                wireObj.addProperty("previousOutputNode", nodeWidgets.indexOf(wireWidget.previousOutput.parent));
-                wireObj.addProperty("previousOutputId", wireWidget.previousOutput.output.id);
-            }
-
-            JsonArray previousWires = new JsonArray();
-            for (WireWidget previousWire : wireWidget.previousWires) {
-                previousWires.add(wireWidgets.indexOf(previousWire));
-            }
-            if (!previousWires.isEmpty()) {
-                wireObj.add("previousWires", previousWires);
-            }
-            
-            if (wireWidget.nextInput != null) {
-                wireObj.addProperty("nextInputNode", nodeWidgets.indexOf(wireWidget.nextInput.parent));
-                wireObj.addProperty("nextInputId", wireWidget.nextInput.input.id);
-            }
-
-            JsonArray nextWires = new JsonArray();
-            for (WireWidget nextWire : wireWidget.nextWires) {
-                nextWires.add(wireWidgets.indexOf(nextWire));
-            }
-            if (!nextWires.isEmpty()) {
-                wireObj.add("nextWires", nextWires);
-            }
-            
-            wires.add(wireObj);
-        }
-        
-        data.add("nodes", nodes);
-        data.add("wires", wires);
-
-        JsonArray functions = new JsonArray();
-        for (FunctionDefinition function : this.functions.values()) {
-            JsonObject obj = new JsonObject();
-            obj.addProperty("name", function.name);
-            obj.addProperty("icon", function.icon.namespace().asString());
-            JsonArray inputs = new JsonArray();
-            for (Node.Output<?> input : function.inputsNode.outputs) {
-                JsonObject inputObj = new JsonObject();
-                inputObj.addProperty("name", input.id);
-                inputObj.add("type", AllTypes.toJson(input.type));
-                inputs.add(inputObj);
-            }
-            obj.add("inputs", inputs);
-            JsonArray outputs = new JsonArray();
-            for (Node.Input<?> output : function.outputsNode.inputs) {
-                JsonObject outputObj = new JsonObject();
-                outputObj.addProperty("name", output.id);
-                outputObj.add("type", AllTypes.toJson(output.type));
-                outputs.add(outputObj);
-            }
-            obj.add("outputs", outputs);
-            functions.add(obj);
-        }
-        data.add("functions", functions);
+        data.add("wires", CodeJSON.wireToJson(wireWidgets, nodeWidgets::indexOf, v -> v));
+        data.add("functions", CodeJSON.fnToJson(this.functions.values()));
 
         try {
             if (!Files.exists(codePath.getParent())) Files.createDirectories(codePath.getParent());
@@ -632,217 +636,22 @@ public class CodeEditor {
         }
     }
 
-    @SuppressWarnings("unchecked")
     public void load() {
         try {
             if (!Files.exists(codePath)) return;
             JsonObject data = JsonParser.parseString(Files.readString(codePath)).getAsJsonObject();
-            
-            JsonArray functions = data.getAsJsonArray("functions");
-            for (JsonElement function : functions) {
-                JsonObject obj = function.getAsJsonObject();
-                String name = obj.get("name").getAsString();
-                Material icon = obj.has("icon") ? Material.fromNamespaceId(obj.get("icon").getAsString()) : null;
-                if (icon == null) icon = Material.COMMAND_BLOCK;
-                FunctionDefinition functionDefinition = new FunctionDefinition(name, icon);
 
-                for (JsonElement input : obj.getAsJsonArray("inputs")) {
-                    JsonObject inputObj = input.getAsJsonObject();
-                    String inputName = inputObj.get("name").getAsString();
-                    functionDefinition.addInput(inputName, AllTypes.fromJson(inputObj.get("type")));
-                }
-                for (JsonElement output : obj.getAsJsonArray("outputs")) {
-                    JsonObject outputObj = output.getAsJsonObject();
-                    String outputName = outputObj.get("name").getAsString();
-                    functionDefinition.addOutput(outputName, AllTypes.fromJson(outputObj.get("type")));
-                }
-                this.functions.put(name, functionDefinition);
+            for (FunctionDefinition fn : CodeJSON.fnFromJson(data.getAsJsonArray("functions"))) {
+                functions.put(fn.name, fn);
             }
 
-            JsonArray nodes = data.getAsJsonArray("nodes");
-            List<NodeWidget> nodeWidgets = new ArrayList<>();
-            
-            Set<Runnable> todo = new HashSet<>();
+            List<NodeWidget> nodeWidgets = CodeJSON.nodeFromJson(data.getAsJsonArray("nodes"), functions::get, this, v -> v);
+            rootWidgets.addAll(nodeWidgets);
+            List<WireWidget> wireWidgets = CodeJSON.wireFromJson(data.getAsJsonArray("wires"), nodeWidgets::get, v -> v);
+            rootWidgets.addAll(wireWidgets);
 
-            for (JsonElement nodeElem : nodes) {
-                JsonObject nodeObj = nodeElem.getAsJsonObject();
-                String type = nodeObj.get("type").getAsString();
-                double x = nodeObj.get("x").getAsDouble();
-                double y = nodeObj.get("y").getAsDouble();
-
-                List<WireType<?>> nodeTypes = new ArrayList<>();
-                if (nodeObj.has("types")) {
-                    JsonArray types = nodeObj.getAsJsonArray("types");
-                    for (JsonElement str : types) {
-                        nodeTypes.add(AllTypes.fromJson(str));
-                    }
-                }
-
-                Node node = null;
-                for (Node n : NodeList.root.collectNodes()) {
-                    if (n.id.equals(type)) {
-                        if (nodeTypes.isEmpty()) {
-                            node = n.copy();
-                        } else {
-                            node = n.copyWithTypes(nodeTypes);
-                        }
-                        break;
-                    }
-                }
-
-                if (node == null && nodeObj.has("function")) {
-                    FunctionDefinition function = this.functions.get(nodeObj.get("function").getAsString());
-                    if (function != null) {
-                        node = switch (type) {
-                            case "function_inputs" -> function.inputsNode;
-                            case "function_outputs" -> function.outputsNode;
-                            case "function_call" -> new FunctionCallNode(function);
-                            default -> null;
-                        };
-                    }
-                }
-
-                if (nodeObj.has("varargs")) {
-                    JsonObject varargsObj = nodeObj.getAsJsonObject("varargs");
-                    for (Map.Entry<String, JsonElement> entry : varargsObj.entrySet()) {
-                        String varargsId = entry.getKey();
-                        JsonArray children = entry.getValue().getAsJsonArray();
-                        for (Varargs<?> varargs : node.varargs) {
-                            varargs.ignoreUpdates = true;
-                            node.inputs.removeAll(varargs.children);
-                            varargs.children.clear();
-                            if (varargs.id.equals(varargsId)) {
-                                for (JsonElement child : children) {
-                                    varargs.addInput(child.getAsString());
-                                }
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                NodeWidget nodeWidget = new NodeWidget(node, this);
-                nodeWidget.setPos(new Vec(x, y, 15.999));
-                nodeWidgets.add(nodeWidget);
-                rootWidgets.add(nodeWidget);
-                
-                if (nodeObj.has("insets")) {
-                    JsonObject insets = nodeObj.getAsJsonObject("insets");
-                    for (Map.Entry<String, JsonElement> entry : insets.entrySet()) {
-                        String inputId = entry.getKey();
-                        String inset = entry.getValue().getAsString();
-                        
-                        for (NodeIOWidget io : nodeWidget.getIOWidgets()) {
-                            if (io.isInput() && io.input.id.equals(inputId)) {
-                                io.insetValue(inset, this);
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                todo.add(() -> {
-                    if (nodeObj.has("inputs")) {
-                        JsonObject inputs = nodeObj.getAsJsonObject("inputs");
-                        for (Map.Entry<String, JsonElement> entry : inputs.entrySet()) {
-                            String inputId = entry.getKey();
-                            int nodeIndex = Integer.parseInt(entry.getValue().getAsString().split(":")[0]);
-                            int outputId = Integer.parseInt(entry.getValue().getAsString().split(":")[1]);
-
-                            NodeWidget other = nodeWidgets.get(nodeIndex);
-                            for (Node.Input<?> input : nodeWidget.node.inputs) {
-                                if (input.id.equals(inputId)) {
-                                    ((Node.Input<Object>) input).connect((Node.Output<Object>) other.node.outputs.get(outputId));
-                                    break;
-                                }
-                            }
-                        }
-                    }
-                    if (nodeObj.has("outputs")) {
-                        JsonObject outputs = nodeObj.getAsJsonObject("outputs");
-                        for (Map.Entry<String, JsonElement> entry : outputs.entrySet()) {
-                            String outputId = entry.getKey();
-                            int nodeIndex = Integer.parseInt(entry.getValue().getAsString().split(":")[0]);
-                            int inputId = Integer.parseInt(entry.getValue().getAsString().split(":")[1]);
-
-                            NodeWidget other = nodeWidgets.get(nodeIndex);
-                            for (Node.Output<?> output : nodeWidget.node.outputs) {
-                                if (output.id.equals(outputId)) {
-                                    ((Node.Output<Object>) output).connected = (Node.Input<Object>) other.node.inputs.get(inputId);
-                                    break;
-                                }
-                            }
-                        }
-                    }
-
-                    for (Varargs<?> varargs : nodeWidget.node.varargs) {
-                        varargs.ignoreUpdates = false;
-                        varargs.update();
-                    }
-                    nodeWidget.update(space.code);
-                });
-            }
-            
-            JsonArray wires = data.getAsJsonArray("wires");
-            List<WireWidget> wireWidgets = new ArrayList<>();
-            
-            for (JsonElement wireElem : wires) {
-                JsonObject wireObj = wireElem.getAsJsonObject();
-                JsonElement type = wireObj.get("type");
-                double fromX = wireObj.get("fromX").getAsDouble();
-                double fromY = wireObj.get("fromY").getAsDouble();
-                double toX = wireObj.get("toX").getAsDouble();
-                double toY = wireObj.get("toY").getAsDouble();
-                
-                WireType<?> typeInst = AllTypes.fromJson(type);
-                WireWidget wire = new WireWidget(typeInst, new Vec(fromX, fromY, 15.999), new Vec(toX, toY, 15.999));
-                if (wireObj.has("previousOutputNode") && wireObj.has("previousOutputId")) {
-                    int nodeIndex = wireObj.get("previousOutputNode").getAsInt();
-                    String outputId = wireObj.get("previousOutputId").getAsString();
-                    for (NodeIOWidget io : nodeWidgets.get(nodeIndex).getIOWidgets()) {
-                        if (!io.isInput() && io.output.id.equals(outputId)) {
-                            wire.setPreviousOutput(io);
-                            io.connections.add(wire);
-                            break;
-                        }
-                    }
-                }
-
-                if (wireObj.has("nextInputId") && wireObj.has("nextInputNode")) {
-                    int nodeIndex = wireObj.get("nextInputNode").getAsInt();
-                    String inputId = wireObj.get("nextInputId").getAsString();
-                    for (NodeIOWidget io : nodeWidgets.get(nodeIndex).getIOWidgets()) {
-                        if (io.isInput() && io.input.id.equals(inputId)) {
-                            wire.setNextInput(io);
-                            io.connections.add(wire);
-                            break;
-                        }
-                    }
-                }
-
-                todo.add(() -> {
-                    if (wireObj.has("previousWires")) {
-                        for (JsonElement previousWireElem : wireObj.getAsJsonArray("previousWires")) {
-                            int index = previousWireElem.getAsInt();
-                            wire.previousWires.add(wireWidgets.get(index));
-                        }
-                    }
-                    if (wireObj.has("nextWires")) {
-                        for (JsonElement nextWireElem : wireObj.getAsJsonArray("nextWires")) {
-                            int index = nextWireElem.getAsInt();
-                            wire.nextWires.add(wireWidgets.get(index));
-                        }
-                    }
-                    wire.update(space.code);
-                });
-
-                wireWidgets.add(wire);
-                rootWidgets.add(wire);
-            }
-
-            for (Runnable item : todo) {
-                item.run();
-            }
+            for (NodeWidget n : nodeWidgets) n.update(space.code);
+            for (WireWidget w : wireWidgets) w.update(space.code);
         } catch (IOException e) {
             FireFlow.LOGGER.error("Failed to load code.json for space " + space.info.id + "!", e);
         }

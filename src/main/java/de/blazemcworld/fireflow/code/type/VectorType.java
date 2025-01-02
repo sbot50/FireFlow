@@ -43,4 +43,13 @@ public class VectorType extends WireType<Vec> {
                 obj.get("z").getAsDouble()
         );
     }
+
+    @Override
+    protected String stringifyInternal(Vec value) {
+        return "<%.2f, %.2f, %.2f>".formatted(
+                value.x(),
+                value.y(),
+                value.z()
+        );
+    }
 }

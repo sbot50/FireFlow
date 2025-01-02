@@ -29,6 +29,11 @@ public class NumberType extends WireType<Double> {
     }
 
     @Override
+    protected String stringifyInternal(Double value) {
+        return String.valueOf(value);
+    }
+
+    @Override
     public Double convert(Object obj) {
         if (obj instanceof Double d) return d;
         return null;

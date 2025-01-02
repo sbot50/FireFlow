@@ -1,17 +1,16 @@
 package de.blazemcworld.fireflow.code.type;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.WeakHashMap;
-
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-
 import de.blazemcworld.fireflow.code.value.ListValue;
 import de.blazemcworld.fireflow.util.Translations;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.item.Material;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.WeakHashMap;
 
 public class ListType<T> extends WireType<ListValue<T>> {
 
@@ -74,6 +73,11 @@ public class ListType<T> extends WireType<ListValue<T>> {
     public String getName() {
         if (type == null) return Translations.get("type.list");
         return Translations.get("type.typed_list", type.getName());
+    }
+
+    @Override
+    protected String stringifyInternal(ListValue<T> value) {
+        return value.type.getName() + " x" + value.size();
     }
 
     @Override

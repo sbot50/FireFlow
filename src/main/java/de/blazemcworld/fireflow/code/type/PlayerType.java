@@ -1,13 +1,14 @@
 package de.blazemcworld.fireflow.code.type;
 
-import java.util.UUID;
-
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
-
 import de.blazemcworld.fireflow.code.value.PlayerValue;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.entity.Player;
 import net.minestom.server.item.Material;
+
+import java.util.UUID;
 
 public class PlayerType extends WireType<PlayerValue> {
 
@@ -36,5 +37,11 @@ public class PlayerType extends WireType<PlayerValue> {
     @Override
     public PlayerValue fromJson(JsonElement json) {
         return new PlayerValue(UUID.fromString(json.getAsString()));
+    }
+
+    @Override
+    protected String stringifyInternal(PlayerValue value) {
+        Player p = MinecraftServer.getConnectionManager().getOnlinePlayerByUuid(value.uuid);
+        return p == null ? value.uuid.toString() : p.getUsername() + " (" + value.uuid + ")";
     }
 }

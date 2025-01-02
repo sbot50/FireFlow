@@ -27,6 +27,11 @@ public class ConditionType extends WireType<Boolean> {
     }
 
     @Override
+    protected String stringifyInternal(Boolean value) {
+        return String.valueOf(value);
+    }
+
+    @Override
     public Boolean convert(Object obj) {
         if (obj instanceof Boolean b) return b;
         return null;

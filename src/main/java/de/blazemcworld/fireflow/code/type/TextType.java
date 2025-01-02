@@ -43,6 +43,11 @@ public class TextType extends WireType<Component> {
     }
 
     @Override
+    protected String stringifyInternal(Component value) {
+        return MM.serialize(value);
+    }
+
+    @Override
     public Component convert(Object obj) {
         if (obj instanceof Component comp) return comp;
         return null;
