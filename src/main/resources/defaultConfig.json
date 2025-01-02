@@ -3,7 +3,7 @@
   "port": 25565,
   "translations": "en_US",
   "limits": {
-    "cpuPerTick": 10000000,
+    "cpuPerSecond": 25000000,
     "spacesPerPlayer": 5,
     "totalSpaces": 100
   }

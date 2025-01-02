@@ -1,6 +1,5 @@
 package de.blazemcworld.fireflow.code.widget;
 
-import de.blazemcworld.fireflow.util.TextWidth;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.coordinate.Vec;
@@ -15,7 +14,6 @@ public class LineElement {
     public Vec to = Vec.ZERO;
     private final Entity display = new Entity(EntityType.TEXT_DISPLAY);
     private final TextDisplayMeta meta = (TextDisplayMeta) display.getEntityMeta();
-    public String pattern = null;
 
     public LineElement() {
         meta.setText(Component.text("-"));
@@ -28,15 +26,7 @@ public class LineElement {
 
     public void update(InstanceContainer inst) {
         double dist = from.withZ(0).distance(to.withZ(0));
-        double xScale = dist * 8;
-        if (pattern != null) {
-            double single = TextWidth.calculate(pattern, false) / 4.0;
-            int repeat = xScale < single ? 1 : (int) (xScale / single);
-            meta.setText(Component.text(pattern.repeat(repeat)).color(meta.getText().color()));
-            xScale /= repeat * 1.6;
-            dist /= repeat;
-        }
-        meta.setScale(new Vec(xScale, 1, 1));
+        meta.setScale(new Vec(dist * 8, 1, 1));
         float angle = (float) Math.atan2(to.y() - from.y(), from.x() - to.x());
         meta.setLeftRotation(new float[]{0, 0, (float) Math.sin(angle * 0.5), (float) Math.cos(angle * 0.5)});
         Vec v = Vec.fromPoint(from).add(to).mul(0.5).add(

@@ -32,7 +32,6 @@ public class WireWidget implements Widget {
         line.to = cursor;
         line.color(previousOutput.color());
         this.type = type;
-        if (type == SignalType.INSTANCE) line.pattern = "→";
     }
 
     public WireWidget(Vec start, WireType<?> type, Vec end) {
@@ -40,7 +39,6 @@ public class WireWidget implements Widget {
         line.to = end;
         line.color(type.color);
         this.type = type;
-        if (type == SignalType.INSTANCE) line.pattern = "→";
     }
 
     public WireWidget(WireWidget previousWire, WireType<?> type, Vec cursor) {
@@ -50,7 +48,6 @@ public class WireWidget implements Widget {
         line.to = cursor;
         line.color(previousWire.line.color());
         this.type = type;
-        if (type == SignalType.INSTANCE) line.pattern = "→";
     }
 
     public WireWidget(WireWidget wire, WireType<?> type, Vec cursor, boolean isNext) {
@@ -64,7 +61,6 @@ public class WireWidget implements Widget {
         line.to = cursor;
         line.color(wire.line.color());
         this.type = type;
-        if (type == SignalType.INSTANCE) line.pattern = "→";
     }
 
     public WireWidget(List<WireWidget> previousWires, WireType<?> type, Vec cursor) {
@@ -73,7 +69,6 @@ public class WireWidget implements Widget {
         line.to = cursor;
         line.color(previousWires.getFirst().line.color());
         this.type = type;
-        if (type == SignalType.INSTANCE) line.pattern = "→";
     }
 
     public WireWidget(WireType<?> type, Vec from, Vec to) {
@@ -81,7 +76,6 @@ public class WireWidget implements Widget {
         line.to = to;
         line.color(type.color);
         this.type = type;
-        if (type == SignalType.INSTANCE) line.pattern = "→";
     }
 
     @Override

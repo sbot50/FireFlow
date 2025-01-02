@@ -17,17 +17,17 @@ import net.minestom.server.event.EventNode;
 import net.minestom.server.event.trait.InstanceEvent;
 import net.minestom.server.timer.TaskSchedule;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class CodeEvaluator {
 
     public final Space space;
     public final EventNode<InstanceEvent> events;
     private boolean stopped = false;
-    private long cpuUsed = 0;
+    private long cpuUsedTick = 0;
+    private long cpuUsedBefore = 0;
     public int cpuPercentage = 0;
+    private List<Long> cpuHistory = new LinkedList<>();
     public final VariableStore sessionVariables = new VariableStore();
 
     public CodeEvaluator(Space space) {
@@ -51,13 +51,16 @@ public class CodeEvaluator {
 
         MinecraftServer.getSchedulerManager().scheduleTask(() -> {
             if (isStopped()) return TaskSchedule.stop();
-            cpuPercentage = (int) (cpuUsed * 100 / Config.store.limits().cpuPerTick());
-            if (cpuUsed > Config.store.limits().cpuPerTick()) {
+            cpuPercentage = (int) ((cpuUsedBefore + cpuUsedTick) * 100 / Config.store.limits().cpuPerSecond());
+            if (cpuUsedBefore + cpuUsedTick > Config.store.limits().cpuPerSecond()) {
                 FireFlow.LOGGER.info("Space " + space.info.id + " used too much CPU: " + cpuPercentage + "%");
                 space.reload("cpu");
                 return TaskSchedule.stop();
             }
-            cpuUsed = 0;
+            cpuHistory.add(cpuUsedTick);
+            if (cpuHistory.size() >= 20) cpuHistory.removeFirst();
+            cpuUsedBefore = cpuHistory.stream().reduce(0L, Long::sum);
+            cpuUsedTick = 0;
             return TaskSchedule.tick(1);
         }, TaskSchedule.tick(1));
     }
@@ -156,7 +159,7 @@ public class CodeEvaluator {
     }
 
     public boolean timelimitHit(long elapsed) {
-        cpuUsed += elapsed;
-        return cpuUsed > Config.store.limits().cpuPerTick();
+        cpuUsedTick += elapsed;
+        return cpuUsedBefore + cpuUsedTick > Config.store.limits().cpuPerSecond();
     }
 }
