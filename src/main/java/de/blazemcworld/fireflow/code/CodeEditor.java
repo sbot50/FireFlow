@@ -538,7 +538,7 @@ public class CodeEditor {
                 }
                 return null;
             }, this, v -> v.add(cursor));
-            List<WireWidget> wireWidgets = CodeJSON.wireFromJson(json.getAsJsonArray("wires"), nodeWidgets::get, v -> v.add(cursor));
+            List<WireWidget> wireWidgets = CodeJSON.wireFromJson(json.getAsJsonArray("wires"), nodeWidgets::get, v -> v.add(cursor), this);
 
             rootWidgets.addAll(nodeWidgets);
             rootWidgets.addAll(wireWidgets);
@@ -647,7 +647,7 @@ public class CodeEditor {
 
             List<NodeWidget> nodeWidgets = CodeJSON.nodeFromJson(data.getAsJsonArray("nodes"), functions::get, this, v -> v);
             rootWidgets.addAll(nodeWidgets);
-            List<WireWidget> wireWidgets = CodeJSON.wireFromJson(data.getAsJsonArray("wires"), nodeWidgets::get, v -> v);
+            List<WireWidget> wireWidgets = CodeJSON.wireFromJson(data.getAsJsonArray("wires"), nodeWidgets::get, v -> v, this);
             rootWidgets.addAll(wireWidgets);
 
             for (NodeWidget n : nodeWidgets) n.update(space.code);
