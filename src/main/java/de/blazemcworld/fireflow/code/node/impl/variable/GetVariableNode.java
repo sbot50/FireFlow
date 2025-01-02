@@ -1,7 +1,5 @@
 package de.blazemcworld.fireflow.code.node.impl.variable;
 
-import java.util.List;
-
 import de.blazemcworld.fireflow.code.VariableStore;
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.AllTypes;
@@ -10,13 +8,15 @@ import de.blazemcworld.fireflow.code.type.WireType;
 import de.blazemcworld.fireflow.util.Translations;
 import net.minestom.server.item.Material;
 
+import java.util.List;
+
 public class GetVariableNode<T> extends Node {
     
     private final WireType<T> type;
     private final VariableStore.Scope scope;
 
     public GetVariableNode(WireType<T> type, VariableStore.Scope scope) {
-        super("get_variable", Material.IRON_INGOT);
+        super("get_variable_" + scope.id, Material.IRON_INGOT);
         this.type = type;
         this.scope = scope;
 
@@ -36,8 +36,8 @@ public class GetVariableNode<T> extends Node {
 
     @Override
     public String getTitle() {
-        if (type == null) return Translations.get("node.get_variable.base_title", Translations.get("variable_scope." + scope.name().toLowerCase()));
-        return Translations.get("node.get_variable.title", Translations.get("variable_scope." + scope.name().toLowerCase()), type.getName());
+        if (type == null) return Translations.get("node.get_variable_" + scope.id + ".base_title");
+        return Translations.get("node.get_variable_" + scope.id + ".title", type.getName());
     }
 
     @Override

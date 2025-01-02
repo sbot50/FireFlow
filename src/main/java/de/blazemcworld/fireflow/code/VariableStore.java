@@ -26,7 +26,12 @@ public class VariableStore {
     }
         
     public enum Scope {
-        SAVED, SESSION, THREAD 
+        SAVED("saved"), SESSION("session"), THREAD("thread");
+
+        public final String id;
+        Scope(String id) {
+            this.id = id;
+        }
     }
 
     public JsonObject toJson() {
