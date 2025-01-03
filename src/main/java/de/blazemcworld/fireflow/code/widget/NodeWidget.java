@@ -220,6 +220,20 @@ public class NodeWidget implements Widget {
         return List.of(root);
     }
 
+    public List<NodeIOWidget> getInputs() {
+        List<NodeIOWidget> list = new ArrayList<>();
+        collectIOWidgets(root, list);
+        list = list.stream().filter(NodeIOWidget::isInput).toList();
+        return list;
+    }
+
+    public List<NodeIOWidget> getOutputs() {
+        List<NodeIOWidget> list = new ArrayList<>();
+        collectIOWidgets(root, list);
+        list = list.stream().filter(io -> !io.isInput()).toList();
+        return list;
+    }
+
     public List<NodeIOWidget> getIOWidgets() {
         List<NodeIOWidget> list = new ArrayList<>();
         collectIOWidgets(root, list);
