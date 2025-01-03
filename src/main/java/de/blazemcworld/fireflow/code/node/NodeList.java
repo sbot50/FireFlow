@@ -76,6 +76,7 @@ public class NodeList {
                     .add(new IfNode())
                     .add(new InvertConditionNode())
                     .add(new ListForEachNode<>(null))
+                    .add(new PauseThreadNode())
                     .add(new RepeatNode())
                     .add(new ScheduleNode())
                     .add(new WhileNode())

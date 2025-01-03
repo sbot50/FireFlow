@@ -1,7 +1,5 @@
 package de.blazemcworld.fireflow.code.node.impl.flow;
 
-import java.util.List;
-
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.AllTypes;
 import de.blazemcworld.fireflow.code.type.ListType;
@@ -10,6 +8,8 @@ import de.blazemcworld.fireflow.code.type.WireType;
 import de.blazemcworld.fireflow.code.value.ListValue;
 import de.blazemcworld.fireflow.util.Translations;
 import net.minestom.server.item.Material;
+
+import java.util.List;
 
 public class ListForEachNode<T> extends Node {
     
@@ -29,13 +29,21 @@ public class ListForEachNode<T> extends Node {
         value.valueFromThread();
 
         signal.onSignal((ctx) -> {
+            int[] index = new int[] { 0 };
             ListValue<T> listValue = list.getValue(ctx);
-            for (int i = 0; i < listValue.size(); i++) {
-                if (ctx.timelimitHit()) return;
-                ctx.setThreadValue(value, listValue.get(i));
-                each.sendSignalImmediately(ctx);
-            }
-            ctx.sendSignal(next);
+
+            Runnable[] step = { null };
+            step[0] = () -> {
+                if (index[0] >= listValue.size()) {
+                    ctx.sendSignal(next);
+                    return;
+                }
+                ctx.setThreadValue(value, listValue.get(index[0]--));
+                ctx.submit(step[0]);
+                ctx.sendSignal(each);
+            };
+
+            step[0].run();
         });
     }
 

@@ -13,22 +13,25 @@ public class FunctionOutputsNode extends Node {
         this.function = function;
     }
 
+    @SuppressWarnings("unchecked")
     public void addOutput(String name, WireType<?> type) {
         Input<?> output = new Input<>(name, type);
         if (type == SignalType.INSTANCE) {
             output.onSignal((ctx) -> {
                 if (ctx.functionStack.isEmpty()) {
                     for (FunctionCallNode call : function.callNodes) {
-                        call.getOutput(name).sendSignalImmediately(ctx);
+                        ctx.sendSignal((Output<Void>) call.getOutput(name));
                     }
                     return;
                 }
                 FunctionCallNode call = ctx.functionStack.peek();
                 if (call.function != function) return;
                 ctx.functionStack.pop();
-                call.getOutput(name).sendSignalImmediately(ctx);
-                ctx.functionStack.push(call);
-                ctx.clearQueue();
+                ctx.submit(() -> {
+                    ctx.functionStack.push(call);
+                    ctx.clearQueue();
+                });
+                ctx.sendSignal((Output<Void>) call.getOutput(name));
             });
         }
     }

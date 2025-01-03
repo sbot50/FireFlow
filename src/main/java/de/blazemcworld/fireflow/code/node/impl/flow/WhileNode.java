@@ -16,10 +16,18 @@ public class WhileNode extends Node {
         Output<Void> next = new Output<>("next", SignalType.INSTANCE);
 
         signal.onSignal((ctx) -> {
-            while (condition.getValue(ctx)) {
-                if (ctx.timelimitHit()) return;
-                repeat.sendSignalImmediately(ctx);
-            }
+            Runnable[] step = { null };
+            step[0] = () -> {
+                if (condition.getValue(ctx)) {
+                    ctx.submit(step[0]);
+                    ctx.sendSignal(repeat);
+                    return;
+                }
+                ctx.sendSignal(next);
+            };
+
+            step[0].run();
+
             ctx.sendSignal(next);
         });
     }
