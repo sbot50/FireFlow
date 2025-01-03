@@ -42,7 +42,7 @@ public class CopySelectionAction implements Action {
 
         for (Widget w : widgets) {
             if (w instanceof WireWidget wireWidget) {
-                WireWidget wireWidgetCopy = new WireWidget(wireWidget.line.from, wireWidget.type(), wireWidget.line.to);
+                WireWidget wireWidgetCopy = new WireWidget(wireWidget.line.from, wireWidget.type(), wireWidget.line.to, editor.space.code);
                 editor.rootWidgets.add(wireWidgetCopy);
                 wireWidgetCopy.update(editor.space.code);
                 oldToNewWires.put(wireWidget, wireWidgetCopy);

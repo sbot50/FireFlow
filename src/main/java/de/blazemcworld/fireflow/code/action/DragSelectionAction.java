@@ -38,7 +38,7 @@ public class DragSelectionAction implements Action {
                         if (prevWires.size() != 1 || prevWires.getFirst().line.to.y() == prevWires.getFirst().line.from.y()) {
                             Vec mid = wire.line.from.add(wire.line.to).div(2);
                             List<WireWidget> splitWires = wire.splitWire(editor, mid);
-                            WireWidget nw = new WireWidget(splitWires.getFirst(), wire.type(), mid);
+                            WireWidget nw = new WireWidget(splitWires.getFirst(), wire.type(), mid, editor.space.code);
                             nw.addNextWire(splitWires.getLast());
                             nw.setPos(mid);
                             splitWires.getFirst().nextWires.remove(splitWires.getLast());

@@ -71,4 +71,13 @@ public class TextWidget implements Widget {
     public List<Widget> getChildren() {
         return null;
     }
+
+    public void setRotation(double rotation) {
+        rotation = Math.toRadians(rotation);
+        meta.setLeftRotation(new float[]{0, 0, (float) Math.sin(rotation * 0.5), (float) Math.cos(rotation * 0.5)});
+    }
+
+    public void stretch(double x, double y) {
+        meta.setScale(new Vec(x, y, 1));
+    }
 }
