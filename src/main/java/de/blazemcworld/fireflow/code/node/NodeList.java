@@ -28,6 +28,7 @@ import net.minestom.server.item.Material;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class NodeList {
 
@@ -149,10 +150,17 @@ public class NodeList {
         public final List<Category> categories = new ArrayList<>();
         public final List<Node> nodes = new ArrayList<>();
         public boolean isFunctions = false;
+        public Predicate<Node> filter;
 
         public Category(String id, Material icon) {
             name = Translations.get("category." + id);
             this.icon = icon;
+        }
+
+        public Category(Category copy) {
+            name = copy.name;
+            icon = copy.icon;
+            isFunctions = copy.isFunctions;
         }
 
         public Category add(Node node) {
@@ -185,6 +193,24 @@ public class NodeList {
         public Category markFunctions() {
             isFunctions = true;
             return this;
+        }
+
+        public Category filtered(Predicate<Node> filter) {
+            Category filtered = new Category(this);
+            for (Node n : nodes) {
+                if (filter.test(n)) filtered.add(n);
+            }
+            for (Category c : categories) {
+                Category fc = c.filtered(filter);
+                if (fc.isFunctions) {
+                    fc.filter = filter;
+                    filtered.categories.add(fc);
+                    continue;
+                }
+                if (fc.nodes.isEmpty() && fc.categories.isEmpty()) continue;
+                filtered.categories.add(fc);
+            }
+            return filtered;
         }
     }
 }

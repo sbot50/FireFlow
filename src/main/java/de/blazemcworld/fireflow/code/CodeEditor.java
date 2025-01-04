@@ -164,6 +164,16 @@ public class CodeEditor {
         }
     }
 
+    public void searchNodes(Player player, String query) {
+        String lowerQuery = query.toLowerCase();
+        Vec pos = getCursor(player).mul(8).apply(Vec.Operator.CEIL).div(8).withZ(15.999);
+        NodeMenuWidget n = new NodeMenuWidget(NodeList.root.filtered((node) -> node.getTitle().toLowerCase().contains(lowerQuery)), this, null);
+        Vec s = n.getSize();
+        n.setPos(pos.add(Math.round(s.x() * 4) / 8f, Math.round(s.y() * 4) / 8f, 0));
+        n.update(space.code);
+        rootWidgets.add(n);
+    }
+
     private Vec getCursor(Player player) {
         double norm = player.getPosition().direction().dot(new Vec(0, 0, -1));
         if (norm >= 0) return Vec.ZERO.withZ(15.999);
