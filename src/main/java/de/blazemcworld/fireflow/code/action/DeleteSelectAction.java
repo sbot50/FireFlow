@@ -44,9 +44,9 @@ public class DeleteSelectAction extends SelectAction {
                             else if (!inputs.getFirst().connections.isEmpty()) inputs.getFirst().connections.getFirst().cleanup(i.editor());
                         }
                     }
+                    nodeWidget.remove(i.editor());
+                    i.editor().rootWidgets.remove(nodeWidget);
                 }
-                w.remove();
-                i.editor().rootWidgets.remove(w);
             }
             i.editor().stopAction(i.player());
         }

@@ -4,6 +4,7 @@ import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
 import de.blazemcworld.fireflow.code.action.DragWireAction;
 import de.blazemcworld.fireflow.code.action.WireAction;
+import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.type.WireType;
 import net.minestom.server.coordinate.Vec;
@@ -437,12 +438,15 @@ public class WireWidget implements Widget {
             });
             this.line.to = wire.line.to;
             if (wire.nextInput != null) {
+                Node.Varargs<?> varargs = wire.nextInput.input.varargsParent;
+                if (varargs != null) varargs.ignoreUpdates = true;
                 this.nextInput = wire.nextInput;
                 this.nextInput.connections.remove(wire);
                 this.nextInput.removed(wire);
                 wire.nextInput = null;
                 this.nextInput.connections.add(this);
                 this.nextInput.connect(this);
+                if (varargs != null) varargs.ignoreUpdates = false;
             }
         }
         this.update(editor.space.code);

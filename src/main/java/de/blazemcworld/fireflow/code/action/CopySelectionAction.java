@@ -65,10 +65,10 @@ public class CopySelectionAction implements Action {
             }
         }
 
+        List<Node.Varargs<?>> varargs = new ArrayList<>();
         for (Widget w : widgets) {
             if (w instanceof NodeWidget nodeWidget) {
                 NodeWidget nodeWidgetCopy = oldToNewNodes.get(nodeWidget);
-                List<Node.Varargs<?>> varargs = new ArrayList<>();
                 for (NodeIOWidget io : nodeWidget.getInputs()) {
                     List<NodeIOWidget> inputs = nodeWidgetCopy.getInputs();
                     NodeIOWidget match = null;
@@ -90,7 +90,7 @@ public class CopySelectionAction implements Action {
                             oldToNewWires.get(wire).setNextInput(match);
                         }
                     }
-                    if (match.input.varargsParent != null) {
+                    if (match.input.varargsParent != null && (io.input.inset != null || io.input.connected != null)) {
                         match.input.varargsParent.addInput(UUID.randomUUID().toString());
                         match.parent.refreshInputs();
                     }
@@ -98,24 +98,26 @@ public class CopySelectionAction implements Action {
                 for (int i = 0; i < nodeWidget.getOutputs().size(); i++) {
                     NodeIOWidget io = nodeWidget.getOutputs().get(i);
                     NodeIOWidget ioCopy = nodeWidgetCopy.getOutputs().get(i);
-                    System.out.println(io.connections);
                     for (WireWidget wire : io.connections) {
-                        if (oldToNewWires.get(wire) == null) {
-                            System.out.println(wire);
-                            return;
-                        }
+                        if (oldToNewWires.get(wire) == null) return;
                         ioCopy.connections.add(oldToNewWires.get(wire));
                         oldToNewWires.get(wire).setPreviousOutput(ioCopy);
                     }
                 }
+            }
+        }
+
+        for (Widget w : widgets) {
+            if (w instanceof NodeWidget nodeWidget) {
+                NodeWidget nodeWidgetCopy = oldToNewNodes.get(nodeWidget);
                 nodeWidgetCopy.getInputs().forEach(io -> io.connections.forEach(io::connect));
                 nodeWidgetCopy.getOutputs().forEach(io -> io.connections.forEach(io::connect));
-                for (Node.Varargs<?> vararg : varargs) {
-                    vararg.ignoreUpdates = false;
-                    vararg.update();
-                }
                 nodeWidgetCopy.update(editor.space.code);
             }
+        }
+        for (Node.Varargs<?> vararg : varargs) {
+            vararg.ignoreUpdates = false;
+            vararg.update();
         }
     }
 
