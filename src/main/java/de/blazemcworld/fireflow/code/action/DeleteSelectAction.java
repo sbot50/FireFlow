@@ -1,6 +1,8 @@
 package de.blazemcworld.fireflow.code.action;
 
 import de.blazemcworld.fireflow.code.Interaction;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionInputsNode;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionOutputsNode;
 import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.widget.NodeIOWidget;
 import de.blazemcworld.fireflow.code.widget.NodeWidget;
@@ -21,9 +23,10 @@ public class DeleteSelectAction extends SelectAction {
 
     @Override
     public void interact(Interaction i) {
-        if (i.type() == Interaction.Type.LEFT_CLICK) i.editor().stopAction(i.player());
-        else if (i.type() == Interaction.Type.RIGHT_CLICK) {
+        if (i.type() == Interaction.Type.RIGHT_CLICK) i.editor().stopAction(i.player());
+        else if (i.type() == Interaction.Type.LEFT_CLICK) {
             List<Widget> widgets = i.editor().getAllWidgetsBetween(i, box.pos, i.pos());
+            widgets = new ArrayList<>(widgets.stream().filter(widget -> !(widget instanceof NodeWidget) || (!(((NodeWidget) widget).node instanceof FunctionInputsNode) && !(((NodeWidget) widget).node instanceof FunctionOutputsNode))).toList());
             widgets.sort((w1, w2) -> {
                 if (w1 instanceof WireWidget && w2 instanceof NodeWidget) return -1;
                 if (w2 instanceof WireWidget && w1 instanceof NodeWidget) return 1;
@@ -41,9 +44,9 @@ public class DeleteSelectAction extends SelectAction {
                             else if (!inputs.getFirst().connections.isEmpty()) inputs.getFirst().connections.getFirst().cleanup(i.editor());
                         }
                     }
+                    nodeWidget.remove(i.editor());
+                    i.editor().rootWidgets.remove(nodeWidget);
                 }
-                w.remove();
-                i.editor().rootWidgets.remove(w);
             }
             i.editor().stopAction(i.player());
         }

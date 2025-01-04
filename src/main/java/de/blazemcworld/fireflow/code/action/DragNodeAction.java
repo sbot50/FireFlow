@@ -2,6 +2,8 @@ package de.blazemcworld.fireflow.code.action;
 
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.Interaction;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionInputsNode;
+import de.blazemcworld.fireflow.code.node.impl.function.FunctionOutputsNode;
 import de.blazemcworld.fireflow.code.widget.NodeIOWidget;
 import de.blazemcworld.fireflow.code.widget.NodeWidget;
 import de.blazemcworld.fireflow.code.widget.WireWidget;
@@ -11,6 +13,7 @@ import net.minestom.server.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class DragNodeAction implements Action {
     private final NodeWidget node;
@@ -75,13 +78,18 @@ public class DragNodeAction implements Action {
     public void interact(Interaction i) {
         if (i.type() == Interaction.Type.RIGHT_CLICK) i.editor().stopAction(i.player());
         if (i.type() == Interaction.Type.SWAP_HANDS) {
+            if (node.node instanceof FunctionInputsNode || node.node instanceof FunctionOutputsNode) return;
             NodeWidget copy = new NodeWidget(node.node.copy(), i.editor().space.editor);
             copy.setPos(node.getPos());
-            int index = 0;
-            for (NodeIOWidget io : node.getIOWidgets()) {
-                NodeIOWidget newWidget = copy.getIOWidgets().get(index);
-                if (io.input != null && io.input.inset != null) newWidget.insetValue(io.input.inset, i.editor());
-                index++;
+            for (NodeIOWidget io : node.getInputs()) {
+                List<NodeIOWidget> inputs = copy.getInputs();
+                NodeIOWidget match = null;
+                for (int j = inputs.size() - 1; j >= 0; j--) {
+                    match = inputs.get(j);
+                    if ((match.input.varargsParent == null || io.input.varargsParent == null) && Objects.equals(io.input.id, match.input.id)) break;
+                    if (match.input.varargsParent != null && io.input.varargsParent != null && Objects.equals(io.input.varargsParent.id, match.input.varargsParent.id)) break;
+                }
+                if (match != null && io.input.inset != null) match.insetValue(io.input.inset, i.editor());
             }
             copy.update(i.editor().space.code);
             i.editor().rootWidgets.add(copy);

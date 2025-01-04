@@ -210,7 +210,7 @@ public class WireAction implements Action {
             }
             wires = permanentWires.removeLast();
             if (permanentWires.isEmpty())
-                startPos = input != null ? input.getPos().sub(-1 / 4f, 1 / 8f, 0) : output.getPos().sub(output.getSize().sub(-1 / 4f, 1 / 8f, 0));
+                startPos = input != null ? input.getPos().sub(-1 / 4f, 1 / 8f, 0) : output != null ? output.getPos().sub(output.getSize().sub(-1 / 4f, 1 / 8f, 0)) : wires.getFirst().line.from;
             else startPos = permanentWires.getLast().getLast().line.to;
         }
     }
