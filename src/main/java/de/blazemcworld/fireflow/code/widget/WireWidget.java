@@ -198,6 +198,21 @@ public class WireWidget implements Widget {
             }
         } else if (i.type() == Interaction.Type.RIGHT_CLICK) {
             if (!previousWires.isEmpty() && !nextWires.isEmpty()) {
+                boolean horizontal = line.from.x() == line.to.x();
+                for (WireWidget wire : previousWires) {
+                    if (horizontal && wire.line.from.x() == wire.line.to.x()) {
+                        if (wire.previousWires.isEmpty() || wire.nextWires.isEmpty()) return false;
+                    } else if (!horizontal && wire.line.from.y() == wire.line.to.y()) {
+                        if (wire.previousWires.isEmpty() || wire.nextWires.isEmpty()) return false;
+                    }
+                }
+                for (WireWidget wire : nextWires) {
+                    if (horizontal && wire.line.from.x() == wire.line.to.x()) {
+                        if (wire.previousWires.isEmpty() || wire.nextWires.isEmpty()) return false;
+                    } else if (!horizontal && wire.line.from.y() == wire.line.to.y()) {
+                        if (wire.previousWires.isEmpty() || wire.nextWires.isEmpty()) return false;
+                    }
+                }
                 i.editor().setAction(i.player(), new DragWireAction(this, i.editor(), i.player()));
                 return true;
             }
