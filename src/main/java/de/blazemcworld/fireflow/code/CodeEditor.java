@@ -479,6 +479,7 @@ public class CodeEditor {
                         nodes.add(other.parent);
                         todo.add(other.parent);
                     }
+                    wires.addAll(wire.getFullWire());
                 }
             }
 
