@@ -23,8 +23,7 @@ public class SendBlockChangeNode extends Node {
             PlayerValue p = player.getValue(ctx);
             Block placedBlock = Block.fromNamespaceId(block.getValue(ctx));
             if (placedBlock != null) {
-                if (p.available(ctx))
-                    p.get(ctx).sendPacket(new BlockChangePacket(position.getValue(ctx), placedBlock));
+                if (p.available(ctx)) p.get(ctx).sendPacket(new BlockChangePacket(position.getValue(ctx), placedBlock));
             }
             ctx.sendSignal(next);
         });

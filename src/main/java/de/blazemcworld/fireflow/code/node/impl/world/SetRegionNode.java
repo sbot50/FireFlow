@@ -31,13 +31,12 @@ public class SetRegionNode extends Node {
                 AtomicInteger curY = new AtomicInteger(corner1a.blockY());
                 AtomicInteger curZ = new AtomicInteger(corner1a.blockZ());
                 ChunkLoadingBlockBatch batch = new ChunkLoadingBlockBatch();
-                MinecraftServer.getSchedulerManager().scheduleTask(() ->{
-                    for (int chunkX = corner1a.blockX(); chunkX < corner2a.blockX(); chunkX+=1){
-                        for (int chunkZ = corner1a.blockZ(); chunkZ < corner2a.blockZ(); chunkZ+=1){
+                MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+                    for (int chunkX = corner1a.blockX(); chunkX < corner2a.blockX(); chunkX += 1) {
+                        for (int chunkZ = corner1a.blockZ(); chunkZ < corner2a.blockZ(); chunkZ += 1) {
                             for (int y = corner1a.blockY(); y <= corner2a.blockY(); y++) {
                                 batch.setBlock(chunkX, y, chunkZ, placedBlock);
                             }
-
                         }
                     }
                     batch.apply(ctx.evaluator.space.play, null);
@@ -45,10 +44,7 @@ public class SetRegionNode extends Node {
                     return TaskSchedule.stop();
                 }, TaskSchedule.nextTick());
                 batch.apply(ctx.evaluator.space.play, null);
-
-
             }
-
             ctx.sendSignal(next);
         });
     }

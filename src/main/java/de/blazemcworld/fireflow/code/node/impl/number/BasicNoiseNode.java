@@ -11,7 +11,7 @@ import net.minestom.server.item.Material;
 public class BasicNoiseNode extends Node {
     public BasicNoiseNode() {
         super("basic_noise", Material.DEAD_BRAIN_CORAL_BLOCK);
-        Input<String> noiseType = new Input<>("noise_type", StringType.INSTANCE).options("Simplex","SmoothSimplex","Perlin","Value", "ValueCubic");
+        Input<String> noiseType = new Input<>("noise_type", StringType.INSTANCE).options("Simplex", "SmoothSimplex", "Perlin", "Value", "ValueCubic");
         Input<String> dimension = new Input<>("dimension", StringType.INSTANCE).options("3D", "2D");
         Input<Vec> position = new Input<>("position", VectorType.INSTANCE);
         Input<Double> frequency = new Input<>("frequency", NumberType.INSTANCE);
@@ -22,7 +22,7 @@ public class BasicNoiseNode extends Node {
         Output<Double> output = new Output<>("output", NumberType.INSTANCE);
 
         output.valueFrom((ctx) -> {
-            FastNoiseLite.NoiseType noiseType1 = switch (noiseType.getValue(ctx)){
+            FastNoiseLite.NoiseType noiseType1 = switch (noiseType.getValue(ctx)) {
                 case "Simplex" -> FastNoiseLite.NoiseType.OpenSimplex2;
                 case "SmoothSimplex" -> FastNoiseLite.NoiseType.OpenSimplex2S;
                 case "Perlin" -> FastNoiseLite.NoiseType.Perlin;
@@ -39,7 +39,7 @@ public class BasicNoiseNode extends Node {
                 noise.SetFrequency(frequency.getValue(ctx).floatValue());
                 noise.SetSeed(seed.getValue(ctx).intValue());
                 Vec loc = position.getValue(ctx);
-                switch (dimension.getValue(ctx)){
+                switch (dimension.getValue(ctx)) {
                     case "3D" -> {
                         return (double) noise.GetNoise(loc.x(), loc.y(), loc.z());
                     }

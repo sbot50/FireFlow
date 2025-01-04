@@ -20,18 +20,16 @@ public class SetBlockNode extends Node {
         signal.onSignal((ctx) -> {
             Block placedBlock = Block.fromNamespaceId(block.getValue(ctx));
             if (placedBlock != null) {
-
-                if (ctx.evaluator.space.spaceBlockBatch == null){
+                if (ctx.evaluator.space.spaceBlockBatch == null) {
                     ctx.evaluator.space.spaceBlockBatch = new ChunkLoadingBlockBatch();
 
                     MinecraftServer.getSchedulerManager().scheduleEndOfTick(() -> {
-                            ctx.evaluator.space.spaceBlockBatch.apply(ctx.evaluator.space.play, null);
-                            ctx.evaluator.space.spaceBlockBatch = null;
-                        });
-                    }
-                ctx.evaluator.space.spaceBlockBatch.setBlock(position.getValue(ctx),placedBlock );
+                        ctx.evaluator.space.spaceBlockBatch.apply(ctx.evaluator.space.play, null);
+                        ctx.evaluator.space.spaceBlockBatch = null;
+                    });
+                }
+                ctx.evaluator.space.spaceBlockBatch.setBlock(position.getValue(ctx), placedBlock);
             }
-
             ctx.sendSignal(next);
         });
     }
