@@ -24,15 +24,6 @@ public class VariableStore {
         values.put(name, value);
         types.put(name, type);
     }
-        
-    public enum Scope {
-        SAVED("saved"), SESSION("session"), THREAD("thread");
-
-        public final String id;
-        Scope(String id) {
-            this.id = id;
-        }
-    }
 
     public JsonObject toJson() {
         JsonObject obj = new JsonObject();

@@ -42,7 +42,21 @@ public class NodeMenuWidget implements Widget {
             list.widgets.add(button);
         }
 
+        boolean emptyCategory = true;
         for (NodeList.Category subCategory : category.categories) {
+            if (subCategory.isFunctions && subCategory.filter != null) {
+                boolean hasEntry = false;
+                for (FunctionDefinition fn : editor.functions.values()) {
+                    FunctionCallNode fnNode = new FunctionCallNode(fn);
+                    fn.callNodes.remove(fnNode); // Remove since its not actually a real node
+                    if (category.filter.test(fnNode)) {
+                        hasEntry = true;
+                        break;
+                    }
+                }
+                if (!hasEntry) continue;
+            }
+
             ButtonWidget button = new ButtonWidget(new ItemWidget(subCategory.icon), new TextWidget(Component.text(subCategory.name)));
 
             button.handler = interaction -> {
@@ -61,6 +75,7 @@ public class NodeMenuWidget implements Widget {
             };
 
             list.widgets.add(button);
+            emptyCategory = false;
         }
 
         List<Node> nodes = category.nodes;
@@ -69,7 +84,7 @@ public class NodeMenuWidget implements Widget {
             for (FunctionDefinition fn : editor.functions.values()) {
                 FunctionCallNode fnNode = new FunctionCallNode(fn);
                 fn.callNodes.remove(fnNode); // Remove since its not actually a real node
-                nodes.add(fnNode);
+                if (category.filter != null && category.filter.test(fnNode)) nodes.add(fnNode);
             }
         }
 
@@ -86,9 +101,10 @@ public class NodeMenuWidget implements Widget {
             };
 
             list.widgets.add(button);
+            emptyCategory = false;
         }
 
-        if (list.widgets.size() == 1) { // Back button
+        if (emptyCategory) {
             list.widgets.add(new TextWidget(Component.text("Empty category")));
         }
 

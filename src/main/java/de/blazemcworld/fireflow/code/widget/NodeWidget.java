@@ -124,7 +124,7 @@ public class NodeWidget implements Widget {
                         if (w.previousWires.isEmpty() || w.previousWires.getFirst().line.from.y() == w.previousWires.getFirst().line.to.y()) {
                             Vec mid = w.line.from.add(w.line.to).div(2);
                             List<WireWidget> wires = w.splitWire(editor, mid);
-                            WireWidget nw = new WireWidget(wires.getFirst(), w.type(), mid);
+                            WireWidget nw = new WireWidget(wires.getFirst(), w.type(), mid, editor.space.code);
                             nw.addNextWire(wires.getLast());
                             wires.getFirst().nextWires.remove(wires.getLast());
                             wires.getLast().addPreviousWire(nw);

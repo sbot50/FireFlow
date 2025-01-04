@@ -10,6 +10,7 @@ import de.blazemcworld.fireflow.util.Translations;
 import net.minestom.server.item.Material;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
@@ -60,6 +61,7 @@ public abstract class Node {
         public Output<T> connected;
         public Varargs<T> varargsParent;
         private Consumer<CodeThread> logic;
+        public List<String> options;
 
         public Input(String id, WireType<T> type) {
             this.id = id;
@@ -71,6 +73,12 @@ public abstract class Node {
             if (connected != null) return connected.computeNow(ctx);
             if (inset != null) return type.parseInset(inset);
             return type.defaultValue();
+        }
+
+        public Input<T> options(String... options) {
+            this.options = Arrays.asList(options);
+            setInset(options[0]);
+            return this;
         }
 
         public void onSignal(Consumer<CodeThread> logic) {
@@ -97,12 +105,14 @@ public abstract class Node {
             inset = value;
             connected = null;
             if (varargsParent != null) varargsParent.update();
+            if (inset == null && options != null) inset = options.getFirst();
         }
 
         public void connect(Output<T> output) {
             connected = output;
             inset = null;
             if (varargsParent != null) varargsParent.update();
+            if (connected == null && options != null) inset = options.getFirst();
         }
     }
 

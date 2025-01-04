@@ -1,7 +1,6 @@
 package de.blazemcworld.fireflow.code.node;
 
 import de.blazemcworld.fireflow.FireFlow;
-import de.blazemcworld.fireflow.code.VariableStore;
 import de.blazemcworld.fireflow.code.node.impl.action.player.*;
 import de.blazemcworld.fireflow.code.node.impl.event.player.*;
 import de.blazemcworld.fireflow.code.node.impl.flow.*;
@@ -15,9 +14,14 @@ import de.blazemcworld.fireflow.code.node.impl.number.*;
 import de.blazemcworld.fireflow.code.node.impl.position.FacingVectorNode;
 import de.blazemcworld.fireflow.code.node.impl.position.PackPositionNode;
 import de.blazemcworld.fireflow.code.node.impl.position.UnpackPositionNode;
+import de.blazemcworld.fireflow.code.node.impl.string.CharacterAtNode;
+import de.blazemcworld.fireflow.code.node.impl.string.StringLengthNode;
+import de.blazemcworld.fireflow.code.node.impl.string.StringsEqualNode;
 import de.blazemcworld.fireflow.code.node.impl.text.FormatToTextNode;
 import de.blazemcworld.fireflow.code.node.impl.text.StringToTextNode;
+import de.blazemcworld.fireflow.code.node.impl.variable.DecrementVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.GetVariableNode;
+import de.blazemcworld.fireflow.code.node.impl.variable.IncrementVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.SetVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.vector.PackVectorNode;
 import de.blazemcworld.fireflow.code.node.impl.vector.SetVectorLengthNode;
@@ -28,6 +32,7 @@ import net.minestom.server.item.Material;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 
 public class NodeList {
 
@@ -36,9 +41,7 @@ public class NodeList {
     public static void init() {
         root = new Category("root", null)
             .add(new Category("action", Material.REDSTONE)
-                    .add(new AdventureModeNode())
                     .add(new ClearInventoryNode())
-                    .add(new CreativeModeNode())
                     .add(new GivePlayerItemNode())
                     .add(new KillPlayerNode())
                     .add(new RespawnPlayerNode())
@@ -47,6 +50,7 @@ public class NodeList {
                     .add(new SetAllowFlyingNode())
                     .add(new SetExperienceLevelNode())
                     .add(new SetExperiencePercentageNode())
+                    .add(new SetGamemodeNode())
                     .add(new SetHeldSlotNode())
                     .add(new SetPlayerFlyingNode())
                     .add(new SetPlayerFoodNode())
@@ -54,8 +58,6 @@ public class NodeList {
                     .add(new SetPlayerInvulnerableNode())
                     .add(new SetPlayerSaturationNode())
                     .add(new SetPlayerVelocityNode())
-                    .add(new SpectatorModeNode())
-                    .add(new SurvivalModeNode())
                     .add(new TeleportPlayerNode())
             )
             .add(new Category("event", Material.OBSERVER)
@@ -76,6 +78,7 @@ public class NodeList {
                     .add(new IfNode())
                     .add(new InvertConditionNode())
                     .add(new ListForEachNode<>(null))
+                    .add(new PauseThreadNode())
                     .add(new RepeatNode())
                     .add(new ScheduleNode())
                     .add(new WhileNode())
@@ -110,6 +113,8 @@ public class NodeList {
                     .add(new GreaterThanNode())
                     .add(new LessEqualNode())
                     .add(new LessThanNode())
+                    .add(new NumbersEqualNode())
+                    .add(new NumberToStringNode())
                     .add(new NumberToTextNode())
                     .add(new MultiplyNumbersNode())
                     .add(new ParseNumberNode())
@@ -121,6 +126,11 @@ public class NodeList {
                     .add(new PlayerPositionNode())
                     .add(new UnpackPositionNode())
             )
+            .add(new Category("string", Material.STRING)
+                    .add(new CharacterAtNode())
+                    .add(new StringLengthNode())
+                    .add(new StringsEqualNode())
+            )
             .add(new Category("vector", Material.ARROW)
                     .add(new PackVectorNode())
                     .add(new SetVectorLengthNode())
@@ -131,12 +141,10 @@ public class NodeList {
                     .add(new StringToTextNode())
             )
             .add(new Category("variable", Material.ENDER_CHEST)
-                    .add(new GetVariableNode<>(null, VariableStore.Scope.SAVED))
-                    .add(new GetVariableNode<>(null, VariableStore.Scope.SESSION))
-                    .add(new GetVariableNode<>(null, VariableStore.Scope.THREAD))
-                    .add(new SetVariableNode<>(null, VariableStore.Scope.SAVED))
-                    .add(new SetVariableNode<>(null, VariableStore.Scope.SESSION))
-                    .add(new SetVariableNode<>(null, VariableStore.Scope.THREAD))
+                    .add(new DecrementVariableNode())
+                    .add(new GetVariableNode<>(null))
+                    .add(new IncrementVariableNode())
+                    .add(new SetVariableNode<>(null))
             )
             .add(new Category("function", Material.COMMAND_BLOCK).markFunctions())
             .finish();
@@ -151,10 +159,17 @@ public class NodeList {
         public final List<Category> categories = new ArrayList<>();
         public final List<Node> nodes = new ArrayList<>();
         public boolean isFunctions = false;
+        public Predicate<Node> filter;
 
         public Category(String id, Material icon) {
             name = Translations.get("category." + id);
             this.icon = icon;
+        }
+
+        public Category(Category copy) {
+            name = copy.name;
+            icon = copy.icon;
+            isFunctions = copy.isFunctions;
         }
 
         public Category add(Node node) {
@@ -187,6 +202,24 @@ public class NodeList {
         public Category markFunctions() {
             isFunctions = true;
             return this;
+        }
+
+        public Category filtered(Predicate<Node> filter) {
+            Category filtered = new Category(this);
+            for (Node n : nodes) {
+                if (filter.test(n)) filtered.add(n);
+            }
+            for (Category c : categories) {
+                Category fc = c.filtered(filter);
+                if (fc.isFunctions) {
+                    fc.filter = filter;
+                    filtered.categories.add(fc);
+                    continue;
+                }
+                if (fc.nodes.isEmpty() && fc.categories.isEmpty()) continue;
+                filtered.categories.add(fc);
+            }
+            return filtered;
         }
     }
 }

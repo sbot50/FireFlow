@@ -17,9 +17,8 @@ public class FunctionCallNode extends Node {
             if (input.type == SignalType.INSTANCE) {
                 input.onSignal((ctx) -> {
                     ctx.functionStack.push(this);
-                    matching.sendSignalImmediately(ctx);
-                    ctx.clearQueue();
-                    ctx.functionStack.pop();
+                    ctx.submit(ctx.functionStack::pop);
+                    ctx.sendSignal((Output<Void>) matching);
                 });
             }
         }

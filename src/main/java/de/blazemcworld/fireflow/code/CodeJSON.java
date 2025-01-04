@@ -314,7 +314,7 @@ public class CodeJSON {
         return out;
     }
 
-    public static List<WireWidget> wireFromJson(JsonArray wires, Function<Integer, NodeWidget> id2Node, Function<Vec, Vec> transformPos) {
+    public static List<WireWidget> wireFromJson(JsonArray wires, Function<Integer, NodeWidget> id2Node, Function<Vec, Vec> transformPos, CodeEditor editor) {
         List<WireWidget> wireWidgets = new ArrayList<>();
         List<Runnable> todo = new ArrayList<>();
 
@@ -327,7 +327,7 @@ public class CodeJSON {
             double toY = wireObj.get("toY").getAsDouble();
 
             WireType<?> typeInst = AllTypes.fromJson(type);
-            WireWidget wire = new WireWidget(typeInst, transformPos.apply(new Vec(fromX, fromY, 15.999)), transformPos.apply(new Vec(toX, toY, 15.999)));
+            WireWidget wire = new WireWidget(typeInst, transformPos.apply(new Vec(fromX, fromY, 15.999)), transformPos.apply(new Vec(toX, toY, 15.999)), editor.space.code);
             if (wireObj.has("previousOutputNode") && wireObj.has("previousOutputId")) {
                 int nodeIndex = wireObj.get("previousOutputNode").getAsInt();
                 String outputId = wireObj.get("previousOutputId").getAsString();

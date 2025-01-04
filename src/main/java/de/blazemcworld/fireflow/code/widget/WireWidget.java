@@ -7,6 +7,8 @@ import de.blazemcworld.fireflow.code.action.WireAction;
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.type.WireType;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.InstanceContainer;
@@ -21,11 +23,12 @@ public class WireWidget implements Widget {
     public NodeIOWidget previousOutput;
     public List<WireWidget> previousWires = new ArrayList<>();
     public final LineElement line = new LineElement();
+    private final List<TextWidget> arrows = new ArrayList<>();
     public List<WireWidget> nextWires = new ArrayList<>();
     public NodeIOWidget nextInput;
     private final WireType<?> type;
 
-    public WireWidget(NodeIOWidget previousOutput, WireType<?> type, Vec cursor) {
+    public WireWidget(NodeIOWidget previousOutput, WireType<?> type, Vec cursor, InstanceContainer inst) {
         if (!previousOutput.isInput()) this.previousOutput = previousOutput;
         else this.nextInput = previousOutput;
         if (previousOutput.isInput()) line.from = previousOutput.getPos().sub(1/8f-1/32f, 1/8f, 0);
@@ -33,25 +36,28 @@ public class WireWidget implements Widget {
         line.to = cursor;
         line.color(previousOutput.color());
         this.type = type;
+        doArrows(inst);
     }
 
-    public WireWidget(Vec start, WireType<?> type, Vec end) {
+    public WireWidget(Vec start, WireType<?> type, Vec end, InstanceContainer inst) {
         line.from = start;
         line.to = end;
         line.color(type.color);
         this.type = type;
+        doArrows(inst);
     }
 
-    public WireWidget(WireWidget previousWire, WireType<?> type, Vec cursor) {
+    public WireWidget(WireWidget previousWire, WireType<?> type, Vec cursor, InstanceContainer inst) {
         this.previousWires.add(previousWire);
         previousWire.nextWires.add(this);
         line.from = previousWire.line.to;
         line.to = cursor;
         line.color(previousWire.line.color());
         this.type = type;
+        doArrows(inst);
     }
 
-    public WireWidget(WireWidget wire, WireType<?> type, Vec cursor, boolean isNext) {
+    public WireWidget(WireWidget wire, WireType<?> type, Vec cursor, boolean isNext, InstanceContainer inst) {
         if (!isNext) {
             this.previousWires.add(wire);
             line.from = wire.line.to;
@@ -62,21 +68,24 @@ public class WireWidget implements Widget {
         line.to = cursor;
         line.color(wire.line.color());
         this.type = type;
+        doArrows(inst);
     }
 
-    public WireWidget(List<WireWidget> previousWires, WireType<?> type, Vec cursor) {
+    public WireWidget(List<WireWidget> previousWires, WireType<?> type, Vec cursor, InstanceContainer inst) {
         this.previousWires.addAll(previousWires);
         line.from = previousWires.getFirst().line.to;
         line.to = cursor;
         line.color(previousWires.getFirst().line.color());
         this.type = type;
+        doArrows(inst);
     }
 
-    public WireWidget(WireType<?> type, Vec from, Vec to) {
+    public WireWidget(WireType<?> type, Vec from, Vec to, InstanceContainer inst) {
         line.from = from;
         line.to = to;
         line.color(type.color);
         this.type = type;
+        doArrows(inst);
     }
 
     @Override
@@ -99,10 +108,50 @@ public class WireWidget implements Widget {
     @Override
     public void update(InstanceContainer inst) {
         line.update(inst);
+        doArrows(inst);
+    }
+
+    private void doArrows(InstanceContainer inst) {
+        double lineLength = Math.abs((line.from.x() == line.to.x()) ? (line.from.y() - line.to.y()) : (line.from.x() - line.to.x()));
+        if (lineLength < 1) {
+            arrows.forEach(TextWidget::remove);
+            arrows.clear();
+            return;
+        }
+        boolean horizontal = line.from.x() != line.to.x();
+        int arrowCount = Math.max((int) Math.ceil(lineLength / 3), 1);
+
+        for (int i = 0; i < arrowCount; i++) {
+            if (arrows.size() <= i) {
+                TextWidget arrow = new TextWidget(Component.text(">").color(type.color).decorate(TextDecoration.BOLD));
+                arrow.stretch(1.5, 1);
+                arrows.add(arrow);
+            }
+            TextWidget arrow = arrows.get(i);
+
+            Vec pos = new Vec((horizontal) ? (Math.min(line.from.x(), line.to.x()) + (lineLength / (arrowCount + 1)) * (i+1)) : line.from.x() + ((line.from.y() < line.to.y()) ? 0.25/-4.15 : 0.25/1.19), ((!horizontal) ? (Math.min(line.from.y(), line.to.y()) + (lineLength / (arrowCount + 1)) * (i+1)) : line.from.y()) + ((line.from.x() > line.to.x()) ? 0.25/1.98 : 0.25*1.585), 15.999);
+            arrow.setPos(pos);
+
+            if (!horizontal) {
+                if (line.from.y() > line.to.y()) arrow.setRotation(-90);
+                else arrow.setRotation(90);
+            } else {
+                if (line.from.x() > line.to.x()) arrow.setRotation(0);
+                else arrow.setRotation(180);
+            }
+            arrow.update(inst);
+        }
+
+        for (int i = arrowCount; i < arrows.size(); i++) {
+            arrows.get(i).remove();
+            arrows.remove(i);
+            i--;
+        }
     }
 
     @Override
     public void remove() {
+        arrows.forEach(TextWidget::remove);
         line.remove();
 
         if (nextInput != null) {
@@ -317,14 +366,14 @@ public class WireWidget implements Widget {
 
     public List<WireWidget> splitWire(CodeEditor editor, Vec pos) {
         WireWidget w1;
-        if (this.previousWires.isEmpty()) w1 = new WireWidget(this.previousOutput, this.type(), pos);
-        else w1 = new WireWidget(this.previousWires, this.type(), pos);
+        if (this.previousWires.isEmpty()) w1 = new WireWidget(this.previousOutput, this.type(), pos, editor.space.code);
+        else w1 = new WireWidget(this.previousWires, this.type(), pos, editor.space.code);
         editor.rootWidgets.add(w1);
         for (WireWidget wireWidget1 : this.previousWires) {
             wireWidget1.nextWires.remove(this);
             wireWidget1.nextWires.add(w1);
         }
-        WireWidget w2 = new WireWidget(w1, this.type(), this.line.to);
+        WireWidget w2 = new WireWidget(w1, this.type(), this.line.to, editor.space.code);
         editor.rootWidgets.add(w2);
         w2.addNextWires(this.nextWires);
         for (WireWidget nextWire : this.nextWires) {
@@ -343,6 +392,8 @@ public class WireWidget implements Widget {
             nextInput.connections.remove(this);
             nextInput.connections.add(w2);
         }
+        this.arrows.forEach(TextWidget::remove);
+        this.arrows.clear();
         this.line.remove();
         editor.rootWidgets.remove(this);
         w1.update(editor.space.code);

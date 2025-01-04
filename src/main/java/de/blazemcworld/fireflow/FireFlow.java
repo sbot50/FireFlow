@@ -59,7 +59,8 @@ public class FireFlow {
                 new LobbyCommand(),
                 new FunctionCommand(),
                 new SpaceCommand(),
-                new SnippetCommand()
+                new SnippetCommand(),
+                new SearchNodeCommand()
         );
 
         GlobalEventHandler events = MinecraftServer.getGlobalEventHandler();

@@ -47,7 +47,7 @@ public class CopySelectionAction implements Action {
                 List<NodeWidget> inputs = wireWidget.getInputs().stream().map(widget -> widget.parent).toList();
                 List<NodeWidget> outputs = wireWidget.getOutputs().stream().map(widget -> widget.parent).toList();
                 if (!widgetsHashset.containsAll(inputs) || !widgetsHashset.containsAll(outputs)) continue;
-                WireWidget wireWidgetCopy = new WireWidget(wireWidget.line.from, wireWidget.type(), wireWidget.line.to);
+                WireWidget wireWidgetCopy = new WireWidget(wireWidget.line.from, wireWidget.type(), wireWidget.line.to, editor.space.code);
                 editor.rootWidgets.add(wireWidgetCopy);
                 wireWidgetCopy.update(editor.space.code);
                 oldToNewWires.put(wireWidget, wireWidgetCopy);

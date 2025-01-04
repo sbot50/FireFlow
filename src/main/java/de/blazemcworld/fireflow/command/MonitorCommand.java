@@ -1,7 +1,5 @@
 package de.blazemcworld.fireflow.command;
 
-import java.util.HashMap;
-
 import de.blazemcworld.fireflow.space.Space;
 import de.blazemcworld.fireflow.space.SpaceManager;
 import de.blazemcworld.fireflow.util.Translations;
@@ -13,6 +11,8 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.builder.Command;
 import net.minestom.server.entity.Player;
 import net.minestom.server.timer.TaskSchedule;
+
+import java.util.HashMap;
 
 public class MonitorCommand extends Command {
 
@@ -56,7 +56,7 @@ public class MonitorCommand extends Command {
                 }
 
                 int percentage = space.evaluator.cpuPercentage;
-                TextColor color = TextColor.color(HSVLike.hsvLike(0.3f - percentage / 300f, 1f, 1f));
+                TextColor color = TextColor.color(HSVLike.hsvLike(Math.clamp(0.3f - percentage / 300f, 0, 0.3f), 1f, 1f));
 
                 Component display = Component.text(Translations.get("info.cpu_usage")).color(color)
                     .append(Component.text(" [").color(NamedTextColor.WHITE))

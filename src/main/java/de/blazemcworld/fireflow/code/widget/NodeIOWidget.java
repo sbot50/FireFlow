@@ -72,6 +72,21 @@ public class NodeIOWidget implements Widget {
     @Override
     public boolean interact(Interaction i) {
         if (!inBounds(i.pos())) return false;
+        if (isInput && input.options != null) {
+            int currentOption = input.options.indexOf(input.inset);
+            if (i.type() == Interaction.Type.LEFT_CLICK) {
+                int next = currentOption + 1;
+                if (next >= input.options.size()) next = 0;
+                insetValue(input.options.get(next), i.editor());
+                return true;
+            }
+            if (i.type() == Interaction.Type.RIGHT_CLICK) {
+                int next = currentOption - 1;
+                if (next < 0) next = input.options.size() - 1;
+                insetValue(input.options.get(next), i.editor());
+                return true;
+            }
+        }
         if (i.type() == Interaction.Type.RIGHT_CLICK) {
             if (!this.isInput()) i.editor().setAction(i.player(), new WireAction(this, i.editor(), i.player()));
             return true;
@@ -120,7 +135,7 @@ public class NodeIOWidget implements Widget {
             }
         } else {
             if (wire.nextInput != null) {
-                wire.nextInput.input.connected = null;
+                wire.nextInput.input.connect(null);
                 if (wire.nextInput.input.varargsParent != null) wire.nextInput.input.varargsParent.update();
             }
         }

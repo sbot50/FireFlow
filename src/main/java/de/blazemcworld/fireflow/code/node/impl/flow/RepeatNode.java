@@ -18,13 +18,21 @@ public class RepeatNode extends Node {
         index.valueFromThread();
 
         signal.onSignal((ctx) -> {
-            double total = times.getValue(ctx);
-            for (int i = 0; i < total; i++) {
-                if (ctx.timelimitHit()) return;
-                ctx.setThreadValue(index, i + 1.0);
-                repeat.sendSignalImmediately(ctx);
-            }
-            ctx.sendSignal(next);
+            int max = times.getValue(ctx).intValue();
+            double[] i = new double[] { 1 };
+
+            Runnable[] step = { null };
+            step[0] = () -> {
+                if (i[0] > max) {
+                    ctx.sendSignal(next);
+                    return;
+                }
+                ctx.setThreadValue(index, i[0]++);
+                ctx.submit(step[0]);
+                ctx.sendSignal(repeat);
+            };
+
+            step[0].run();
         });
     }
 

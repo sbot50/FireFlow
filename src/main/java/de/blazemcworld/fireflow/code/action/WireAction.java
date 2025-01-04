@@ -32,7 +32,7 @@ public class WireAction implements Action {
         if (!io.isInput()) {
             output = io;
             startPos = io.getPos().sub(output.getSize().sub(-1 / 4f, 1 / 8f, 0));
-            startWire = new WireWidget(io.getPos().sub(output.getSize().sub(1 / 8f, 1 / 8f, 0)), output.type(), startPos);
+            startWire = new WireWidget(io.getPos().sub(output.getSize().sub(1 / 8f, 1 / 8f, 0)), output.type(), startPos, editor.space.code);
             editor.lockWidget(io.parent, player);
         }
 //        else {
@@ -65,7 +65,7 @@ public class WireAction implements Action {
         }
         List<Vec> positions = editor.pathfinder.findPath(startPos, endPos, 5, 256);
         if (wires.isEmpty()) {
-            WireWidget lastWire = new WireWidget(startPos, type, startPos);
+            WireWidget lastWire = new WireWidget(startPos, type, startPos, editor.space.code);
             lastWire.update(editor.space.code);
             wires.add(lastWire);
         }
@@ -73,7 +73,7 @@ public class WireAction implements Action {
         for (Vec position : positions) {
             WireWidget lastWire = wires.get(index);
             if (index == wires.size() - 1) {
-                WireWidget wire = new WireWidget(lastWire, type, position);
+                WireWidget wire = new WireWidget(lastWire, type, position, editor.space.code);
                 wire.update(editor.space.code);
                 wires.add(wire);
             } else {
@@ -91,7 +91,7 @@ public class WireAction implements Action {
 
         if (hover != null) {
             WireWidget lastWire = wires.get(index);
-            if (endWire == null) endWire = new WireWidget(lastWire, hover.type(), hover.getPos());
+            if (endWire == null) endWire = new WireWidget(lastWire, hover.type(), hover.getPos(), editor.space.code);
             endWire.line.from = lastWire.line.to;
             endWire.line.to = (hover.isInput()) ? hover.getPos().sub(1 / 8f, 1 / 8f, 0) : hover.getPos().sub(hover.getSize().sub(1 / 8f, 1 / 8f, 0));
             endWire.update(editor.space.code);
