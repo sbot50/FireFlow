@@ -14,38 +14,39 @@ import java.util.List;
 public class SetVariableNode<T> extends Node {
 
     private final WireType<T> type;
-    private final VariableStore.Scope scope;
 
-    public SetVariableNode(WireType<T> type, VariableStore.Scope scope) {
-        super("set_variable_" + scope.id, Material.IRON_BLOCK);
+    public SetVariableNode(WireType<T> type) {
+        super("set_variable", Material.IRON_BLOCK);
         this.type = type;
-        this.scope = scope;
 
         Input<Void> signal = new Input<>("signal", SignalType.INSTANCE);
         Input<String> name = new Input<>("name", StringType.INSTANCE);
+        Input<String> scope = new Input<>("scope", StringType.INSTANCE)
+                .options("thread", "session", "saved");
         Input<T> value = new Input<>("value", type);
         Output<Void> next = new Output<>("next", SignalType.INSTANCE);
 
         signal.onSignal((ctx) -> {
-            VariableStore store = switch (scope) {
-                case SAVED -> ctx.evaluator.space.savedVariables;
-                case SESSION -> ctx.evaluator.sessionVariables;
-                case THREAD -> ctx.threadVariables;
+            VariableStore store = switch (scope.getValue(ctx)) {
+                case "saved" -> ctx.evaluator.space.savedVariables;
+                case "session" -> ctx.evaluator.sessionVariables;
+                case "thread" -> ctx.threadVariables;
+                default -> null;
             };
-            store.set(name.getValue(ctx), type, value.getValue(ctx));
+            if (store != null) store.set(name.getValue(ctx), type, value.getValue(ctx));
             ctx.sendSignal(next);
         });
     }
 
     @Override
     public String getTitle() {
-        if (type == null) return Translations.get("node.set_variable_" + scope.id + ".base_title");
-        return Translations.get("node.set_variable_" + scope.id + ".title", type.getName());
+        if (type == null) return Translations.get("node.set_variable.base_title");
+        return Translations.get("node.set_variable.title", type.getName());
     }
 
     @Override
     public Node copy() {
-        return new SetVariableNode<>(type, scope);
+        return new SetVariableNode<>(type);
     }
 
     @Override
@@ -65,6 +66,6 @@ public class SetVariableNode<T> extends Node {
 
     @Override
     public Node copyWithTypes(List<WireType<?>> types) {
-        return new SetVariableNode<>(types.get(0), scope);
+        return new SetVariableNode<>(types.get(0));
     }
 }

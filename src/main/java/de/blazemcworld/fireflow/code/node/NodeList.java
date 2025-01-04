@@ -1,7 +1,6 @@
 package de.blazemcworld.fireflow.code.node;
 
 import de.blazemcworld.fireflow.FireFlow;
-import de.blazemcworld.fireflow.code.VariableStore;
 import de.blazemcworld.fireflow.code.node.impl.action.player.*;
 import de.blazemcworld.fireflow.code.node.impl.event.player.*;
 import de.blazemcworld.fireflow.code.node.impl.flow.*;
@@ -15,9 +14,14 @@ import de.blazemcworld.fireflow.code.node.impl.number.*;
 import de.blazemcworld.fireflow.code.node.impl.position.FacingVectorNode;
 import de.blazemcworld.fireflow.code.node.impl.position.PackPositionNode;
 import de.blazemcworld.fireflow.code.node.impl.position.UnpackPositionNode;
+import de.blazemcworld.fireflow.code.node.impl.string.CharacterAtNode;
+import de.blazemcworld.fireflow.code.node.impl.string.StringLengthNode;
+import de.blazemcworld.fireflow.code.node.impl.string.StringsEqualNode;
 import de.blazemcworld.fireflow.code.node.impl.text.FormatToTextNode;
 import de.blazemcworld.fireflow.code.node.impl.text.StringToTextNode;
+import de.blazemcworld.fireflow.code.node.impl.variable.DecrementVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.GetVariableNode;
+import de.blazemcworld.fireflow.code.node.impl.variable.IncrementVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.SetVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.vector.PackVectorNode;
 import de.blazemcworld.fireflow.code.node.impl.vector.SetVectorLengthNode;
@@ -109,6 +113,8 @@ public class NodeList {
                     .add(new GreaterThanNode())
                     .add(new LessEqualNode())
                     .add(new LessThanNode())
+                    .add(new NumbersEqualNode())
+                    .add(new NumberToStringNode())
                     .add(new NumberToTextNode())
                     .add(new MultiplyNumbersNode())
                     .add(new ParseNumberNode())
@@ -120,6 +126,11 @@ public class NodeList {
                     .add(new PlayerPositionNode())
                     .add(new UnpackPositionNode())
             )
+            .add(new Category("string", Material.STRING)
+                    .add(new CharacterAtNode())
+                    .add(new StringLengthNode())
+                    .add(new StringsEqualNode())
+            )
             .add(new Category("vector", Material.ARROW)
                     .add(new PackVectorNode())
                     .add(new SetVectorLengthNode())
@@ -130,12 +141,10 @@ public class NodeList {
                     .add(new StringToTextNode())
             )
             .add(new Category("variable", Material.ENDER_CHEST)
-                    .add(new GetVariableNode<>(null, VariableStore.Scope.SAVED))
-                    .add(new GetVariableNode<>(null, VariableStore.Scope.SESSION))
-                    .add(new GetVariableNode<>(null, VariableStore.Scope.THREAD))
-                    .add(new SetVariableNode<>(null, VariableStore.Scope.SAVED))
-                    .add(new SetVariableNode<>(null, VariableStore.Scope.SESSION))
-                    .add(new SetVariableNode<>(null, VariableStore.Scope.THREAD))
+                    .add(new DecrementVariableNode())
+                    .add(new GetVariableNode<>(null))
+                    .add(new IncrementVariableNode())
+                    .add(new SetVariableNode<>(null))
             )
             .add(new Category("function", Material.COMMAND_BLOCK).markFunctions())
             .finish();

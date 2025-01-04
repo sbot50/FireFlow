@@ -13,36 +13,37 @@ import java.util.List;
 public class GetVariableNode<T> extends Node {
     
     private final WireType<T> type;
-    private final VariableStore.Scope scope;
 
-    public GetVariableNode(WireType<T> type, VariableStore.Scope scope) {
-        super("get_variable_" + scope.id, Material.IRON_INGOT);
+    public GetVariableNode(WireType<T> type) {
+        super("get_variable", Material.IRON_INGOT);
         this.type = type;
-        this.scope = scope;
 
         Input<String> name = new Input<>("name", StringType.INSTANCE);
+        Input<String> scope = new Input<>("scope", StringType.INSTANCE)
+                .options("thread", "session", "saved");
         Output<T> value = new Output<>("value", type);
 
         value.valueFrom((ctx) -> {
-            VariableStore store = switch (scope) {
-                case SAVED -> ctx.evaluator.space.savedVariables;
-                case SESSION -> ctx.evaluator.sessionVariables;
-                case THREAD -> ctx.threadVariables;
+            VariableStore store = switch (scope.getValue(ctx)) {
+                case "saved" -> ctx.evaluator.space.savedVariables;
+                case "session" -> ctx.evaluator.sessionVariables;
+                case "thread" -> ctx.threadVariables;
+                default -> null;
             };
-
+            if (store == null) return type.defaultValue();
             return store.get(name.getValue(ctx), type);
         });
     }
 
     @Override
     public String getTitle() {
-        if (type == null) return Translations.get("node.get_variable_" + scope.id + ".base_title");
-        return Translations.get("node.get_variable_" + scope.id + ".title", type.getName());
+        if (type == null) return Translations.get("node.get_variable.base_title");
+        return Translations.get("node.get_variable.title", type.getName());
     }
 
     @Override
     public Node copy() {
-        return new GetVariableNode<>(type, scope);
+        return new GetVariableNode<>(type);
     }
 
     @Override
@@ -52,7 +53,7 @@ public class GetVariableNode<T> extends Node {
 
     @Override
     public Node copyWithTypes(List<WireType<?>> types) {
-        return new GetVariableNode<>(types.get(0), scope);
+        return new GetVariableNode<>(types.get(0));
     }
 
     @Override
