@@ -26,6 +26,8 @@ import de.blazemcworld.fireflow.code.node.impl.variable.SetVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.vector.PackVectorNode;
 import de.blazemcworld.fireflow.code.node.impl.vector.SetVectorLengthNode;
 import de.blazemcworld.fireflow.code.node.impl.vector.UnpackVectorNode;
+import de.blazemcworld.fireflow.code.node.impl.world.SetBlockNode;
+import de.blazemcworld.fireflow.code.node.impl.world.SetRegionNode;
 import de.blazemcworld.fireflow.util.Translations;
 import net.minestom.server.item.Material;
 
@@ -37,7 +39,7 @@ import java.util.function.Predicate;
 public class NodeList {
 
     public static Category root;
-    
+
     public static void init() {
         root = new Category("root", null)
             .add(new Category("action", Material.REDSTONE)
@@ -59,6 +61,7 @@ public class NodeList {
                     .add(new SetPlayerSaturationNode())
                     .add(new SetPlayerVelocityNode())
                     .add(new TeleportPlayerNode())
+                    .add(new SendBlockChangeNode())
             )
             .add(new Category("event", Material.OBSERVER)
                     .add(new OnPlayerChatNode())
@@ -119,6 +122,9 @@ public class NodeList {
                     .add(new MultiplyNumbersNode())
                     .add(new ParseNumberNode())
                     .add(new SubtractNumbersNode())
+                    .add(new Category("noises", Material.GRAY_CONCRETE_POWDER)
+                            .add(new BasicNoiseNode())
+                    )
             )
             .add(new Category("position", Material.COMPASS)
                     .add(new FacingVectorNode())
@@ -147,15 +153,19 @@ public class NodeList {
                     .add(new SetVariableNode<>(null))
             )
             .add(new Category("function", Material.COMMAND_BLOCK).markFunctions())
+            .add(new Category("world",Material.GRASS_BLOCK)
+                    .add(new SetBlockNode())
+                    .add(new SetRegionNode())
+            )
             .finish();
-        
+
         FireFlow.LOGGER.info("Loaded " + root.collectNodes().size() + " node types");
     }
 
     public static class Category {
         public final String name;
         public final Material icon;
-        
+
         public final List<Category> categories = new ArrayList<>();
         public final List<Node> nodes = new ArrayList<>();
         public boolean isFunctions = false;
