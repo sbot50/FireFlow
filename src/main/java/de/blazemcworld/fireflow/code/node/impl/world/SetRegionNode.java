@@ -1,17 +1,16 @@
 package de.blazemcworld.fireflow.code.node.impl.world;
 
+import de.blazemcworld.fireflow.code.CodeThread;
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.type.StringType;
 import de.blazemcworld.fireflow.code.type.VectorType;
-import de.blazemcworld.fireflow.util.ChunkLoadingBlockBatch;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
+import net.minestom.server.instance.batch.AbsoluteBlockBatch;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
 import net.minestom.server.timer.TaskSchedule;
-
-import java.util.concurrent.atomic.AtomicInteger;
 
 public class SetRegionNode extends Node {
     public SetRegionNode() {
@@ -20,32 +19,74 @@ public class SetRegionNode extends Node {
         Input<Vec> corner1 = new Input<>("corner1", VectorType.INSTANCE);
         Input<Vec> corner2 = new Input<>("corner2", VectorType.INSTANCE);
         Input<String> block = new Input<>("block", StringType.INSTANCE);
-        Output<Void> next = new Output<>("next", SignalType.INSTANCE);
+        Output<Void> now = new Output<>("now", SignalType.INSTANCE);
+        Output<Void> then = new Output<>("then", SignalType.INSTANCE);
+
         signal.onSignal((ctx) -> {
             Block placedBlock = Block.fromNamespaceId(block.getValue(ctx));
             if (placedBlock != null) {
-                Vec corner1a = corner1.getValue(ctx);
-                Vec corner2a = corner2.getValue(ctx);
+                Vec corner1Value = corner1.getValue(ctx);
+                Vec corner2Value = corner2.getValue(ctx);
 
-                AtomicInteger curX = new AtomicInteger(corner1a.blockX());
-                AtomicInteger curY = new AtomicInteger(corner1a.blockY());
-                AtomicInteger curZ = new AtomicInteger(corner1a.blockZ());
-                ChunkLoadingBlockBatch batch = new ChunkLoadingBlockBatch();
-                MinecraftServer.getSchedulerManager().scheduleTask(() -> {
-                    for (int chunkX = corner1a.blockX(); chunkX < corner2a.blockX(); chunkX += 1) {
-                        for (int chunkZ = corner1a.blockZ(); chunkZ < corner2a.blockZ(); chunkZ += 1) {
-                            for (int y = corner1a.blockY(); y <= corner2a.blockY(); y++) {
-                                batch.setBlock(chunkX, y, chunkZ, placedBlock);
+                Vec min = corner1Value.min(corner2Value).max(Integer.MIN_VALUE, -64, Integer.MIN_VALUE);
+                Vec max = corner1Value.max(corner2Value).min(Integer.MAX_VALUE, 320, Integer.MAX_VALUE);
+                int[] chunk = { min.chunkX(), min.chunkZ() };
+
+                int yStart = min.blockY();
+                int yEnd = max.blockY();
+                CodeThread worker = ctx.subThread();
+
+                Runnable[] step = { null };
+                step[0] = () -> {
+                    if (ctx.evaluator.isStopped()) return;
+
+                    if (ctx.evaluator.space.play.getChunk(chunk[0], chunk[1]) == null) {
+                        ctx.evaluator.space.play.loadChunk(chunk[0], chunk[1]).thenRun(() -> {
+                            worker.submit(step[0]);
+                            worker.resume();
+                        });
+                        return;
+                    }
+
+                    int xStart = Math.max(chunk[0] * 16, min.blockX());
+                    int xEnd = Math.min(chunk[0] * 16 + 16, max.blockX());
+                    int zStart = Math.max(chunk[1] * 16, min.blockZ());
+                    int zEnd = Math.min(chunk[1] * 16 + 16, max.blockZ());
+
+                    AbsoluteBlockBatch batch = new AbsoluteBlockBatch();
+                    for (int x = xStart; x < xEnd; x++) {
+                        for (int z = zStart; z < zEnd; z++) {
+                            for (int y = yStart; y < yEnd; y++) {
+                                batch.setBlock(x, y, z, placedBlock);
                             }
                         }
                     }
-                    batch.apply(ctx.evaluator.space.play, null);
 
-                    return TaskSchedule.stop();
-                }, TaskSchedule.nextTick());
-                batch.apply(ctx.evaluator.space.play, null);
+                    batch.apply(ctx.evaluator.space.play, () -> {
+                        chunk[0]++;
+                        if (chunk[0] > max.chunkX()) {
+                            chunk[0] = min.chunkX();
+                            chunk[1]++;
+                            if (chunk[1] > max.chunkZ()) {
+                                worker.sendSignal(then);
+                                worker.resume();
+                                return;
+                            }
+                        }
+
+                        worker.submit(step[0]);
+                        MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+                            if (ctx.evaluator.cpuPercentage > 50) return TaskSchedule.nextTick();
+                            worker.resume();
+                            return TaskSchedule.stop();
+                        }, TaskSchedule.nextTick());
+                    });
+                };
+
+                worker.submit(step[0]);
+                worker.clearQueue();
             }
-            ctx.sendSignal(next);
+            ctx.sendSignal(now);
         });
     }
 

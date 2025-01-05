@@ -41,6 +41,7 @@ public class CodeThread {
             if (timelimitHit()) return;
             todo.pop().run();
         }
+        timelimitHit();
     }
 
     public boolean timelimitHit() {
