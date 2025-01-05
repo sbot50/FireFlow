@@ -29,6 +29,9 @@ public class CodeThread {
     }
 
     public void sendSignal(Node.Output<Void> signal) {
+        if (evaluator.space.debugger.isActive()) {
+            evaluator.space.debugger.onSignal(signal, this);
+        }
         todo.push(() -> signal.sendSignalImmediately(this));
     }
 

@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.CodeEvaluator;
+import de.blazemcworld.fireflow.code.CodeDebugger;
 import de.blazemcworld.fireflow.code.VariableStore;
 import de.blazemcworld.fireflow.util.ChunkLoadingBlockBatch;
 import de.blazemcworld.fireflow.util.Transfer;
@@ -35,6 +36,7 @@ public class Space {
     public final InstanceContainer code = MinecraftServer.getInstanceManager().createInstanceContainer();
     public final CodeEditor editor;
     public CodeEvaluator evaluator;
+    public CodeDebugger debugger;
     public ChunkLoadingBlockBatch spaceBlockBatch;
     private long emptySince = -1;
     private boolean loaded = true;
@@ -67,6 +69,7 @@ public class Space {
         });
 
         editor = new CodeEditor(this);
+        debugger = new CodeDebugger(this);
         evaluator = new CodeEvaluator(this);
 
         play.eventNode().addListener(PlayerSpawnEvent.class, event -> {

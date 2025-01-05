@@ -27,8 +27,9 @@ public class CodeEvaluator {
     private long cpuUsedTick = 0;
     private long cpuUsedBefore = 0;
     public int cpuPercentage = 0;
-    private List<Long> cpuHistory = new LinkedList<>();
+    private final List<Long> cpuHistory = new LinkedList<>();
     public final VariableStore sessionVariables = new VariableStore();
+    public final Set<Node> nodes;
 
     public CodeEvaluator(Space space) {
         this.space = space;
@@ -43,9 +44,9 @@ public class CodeEvaluator {
         events = EventNode.type("space-" + space.info.id, EventFilter.INSTANCE);
         space.play.eventNode().addChild(events);
 
-        nodes = copyNodes(nodes);
+        this.nodes = copyNodes(nodes);
 
-        for (Node node : nodes) {
+        for (Node node : this.nodes) {
             node.init(this);
         }
 
@@ -121,6 +122,7 @@ public class CodeEvaluator {
                 }
             }
 
+            copy.clonedFrom = node;
             old2new.put(node, copy);
         }
 

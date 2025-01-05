@@ -618,6 +618,16 @@ public class CodeEditor {
                 && max.x() > v.x() && max.y() > v.y();
     }
 
+    public NodeIOWidget selectIOWidget(Player player) {
+        Vec pos = getCursor(player).mul(8).apply(Vec.Operator.CEIL).div(8).withZ(15.999);
+        for (Widget w : rootWidgets) {
+            if (w.getWidget(pos) instanceof NodeIOWidget io) {
+                return io;
+            }
+        }
+        return null;
+    }
+
     public void save() {
         JsonObject data = new JsonObject();
 

@@ -23,6 +23,7 @@ public abstract class Node {
     public List<Input<?>> inputs = new ArrayList<>();
     public List<Varargs<?>> varargs = new ArrayList<>();
     public List<Output<?>> outputs = new ArrayList<>();
+    public Node clonedFrom;
 
     protected Node(String id, Material icon) {
         this.id = id;
@@ -137,7 +138,7 @@ public abstract class Node {
             connected.computeNow(ctx);
         }
 
-        private T computeNow(CodeThread ctx) {
+        public T computeNow(CodeThread ctx) {
             if (ctx.timelimitHit()) return type.defaultValue();
             return logic.apply(ctx);
         }
