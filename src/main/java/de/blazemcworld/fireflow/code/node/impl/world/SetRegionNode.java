@@ -29,7 +29,7 @@ public class SetRegionNode extends Node {
                 Vec corner2Value = corner2.getValue(ctx);
 
                 Vec min = corner1Value.min(corner2Value).max(Integer.MIN_VALUE, -64, Integer.MIN_VALUE);
-                Vec max = corner1Value.max(corner2Value).min(Integer.MAX_VALUE, 320, Integer.MAX_VALUE);
+                Vec max = corner1Value.max(corner2Value).add(1, 1, 1).min(Integer.MAX_VALUE, 320, Integer.MAX_VALUE);
                 int[] chunk = { min.chunkX(), min.chunkZ() };
 
                 int yStart = min.blockY();

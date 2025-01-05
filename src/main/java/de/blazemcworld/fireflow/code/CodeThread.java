@@ -21,6 +21,8 @@ public class CodeThread {
 
     @SuppressWarnings("unchecked")
     public <T> T getThreadValue(Node.Output<T> out) {
+        Object v = threadValues.get(out);
+        if (v == null) return out.type.defaultValue();
         return (T) threadValues.get(out);
     }
 
