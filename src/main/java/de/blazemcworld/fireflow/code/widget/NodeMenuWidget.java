@@ -49,7 +49,7 @@ public class NodeMenuWidget implements Widget {
                 for (FunctionDefinition fn : editor.functions.values()) {
                     FunctionCallNode fnNode = new FunctionCallNode(fn);
                     fn.callNodes.remove(fnNode); // Remove since its not actually a real node
-                    if (category.filter.test(fnNode)) {
+                    if (subCategory.filter.test(fnNode)) {
                         hasEntry = true;
                         break;
                     }

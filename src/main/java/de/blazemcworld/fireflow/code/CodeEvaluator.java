@@ -52,14 +52,14 @@ public class CodeEvaluator {
 
         MinecraftServer.getSchedulerManager().scheduleTask(() -> {
             if (isStopped()) return TaskSchedule.stop();
-            cpuPercentage = (int) ((cpuUsedBefore + cpuUsedTick) * 100 / Config.store.limits().cpuPerSecond());
-            if (cpuUsedBefore + cpuUsedTick > Config.store.limits().cpuPerSecond()) {
+            cpuPercentage = (int) ((cpuUsedBefore + cpuUsedTick) * 100 / Config.store.limits().cpuUsage());
+            if (cpuUsedBefore + cpuUsedTick > Config.store.limits().cpuUsage()) {
                 FireFlow.LOGGER.info("Space " + space.info.id + " used too much CPU: " + cpuPercentage + "%");
                 space.reload("cpu");
                 return TaskSchedule.stop();
             }
             cpuHistory.add(cpuUsedTick);
-            if (cpuHistory.size() >= 20) cpuHistory.removeFirst();
+            if (cpuHistory.size() >= Config.store.limits().cpuHistory()) cpuHistory.removeFirst();
             cpuUsedBefore = cpuHistory.stream().reduce(0L, Long::sum);
             cpuUsedTick = 0;
             return TaskSchedule.tick(1);
@@ -162,6 +162,10 @@ public class CodeEvaluator {
 
     public boolean timelimitHit(long elapsed) {
         cpuUsedTick += elapsed;
-        return cpuUsedBefore + cpuUsedTick > Config.store.limits().cpuPerSecond();
+        return cpuUsedBefore + cpuUsedTick > Config.store.limits().cpuUsage();
+    }
+
+    public long remainingCpu() {
+        return Config.store.limits().cpuUsage() - cpuUsedBefore - cpuUsedTick;
     }
 }

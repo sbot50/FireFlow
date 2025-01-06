@@ -3,7 +3,9 @@ package de.blazemcworld.fireflow.code.node;
 import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.node.impl.action.player.*;
 import de.blazemcworld.fireflow.code.node.impl.event.player.*;
+import de.blazemcworld.fireflow.code.node.impl.event.space.OnChunkLoadNode;
 import de.blazemcworld.fireflow.code.node.impl.flow.*;
+import de.blazemcworld.fireflow.code.node.impl.info.RemainingCpuNode;
 import de.blazemcworld.fireflow.code.node.impl.info.player.*;
 import de.blazemcworld.fireflow.code.node.impl.item.CreateItemNode;
 import de.blazemcworld.fireflow.code.node.impl.item.ItemsEqualNode;
@@ -64,6 +66,7 @@ public class NodeList {
                     .add(new SendBlockChangeNode())
             )
             .add(new Category("event", Material.OBSERVER)
+                    .add(new OnChunkLoadNode())
                     .add(new OnPlayerChatNode())
                     .add(new OnPlayerJoinNode())
                     .add(new OnPlayerStartFlyingNode())
@@ -104,6 +107,7 @@ public class NodeList {
                     .add(new PlayerCanFlyNode())
                     .add(new PlayerIsFlyingNode())
                     .add(new PlayerMainItemNode())
+                    .add(new RemainingCpuNode())
             )
             .add(new Category("list", Material.BOOKSHELF)
                     .add(new CreateListNode<>(null))

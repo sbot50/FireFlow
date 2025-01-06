@@ -19,11 +19,11 @@ public class RepeatNode extends Node {
 
         signal.onSignal((ctx) -> {
             int max = times.getValue(ctx).intValue();
-            double[] i = new double[] { 1 };
+            double[] i = new double[] { 0 };
 
             Runnable[] step = { null };
             step[0] = () -> {
-                if (i[0] > max) {
+                if (i[0] >= max) {
                     ctx.sendSignal(next);
                     return;
                 }

@@ -29,11 +29,11 @@ public class SetRegionNode extends Node {
                 Vec corner2Value = corner2.getValue(ctx);
 
                 Vec min = corner1Value.min(corner2Value).max(Integer.MIN_VALUE, -64, Integer.MIN_VALUE);
-                Vec max = corner1Value.max(corner2Value).add(1, 1, 1).min(Integer.MAX_VALUE, 320, Integer.MAX_VALUE);
+                Vec max = corner1Value.max(corner2Value).min(Integer.MAX_VALUE, 320, Integer.MAX_VALUE);
                 int[] chunk = { min.chunkX(), min.chunkZ() };
 
                 int yStart = min.blockY();
-                int yEnd = max.blockY();
+                int yEnd = max.blockY() + 1;
                 CodeThread worker = ctx.subThread();
 
                 Runnable[] step = { null };
@@ -42,16 +42,18 @@ public class SetRegionNode extends Node {
 
                     if (ctx.evaluator.space.play.getChunk(chunk[0], chunk[1]) == null) {
                         ctx.evaluator.space.play.loadChunk(chunk[0], chunk[1]).thenRun(() -> {
-                            worker.submit(step[0]);
-                            worker.resume();
+                            MinecraftServer.getSchedulerManager().scheduleNextTick(() -> {
+                                worker.submit(step[0]);
+                                worker.resume();
+                            });
                         });
                         return;
                     }
 
                     int xStart = Math.max(chunk[0] * 16, min.blockX());
-                    int xEnd = Math.min(chunk[0] * 16 + 16, max.blockX());
+                    int xEnd = Math.min(chunk[0] * 16 + 16, max.blockX() + 1);
                     int zStart = Math.max(chunk[1] * 16, min.blockZ());
-                    int zEnd = Math.min(chunk[1] * 16 + 16, max.blockZ());
+                    int zEnd = Math.min(chunk[1] * 16 + 16, max.blockZ() + 1);
 
                     AbsoluteBlockBatch batch = new AbsoluteBlockBatch();
                     for (int x = xStart; x < xEnd; x++) {
@@ -63,20 +65,20 @@ public class SetRegionNode extends Node {
                     }
 
                     batch.apply(ctx.evaluator.space.play, () -> {
-                        chunk[0]++;
-                        if (chunk[0] > max.chunkX()) {
-                            chunk[0] = min.chunkX();
-                            chunk[1]++;
-                            if (chunk[1] > max.chunkZ()) {
-                                worker.sendSignal(then);
-                                worker.resume();
-                                return;
-                            }
-                        }
-
-                        worker.submit(step[0]);
                         MinecraftServer.getSchedulerManager().scheduleTask(() -> {
-                            if (ctx.evaluator.cpuPercentage > 50) return TaskSchedule.nextTick();
+                            if (ctx.evaluator.remainingCpu() < 10000000) return TaskSchedule.nextTick();
+                            chunk[0]++;
+                            if (chunk[0] > max.chunkX()) {
+                                chunk[0] = min.chunkX();
+                                chunk[1]++;
+                                if (chunk[1] > max.chunkZ()) {
+                                    worker.sendSignal(then);
+                                    worker.resume();
+                                    return TaskSchedule.stop();
+                                }
+                            }
+
+                            worker.submit(step[0]);
                             worker.resume();
                             return TaskSchedule.stop();
                         }, TaskSchedule.nextTick());

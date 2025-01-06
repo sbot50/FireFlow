@@ -3,9 +3,9 @@ package de.blazemcworld.fireflow.space;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.blazemcworld.fireflow.FireFlow;
+import de.blazemcworld.fireflow.code.CodeDebugger;
 import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.CodeEvaluator;
-import de.blazemcworld.fireflow.code.CodeDebugger;
 import de.blazemcworld.fireflow.code.VariableStore;
 import de.blazemcworld.fireflow.util.ChunkLoadingBlockBatch;
 import de.blazemcworld.fireflow.util.Transfer;
@@ -111,6 +111,7 @@ public class Space {
                 Transfer.move(player, Lobby.instance);
             }
         }
+        save();
         evaluator = new CodeEvaluator(this);
     }
 
