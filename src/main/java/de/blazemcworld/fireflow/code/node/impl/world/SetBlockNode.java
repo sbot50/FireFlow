@@ -23,7 +23,7 @@ public class SetBlockNode extends Node {
                 if (ctx.evaluator.space.spaceBlockBatch == null) {
                     ctx.evaluator.space.spaceBlockBatch = new ChunkLoadingBlockBatch();
 
-                    MinecraftServer.getSchedulerManager().scheduleEndOfTick(() -> {
+                    MinecraftServer.getSchedulerManager().scheduleNextTick(() -> {
                         ctx.evaluator.space.spaceBlockBatch.apply(ctx.evaluator.space.play, null);
                         ctx.evaluator.space.spaceBlockBatch = null;
                     });

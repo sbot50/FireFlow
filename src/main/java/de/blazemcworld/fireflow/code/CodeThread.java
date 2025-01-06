@@ -2,6 +2,8 @@ package de.blazemcworld.fireflow.code;
 
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionCallNode;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.timer.TaskSchedule;
 
 import java.util.*;
 
@@ -42,18 +44,26 @@ public class CodeThread {
     }
 
     public void clearQueue() {
-        while (!todo.isEmpty() && !paused) {
-            if (timelimitHit()) return;
-            todo.pop().run();
-        }
         timelimitHit();
+        while (!todo.isEmpty() && !paused) {
+            todo.pop().run();
+            timelimitHit();
+        }
     }
 
-    public boolean timelimitHit() {
+    public void timelimitHit() {
         long now = System.nanoTime();
         long elapsed = now - lastSync;
         lastSync = now;
-        return evaluator.timelimitHit(elapsed);
+        if (evaluator.timelimitHit(elapsed) && !paused) {
+            pause();
+            MinecraftServer.getSchedulerManager().scheduleTask(() -> {
+                if (evaluator.isStopped()) return TaskSchedule.stop();
+                if (evaluator.remainingCpu() <= 0) return TaskSchedule.nextTick();
+                resume();
+                return TaskSchedule.stop();
+            }, TaskSchedule.nextTick());
+        }
     }
 
     public CodeThread subThread() {

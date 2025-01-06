@@ -87,7 +87,6 @@ public abstract class Node {
         }
 
         private void computeNow(CodeThread ctx) {
-            if (ctx.timelimitHit()) return;
             if (logic == null) return;
             logic.accept(ctx);
         }
@@ -139,7 +138,6 @@ public abstract class Node {
         }
 
         public T computeNow(CodeThread ctx) {
-            if (ctx.timelimitHit()) return type.defaultValue();
             return logic.apply(ctx);
         }
 

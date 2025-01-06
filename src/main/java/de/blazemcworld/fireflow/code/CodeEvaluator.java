@@ -1,6 +1,5 @@
 package de.blazemcworld.fireflow.code;
 
-import de.blazemcworld.fireflow.FireFlow;
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.node.Node.Varargs;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionCallNode;
@@ -52,12 +51,7 @@ public class CodeEvaluator {
 
         MinecraftServer.getSchedulerManager().scheduleTask(() -> {
             if (isStopped()) return TaskSchedule.stop();
-            cpuPercentage = (int) ((cpuUsedBefore + cpuUsedTick) * 100 / Config.store.limits().cpuUsage());
-            if (cpuUsedBefore + cpuUsedTick > Config.store.limits().cpuUsage()) {
-                FireFlow.LOGGER.info("Space " + space.info.id + " used too much CPU: " + cpuPercentage + "%");
-                space.reload("cpu");
-                return TaskSchedule.stop();
-            }
+            cpuPercentage = Math.min(100, (int) ((cpuUsedBefore + cpuUsedTick) * 100 / Config.store.limits().cpuUsage()));
             cpuHistory.add(cpuUsedTick);
             if (cpuHistory.size() >= Config.store.limits().cpuHistory()) cpuHistory.removeFirst();
             cpuUsedBefore = cpuHistory.stream().reduce(0L, Long::sum);

@@ -555,6 +555,7 @@ public class CodeEditor {
             rootWidgets.addAll(wireWidgets);
             for (NodeWidget n : nodeWidgets) n.update(space.code);
             for (WireWidget w : wireWidgets) w.update(space.code);
+            for (FunctionDefinition fn : definitions) functions.put(fn.name, fn);
 
             player.sendMessage(Component.text(Translations.get("success.snippet.place", String.valueOf(nodeWidgets.size()))).color(NamedTextColor.AQUA));
         } catch (Exception e) {

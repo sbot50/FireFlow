@@ -30,15 +30,12 @@ public class OnChunkLoadNode extends Node {
     public void init(CodeEvaluator evaluator) {
         evaluator.events.addListener(InstanceChunkLoadEvent.class, event -> {
             MinecraftServer.getSchedulerManager().scheduleTask(() -> {
-                if (evaluator.isStopped()) return TaskSchedule.stop();
-                if (evaluator.remainingCpu() < 10000000) return TaskSchedule.nextTick();
                 CodeThread thread = evaluator.newCodeThread();
                 thread.setThreadValue(x, event.getChunkX() * 16.0);
                 thread.setThreadValue(z, event.getChunkZ() * 16.0);
                 thread.sendSignal(signal);
                 thread.clearQueue();
-                return TaskSchedule.stop();
-            }, TaskSchedule.tick(2));
+            }, TaskSchedule.tick(3), TaskSchedule.stop());
         });
     }
 

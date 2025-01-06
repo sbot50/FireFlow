@@ -84,7 +84,7 @@ public class NodeMenuWidget implements Widget {
             for (FunctionDefinition fn : editor.functions.values()) {
                 FunctionCallNode fnNode = new FunctionCallNode(fn);
                 fn.callNodes.remove(fnNode); // Remove since its not actually a real node
-                if (category.filter != null && category.filter.test(fnNode)) nodes.add(fnNode);
+                if (category.filter == null || category.filter.test(fnNode)) nodes.add(fnNode);
             }
         }
 

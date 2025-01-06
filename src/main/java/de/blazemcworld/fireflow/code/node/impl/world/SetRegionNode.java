@@ -29,7 +29,7 @@ public class SetRegionNode extends Node {
                 Vec corner2Value = corner2.getValue(ctx);
 
                 Vec min = corner1Value.min(corner2Value).max(Integer.MIN_VALUE, -64, Integer.MIN_VALUE);
-                Vec max = corner1Value.max(corner2Value).min(Integer.MAX_VALUE, 320, Integer.MAX_VALUE);
+                Vec max = corner1Value.max(corner2Value).min(Integer.MAX_VALUE, 319, Integer.MAX_VALUE);
                 int[] chunk = { min.chunkX(), min.chunkZ() };
 
                 int yStart = min.blockY();
@@ -66,7 +66,7 @@ public class SetRegionNode extends Node {
 
                     batch.apply(ctx.evaluator.space.play, () -> {
                         MinecraftServer.getSchedulerManager().scheduleTask(() -> {
-                            if (ctx.evaluator.remainingCpu() < 10000000) return TaskSchedule.nextTick();
+                            if (ctx.evaluator.remainingCpu() < 0) return TaskSchedule.nextTick();
                             chunk[0]++;
                             if (chunk[0] > max.chunkX()) {
                                 chunk[0] = min.chunkX();
