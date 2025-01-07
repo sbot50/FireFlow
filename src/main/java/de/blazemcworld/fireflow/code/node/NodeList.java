@@ -25,9 +25,7 @@ import de.blazemcworld.fireflow.code.node.impl.variable.DecrementVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.GetVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.IncrementVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.SetVariableNode;
-import de.blazemcworld.fireflow.code.node.impl.vector.PackVectorNode;
-import de.blazemcworld.fireflow.code.node.impl.vector.SetVectorLengthNode;
-import de.blazemcworld.fireflow.code.node.impl.vector.UnpackVectorNode;
+import de.blazemcworld.fireflow.code.node.impl.vector.*;
 import de.blazemcworld.fireflow.code.node.impl.world.SetBlockNode;
 import de.blazemcworld.fireflow.code.node.impl.world.SetRegionNode;
 import de.blazemcworld.fireflow.util.Translations;
@@ -114,21 +112,25 @@ public class NodeList {
                     .add(new ListAppendNode<>(null))
             )
             .add(new Category("number", Material.CLOCK)
+                    .add(new Category("noises", Material.GRAY_CONCRETE_POWDER)
+                            .add(new BasicNoiseNode())
+                    )
                     .add(new AddNumbersNode())
+                    .add(new ClampNumberNode())
                     .add(new DivideNumbersNode())
                     .add(new GreaterEqualNode())
                     .add(new GreaterThanNode())
                     .add(new LessEqualNode())
                     .add(new LessThanNode())
-                    .add(new NumbersEqualNode())
+                    .add(new MultiplyNumbersNode())
                     .add(new NumberToStringNode())
                     .add(new NumberToTextNode())
-                    .add(new MultiplyNumbersNode())
+                    .add(new NumbersEqualNode())
                     .add(new ParseNumberNode())
+                    .add(new RandomNumberNode())
+                    .add(new RoundNumberNode())
+                    .add(new SetToExponentialNode())
                     .add(new SubtractNumbersNode())
-                    .add(new Category("noises", Material.GRAY_CONCRETE_POWDER)
-                            .add(new BasicNoiseNode())
-                    )
             )
             .add(new Category("position", Material.COMPASS)
                     .add(new FacingVectorNode())
@@ -142,7 +144,9 @@ public class NodeList {
                     .add(new StringsEqualNode())
             )
             .add(new Category("vector", Material.ARROW)
+                    .add(new GetVectorComponentNode())
                     .add(new PackVectorNode())
+                    .add(new SetVectorComponentNode())
                     .add(new SetVectorLengthNode())
                     .add(new UnpackVectorNode())
             )
