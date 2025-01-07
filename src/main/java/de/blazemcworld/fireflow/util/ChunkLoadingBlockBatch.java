@@ -20,7 +20,10 @@ public class ChunkLoadingBlockBatch extends AbsoluteBlockBatch {
 
     @Override
     public void setBlock(int x, int y, int z, @NotNull Block block) {
-        changedChunks.add(Pair.of(CoordConversion.globalToChunk(x), CoordConversion.globalToChunk(z)));
+        int chunkX = CoordConversion.globalToChunk(x);
+        int chunkZ = CoordConversion.globalToChunk(z);
+        if (SpaceInstance.chunkNotInBounds(chunkX, chunkX)) return;
+        changedChunks.add(Pair.of(chunkX, chunkZ));
         super.setBlock(x, y, z, block);
     }
 

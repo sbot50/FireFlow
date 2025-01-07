@@ -5,6 +5,7 @@
   "limits": {
     "cpuUsage": 25000000,
     "cpuHistory": 5,
+    "spaceChunkDistance": 32,
     "spacesPerPlayer": 5,
     "totalSpaces": 100
   }

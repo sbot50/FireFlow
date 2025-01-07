@@ -8,6 +8,7 @@ import de.blazemcworld.fireflow.code.CodeEditor;
 import de.blazemcworld.fireflow.code.CodeEvaluator;
 import de.blazemcworld.fireflow.code.VariableStore;
 import de.blazemcworld.fireflow.util.ChunkLoadingBlockBatch;
+import de.blazemcworld.fireflow.util.SpaceInstance;
 import de.blazemcworld.fireflow.util.Transfer;
 import de.blazemcworld.fireflow.util.Translations;
 import net.kyori.adventure.text.Component;
@@ -32,7 +33,7 @@ import java.util.List;
 public class Space {
 
     public final SpaceInfo info;
-    public final InstanceContainer play = MinecraftServer.getInstanceManager().createInstanceContainer();
+    public final InstanceContainer play = new SpaceInstance();
     public final InstanceContainer code = MinecraftServer.getInstanceManager().createInstanceContainer();
     public final CodeEditor editor;
     public CodeEvaluator evaluator;

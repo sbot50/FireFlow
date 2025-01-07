@@ -5,6 +5,7 @@ import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.SignalType;
 import de.blazemcworld.fireflow.code.type.StringType;
 import de.blazemcworld.fireflow.code.type.VectorType;
+import de.blazemcworld.fireflow.util.Config;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.instance.batch.AbsoluteBlockBatch;
@@ -28,8 +29,9 @@ public class SetRegionNode extends Node {
                 Vec corner1Value = corner1.getValue(ctx);
                 Vec corner2Value = corner2.getValue(ctx);
 
-                Vec min = corner1Value.min(corner2Value).max(Integer.MIN_VALUE, -64, Integer.MIN_VALUE);
-                Vec max = corner1Value.max(corner2Value).min(Integer.MAX_VALUE, 319, Integer.MAX_VALUE);
+                int maxDistance = Config.store.limits().spaceChunkDistance() * 16;
+                Vec min = corner1Value.min(corner2Value).max(-maxDistance, -64, -maxDistance);
+                Vec max = corner1Value.max(corner2Value).min(maxDistance - 1, 319, maxDistance - 1);
                 int[] chunk = { min.chunkX(), min.chunkZ() };
 
                 int yStart = min.blockY();
