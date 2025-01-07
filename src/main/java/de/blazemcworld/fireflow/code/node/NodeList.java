@@ -128,6 +128,7 @@ public class NodeList {
                     .add(new RoundNumberNode())
                     .add(new SetToExponentialNode())
                     .add(new SubtractNumbersNode())
+                    .add(new SquareRootNode())
             )
             .add(new Category("position", Material.COMPASS)
                     .add(new FacingVectorNode())
