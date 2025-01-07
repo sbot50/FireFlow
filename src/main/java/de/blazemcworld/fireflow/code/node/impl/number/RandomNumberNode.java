@@ -17,8 +17,10 @@ public class RandomNumberNode extends Node {
             double outputMin = min.getValue(ctx);
             double outputMax = max.getValue(ctx);
             return switch (mode.getValue(ctx)) {
-                case "Decimal" -> ((Math.random() * (outputMax - outputMin)) + outputMin);
-                case "Whole" -> Math.round(Math.random() * (outputMax - outputMin)) + outputMin;
+                case "Decimal" -> (Math.random() * (outputMax - outputMin) + outputMin);
+                case "WholeExclusive" -> Math.floor(Math.random() * (outputMax - outputMin) + outputMin);
+                case "WholeInclusive" -> Math.floor(Math.random() * ((outputMax + 1) - outputMin) + outputMin);
+
                 default -> 0.0;
             };
         }));
