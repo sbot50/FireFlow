@@ -25,9 +25,7 @@ import de.blazemcworld.fireflow.code.node.impl.variable.DecrementVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.GetVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.IncrementVariableNode;
 import de.blazemcworld.fireflow.code.node.impl.variable.SetVariableNode;
-import de.blazemcworld.fireflow.code.node.impl.vector.PackVectorNode;
-import de.blazemcworld.fireflow.code.node.impl.vector.SetVectorLengthNode;
-import de.blazemcworld.fireflow.code.node.impl.vector.UnpackVectorNode;
+import de.blazemcworld.fireflow.code.node.impl.vector.*;
 import de.blazemcworld.fireflow.code.node.impl.world.SetBlockNode;
 import de.blazemcworld.fireflow.code.node.impl.world.SetRegionNode;
 import de.blazemcworld.fireflow.util.Translations;
@@ -126,6 +124,10 @@ public class NodeList {
                     .add(new MultiplyNumbersNode())
                     .add(new ParseNumberNode())
                     .add(new SubtractNumbersNode())
+                    .add(new SetToExponentialNode())
+                    .add(new RandomNumberNode())
+                    .add(new ClampNumberNode())
+                    .add(new RoundNumberNode())
                     .add(new Category("noises", Material.GRAY_CONCRETE_POWDER)
                             .add(new BasicNoiseNode())
                     )
@@ -145,6 +147,8 @@ public class NodeList {
                     .add(new PackVectorNode())
                     .add(new SetVectorLengthNode())
                     .add(new UnpackVectorNode())
+                    .add(new SetVectorComponentNode())
+                    .add(new GetVectorComponentNode())
             )
             .add(new Category("text", Material.WRITABLE_BOOK)
                     .add(new FormatToTextNode())
