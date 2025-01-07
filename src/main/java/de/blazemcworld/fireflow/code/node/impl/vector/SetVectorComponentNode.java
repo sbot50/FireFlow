@@ -19,10 +19,10 @@ public class SetVectorComponentNode extends Node {
             Vec outputVec = vector.getValue(ctx);
             double outputValue = value.getValue(ctx);
             return switch (axis.getValue(ctx)) {
-                case "X" -> new Vec(outputValue, outputVec.y(), outputVec.z());
-                case "Y" -> new Vec(outputVec.x(), outputValue, outputVec.z());
-                case "Z" -> new Vec(outputVec.x(), outputVec.y(), outputValue);
-                default -> null;
+                case "X" -> outputVec.withX(outputValue);
+                case "Y" -> outputVec.withY(outputValue);
+                case "Z" -> outputVec.withZ(outputValue);
+                default -> outputVec;
             };
         });
     }

@@ -20,7 +20,7 @@ public class GetVectorComponentNode extends Node {
                 case "X" -> inputVector.x();
                 case "Y" -> inputVector.y();
                 case "Z" -> inputVector.z();
-                default -> null;
+                default -> 0.0;
             };
         }));
     }

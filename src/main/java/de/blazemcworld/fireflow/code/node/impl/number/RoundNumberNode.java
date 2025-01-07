@@ -15,6 +15,7 @@ public class RoundNumberNode extends Node {
 
         result.valueFrom((ctx) -> {
             double decimal = decimal_place.getValue(ctx);
+            decimal = Math.pow(10, decimal);
             double valueInput = value.getValue(ctx);
             switch (mode.getValue(ctx)) {
                 case "Round" -> {
@@ -27,7 +28,7 @@ public class RoundNumberNode extends Node {
                     return Math.ceil(valueInput / decimal) * decimal;
                 }
                 default -> {
-                    return null;
+                    return 0.0;
                 }
             }
         });

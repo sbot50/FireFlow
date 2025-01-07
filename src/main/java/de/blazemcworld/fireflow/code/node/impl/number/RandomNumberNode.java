@@ -19,7 +19,7 @@ public class RandomNumberNode extends Node {
             return switch (mode.getValue(ctx)) {
                 case "Decimal" -> ((Math.random() * (outputMax - outputMin)) + outputMin);
                 case "Whole" -> Math.round(Math.random() * (outputMax - outputMin)) + outputMin;
-                default -> null;
+                default -> 0.0;
             };
         }));
     }
