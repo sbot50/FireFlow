@@ -35,7 +35,7 @@ public class Config {
     public record Store(String motd, int port, LimitsConfig limits, String translations) {
     }
 
-    public record LimitsConfig(long cpuUsage, int cpuHistory, int spacesPerPlayer, int totalSpaces) {
+    public record LimitsConfig(long cpuUsage, int cpuHistory, int spacesPerPlayer, int totalSpaces, int spaceChunkDistance) {
     }
 
 }

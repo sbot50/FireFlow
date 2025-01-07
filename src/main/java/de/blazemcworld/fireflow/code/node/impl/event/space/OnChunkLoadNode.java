@@ -5,6 +5,7 @@ import de.blazemcworld.fireflow.code.CodeThread;
 import de.blazemcworld.fireflow.code.node.Node;
 import de.blazemcworld.fireflow.code.type.NumberType;
 import de.blazemcworld.fireflow.code.type.SignalType;
+import de.blazemcworld.fireflow.util.SpaceInstance;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.instance.InstanceChunkLoadEvent;
 import net.minestom.server.item.Material;
@@ -29,6 +30,7 @@ public class OnChunkLoadNode extends Node {
     @Override
     public void init(CodeEvaluator evaluator) {
         evaluator.events.addListener(InstanceChunkLoadEvent.class, event -> {
+            if (SpaceInstance.chunkNotInBounds(event.getChunkX(), event.getChunkZ())) return;
             MinecraftServer.getSchedulerManager().scheduleTask(() -> {
                 CodeThread thread = evaluator.newCodeThread();
                 thread.setThreadValue(x, event.getChunkX() * 16.0);
