@@ -8,8 +8,12 @@ public class Translations {
     private static final Properties data = new Properties();
 
     public static void init() {
+        use(Config.store.translations());
+    }
+
+    public static void use(String language) {
         try {
-            data.load(Translations.class.getClassLoader().getResourceAsStream("languages/" + Config.store.translations() + ".properties"));
+            data.load(Translations.class.getClassLoader().getResourceAsStream("languages/" + language + ".properties"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

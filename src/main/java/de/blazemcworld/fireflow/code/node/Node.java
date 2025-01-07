@@ -7,6 +7,8 @@ import de.blazemcworld.fireflow.code.node.impl.function.FunctionInputsNode;
 import de.blazemcworld.fireflow.code.node.impl.function.FunctionOutputsNode;
 import de.blazemcworld.fireflow.code.type.WireType;
 import de.blazemcworld.fireflow.util.Translations;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.item.Material;
 
 import java.util.ArrayList;
@@ -15,6 +17,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public abstract class Node {
 
@@ -24,6 +28,7 @@ public abstract class Node {
     public List<Varargs<?>> varargs = new ArrayList<>();
     public List<Output<?>> outputs = new ArrayList<>();
     public Node clonedFrom;
+    private static final Pattern descriptionReferencePattern = Pattern.compile("(in|out)#(\\w+)");
 
     protected Node(String id, Material icon) {
         this.id = id;
@@ -53,6 +58,42 @@ public abstract class Node {
 
     public Node copyWithTypes(List<WireType<?>> types) {
         return copy();
+    }
+
+    public Component getIngameDescription() {
+        Component out = Component.empty();
+        String raw = Translations.get("node." + id + ".description");
+        Matcher m = descriptionReferencePattern.matcher(raw);
+        int index = 0;
+        while (m.find()) {
+            out = out.append(Component.text(raw.substring(index, m.start())));
+            index = m.end();
+            if (m.group(1).equals("in")) {
+                out = out.append(Component.text(Translations.get("node." + id + ".input." + m.group(2))).color(NamedTextColor.YELLOW));
+            } else {
+                out = out.append(Component.text(Translations.get("node." + id + ".output." + m.group(2))).color(NamedTextColor.YELLOW));
+            }
+        }
+        out = out.append(Component.text(raw.substring(index)));
+        return out;
+    }
+
+    public String getWikiDescription() {
+        StringBuilder out = new StringBuilder();
+        String raw = Translations.get("node." + id + ".description");
+        Matcher m = descriptionReferencePattern.matcher(raw);
+        int index = 0;
+        while (m.find()) {
+            out.append(raw, index, m.start());
+            index = m.end();
+            if (m.group(1).equals("in")) {
+                out.append("`").append(Translations.get("node." + id + ".input." + m.group(2))).append("`");
+            } else {
+                out.append("`").append(Translations.get("node." + id + ".output." + m.group(2))).append("`");
+            }
+        }
+        out.append(raw.substring(index));
+        return out.toString();
     }
 
     public class Input<T> {
