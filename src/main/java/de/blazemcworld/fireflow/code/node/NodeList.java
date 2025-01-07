@@ -21,10 +21,7 @@ import de.blazemcworld.fireflow.code.node.impl.string.StringLengthNode;
 import de.blazemcworld.fireflow.code.node.impl.string.StringsEqualNode;
 import de.blazemcworld.fireflow.code.node.impl.text.FormatToTextNode;
 import de.blazemcworld.fireflow.code.node.impl.text.StringToTextNode;
-import de.blazemcworld.fireflow.code.node.impl.variable.DecrementVariableNode;
-import de.blazemcworld.fireflow.code.node.impl.variable.GetVariableNode;
-import de.blazemcworld.fireflow.code.node.impl.variable.IncrementVariableNode;
-import de.blazemcworld.fireflow.code.node.impl.variable.SetVariableNode;
+import de.blazemcworld.fireflow.code.node.impl.variable.*;
 import de.blazemcworld.fireflow.code.node.impl.vector.*;
 import de.blazemcworld.fireflow.code.node.impl.world.SetBlockNode;
 import de.blazemcworld.fireflow.code.node.impl.world.SetRegionNode;
@@ -155,6 +152,7 @@ public class NodeList {
                     .add(new StringToTextNode())
             )
             .add(new Category("variable", Material.ENDER_CHEST)
+                    .add(new CacheValueNode<>(null))
                     .add(new DecrementVariableNode())
                     .add(new GetVariableNode<>(null))
                     .add(new IncrementVariableNode())
