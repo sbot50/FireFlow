@@ -7,7 +7,7 @@ import net.minestom.server.item.Material;
 public class SquareRootNode extends Node {
 
     public SquareRootNode() {
-        super("multiply_numbers", Material.SMITHING_TABLE);
+        super("square_root", Material.BEETROOT);
 
         Input<Double> number = new Input<>("number", NumberType.INSTANCE);
         Output<Double> result = new Output<>("result", NumberType.INSTANCE);
