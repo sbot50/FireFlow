@@ -8,7 +8,7 @@ import net.minestom.server.item.Material;
 public class RandomNumberNode extends Node {
     public RandomNumberNode() {
         super("random_number", Material.MULE_SPAWN_EGG);
-        Input<String> mode = new Input<>("mode", StringType.INSTANCE).options("Decimal", "Whole");
+        Input<String> mode = new Input<>("mode", StringType.INSTANCE).options("Decimal", "WholeExclusive", "WholeInclusive");
         Input<Double> min = new Input<>("min", NumberType.INSTANCE);
         Input<Double> max = new Input<>("max", NumberType.INSTANCE);
         Output<Double> output = new Output<>("output", NumberType.INSTANCE);
