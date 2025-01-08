@@ -127,6 +127,7 @@ public class NodeList {
                     .add(new RandomNumberNode())
                     .add(new RoundNumberNode())
                     .add(new SetToExponentialNode())
+                    .add(new SquareRootNode())
                     .add(new SubtractNumbersNode())
             )
             .add(new Category("position", Material.COMPASS)
