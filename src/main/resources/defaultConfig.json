@@ -2,6 +2,7 @@
   "motd": "A new FireFlow Server",
   "port": 25565,
   "translations": "en_US",
+  "useFileURLs": false,
   "limits": {
     "cpuUsage": 25000000,
     "cpuHistory": 5,
