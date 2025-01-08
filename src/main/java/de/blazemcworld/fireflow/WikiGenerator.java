@@ -134,7 +134,7 @@ public class WikiGenerator {
     }
 
     private static String colorStart(TextColor color) {
-        return "<span style=\"color: " + color.asHexString() + "\">";
+        return "<span style=\"color: " + color.asHexString() + " !important\">";
     }
 
     private static String colorEnd() {
